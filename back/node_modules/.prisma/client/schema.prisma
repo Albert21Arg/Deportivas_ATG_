@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int              @id @default(autoincrement())
+  name        String
+  email       String           @unique
+  password    String
+  role        String           @default("ADMIN")
+  status      String           @default("ACTIVE")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  tournaments UserTournament[]
+}
+
+model Tournament {
+  id               Int              @id @default(autoincrement())
+  name             String
+  description      String?
+  status           String           @default("ACTIVE")
+  mode             String           @default("ROUND_ROBIN")
+  hasThirdPlace    Boolean          @default(false)
+  blueCardEnabled  Boolean          @default(true)
+  awayGoalsRule    Boolean          @default(false)
+  championTeamId   Int?
+  runnerUpTeamId   Int?
+  thirdPlaceTeamId Int?
+  finishedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  groups           Group[]
+  ties             KnockoutTie[]
+  matches          Match[]
+  captions         TableCaption[]
+  thirdPlaceTeam   Team?            @relation("TournamentThirdPlace", fields: [thirdPlaceTeamId], references: [id])
+  runnerUpTeam     Team?            @relation("TournamentRunnerUp", fields: [runnerUpTeamId], references: [id])
+  championTeam     Team?            @relation("TournamentChampion", fields: [championTeamId], references: [id])
+  teams            TournamentTeam[]
+  admins           UserTournament[]
+
+  @@index([status])
+}
+
+model Team {
+  id                    Int              @id @default(autoincrement())
+  name                  String
+  logo                  String?
+  status                String           @default("ACTIVE")
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  logoExpiresAt         DateTime?
+  paidUntil             DateTime?
+  groups                GroupTeam[]
+  knockoutWinnerTies    KnockoutTie[]    @relation("KnockoutWinnerTeam")
+  knockoutAwayTies      KnockoutTie[]    @relation("KnockoutAwayTeam")
+  knockoutHomeTies      KnockoutTie[]    @relation("KnockoutHomeTeam")
+  awayMatches           Match[]          @relation("AwayTeam")
+  homeMatches           Match[]          @relation("HomeTeam")
+  matchEvents           MatchEvent[]
+  players               PlayerTeam[]
+  thirdPlaceTournaments Tournament[]     @relation("TournamentThirdPlace")
+  runnerUpTournaments   Tournament[]     @relation("TournamentRunnerUp")
+  championTournaments   Tournament[]     @relation("TournamentChampion")
+  tournaments           TournamentTeam[]
+}
+
+model Player {
+  id             Int          @id @default(autoincrement())
+  name           String
+  birthDate      DateTime
+  documentNumber String?      @unique
+  jerseyNumber   String?
+  photo          String?
+  status         String       @default("ACTIVE")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  matchEvents    MatchEvent[]
+  teams          PlayerTeam[]
+}
+
+model PlayerTeam {
+  playerId  Int
+  teamId    Int
+  createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id])
+  player    Player   @relation(fields: [playerId], references: [id])
+
+  @@id([playerId, teamId])
+  @@index([teamId])
+}
+
+model UserTournament {
+  userId       Int
+  tournamentId Int
+  createdAt    DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@id([userId, tournamentId])
+  @@index([tournamentId])
+}
+
+model TournamentTeam {
+  tournamentId Int
+  teamId       Int
+  createdAt    DateTime   @default(now())
+  team         Team       @relation(fields: [teamId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id])
+
+  @@id([tournamentId, teamId])
+  @@index([teamId])
+}
+
+model Match {
+  id               Int          @id @default(autoincrement())
+  tournamentId     Int
+  homeTeamId       Int
+  awayTeamId       Int
+  date             DateTime
+  time             String
+  status           String       @default("SCHEDULED")
+  homeScore        Int?
+  awayScore        Int?
+  stage            String?
+  groupId          Int?
+  tieId            Int?
+  leg              Int?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  awayPenaltyScore Int?
+  homePenaltyScore Int?
+  tie              KnockoutTie? @relation(fields: [tieId], references: [id])
+  group            Group?       @relation(fields: [groupId], references: [id])
+  awayTeam         Team         @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  homeTeam         Team         @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  tournament       Tournament   @relation(fields: [tournamentId], references: [id])
+  events           MatchEvent[]
+
+  @@index([tournamentId, date, time])
+  @@index([status])
+  @@index([groupId])
+  @@index([tieId])
+}
+
+model Announcement {
+  id              Int       @id @default(autoincrement())
+  title           String
+  imageUrl        String
+  linkUrl         String?
+  delaySeconds    Int       @default(0)
+  durationSeconds Int       @default(8)
+  status          String    @default("ACTIVE")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  expiresAt       DateTime?
+
+  @@index([status, createdAt])
+}
+
+model MatchEvent {
+  id        Int      @id @default(autoincrement())
+  matchId   Int
+  teamId    Int
+  playerId  Int?
+  type      String
+  minute    Int?
+  createdAt DateTime @default(now())
+  player    Player?  @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  team      Team     @relation(fields: [teamId], references: [id])
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@index([matchId, createdAt])
+  @@index([teamId, type])
+}
+
+model FloatingBubble {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  linkUrl   String
+  icon      String   @default("MessageCircle")
+  logoUrl   String?
+  color     String   @default("emerald")
+  position  Int      @default(0)
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, position])
+}
+
+model TableCaption {
+  id           Int        @id @default(autoincrement())
+  tournamentId Int
+  tableKey     String
+  text         String?
+  expiresAt    DateTime?
+  updatedAt    DateTime   @updatedAt
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, tableKey])
+}
+
+model Group {
+  id           Int         @id @default(autoincrement())
+  tournamentId Int
+  name         String
+  position     Int         @default(0)
+  createdAt    DateTime    @default(now())
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teams        GroupTeam[]
+  matches      Match[]
+
+  @@index([tournamentId])
+}
+
+model GroupTeam {
+  groupId   Int
+  teamId    Int
+  pot       Int      @default(1)
+  createdAt DateTime @default(now())
+  team      Team     @relation(fields: [teamId], references: [id])
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, teamId])
+  @@index([teamId])
+}
+
+model KnockoutTie {
+  id           Int        @id @default(autoincrement())
+  tournamentId Int
+  stage        String
+  slot         Int
+  homeTeamId   Int?
+  awayTeamId   Int?
+  winnerTeamId Int?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  winnerTeam   Team?      @relation("KnockoutWinnerTeam", fields: [winnerTeamId], references: [id])
+  awayTeam     Team?      @relation("KnockoutAwayTeam", fields: [awayTeamId], references: [id])
+  homeTeam     Team?      @relation("KnockoutHomeTeam", fields: [homeTeamId], references: [id])
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  matches      Match[]
+
+  @@unique([tournamentId, stage, slot])
+  @@index([tournamentId, stage])
+}

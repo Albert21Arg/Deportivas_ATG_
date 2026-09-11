@@ -1,0 +1,1 @@
+ALTER TABLE "Announcement" ADD COLUMN "displayCount" INTEGER NOT NULL DEFAULT 1;

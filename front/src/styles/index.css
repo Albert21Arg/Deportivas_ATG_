@@ -1,0 +1,62 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.scroll-invisible {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-invisible::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+  Modo diurno: todo texto blanco/gris (pensado originalmente para fondo
+  oscuro) se repinta en el mismo azul cian de la firma "Albert Taborda"
+  sobre el logo, en vez de negro. Cubre las clases base de Tailwind sin
+  tocar variantes (hover:, sm:, dark:, etc.) ni colores de acento
+  (emerald, red, amber...), que se dejan intactos.
+*/
+:root:not(.dark) [class~="text-white"],
+:root:not(.dark) [class~="text-slate-50"],
+:root:not(.dark) [class~="text-slate-100"],
+:root:not(.dark) [class~="text-slate-200"],
+:root:not(.dark) [class~="text-slate-300"],
+:root:not(.dark) [class~="text-slate-400"],
+:root:not(.dark) [class~="text-slate-500"],
+:root:not(.dark) [class~="text-slate-600"],
+:root:not(.dark) [class~="text-slate-700"],
+:root:not(.dark) [class~="text-slate-800"],
+:root:not(.dark) [class~="text-slate-900"],
+:root:not(.dark) [class~="text-slate-950"] {
+  color: #00c2cb !important;
+}
+
+/*
+  Modo diurno: los botones con fondo oscuro/neutro (pensados para el
+  tema oscuro) pasan a fondo blanco. Los botones con color de acento
+  (emerald, red, amber...) no se tocan porque siguen siendo válidos
+  sobre fondo claro.
+*/
+:root:not(.dark) button[class~="bg-slate-600"],
+:root:not(.dark) button[class~="bg-slate-700"],
+:root:not(.dark) button[class~="bg-slate-800"],
+:root:not(.dark) button[class~="bg-slate-900"],
+:root:not(.dark) button[class~="bg-slate-950"],
+:root:not(.dark) button[class~="bg-black/20"],
+:root:not(.dark) button[class~="bg-black/30"],
+:root:not(.dark) button[class~="bg-black/40"],
+:root:not(.dark) button[class~="bg-black/75"],
+:root:not(.dark) [class~="bg-emerald-500"] {
+  background-color: #fff !important;
+}
