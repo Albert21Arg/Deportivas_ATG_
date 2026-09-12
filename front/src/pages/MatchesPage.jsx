@@ -30,11 +30,16 @@ const statusLabels = {
 };
 
 const statusStyles = {
-  SCHEDULED: "border-blue-500/20 bg-blue-500/10 text-blue-300",
-  STARTED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-  FINISHED: "border-emerald-500/20 bg-emerald-500/10 text-emerald-300",
-  POSTPONED: "border-amber-500/20 bg-amber-500/10 text-amber-300",
-  CANCELLED: "border-red-500/20 bg-red-500/10 text-red-300",
+  SCHEDULED:
+    "border-blue-400/20 bg-blue-400/[0.08] text-blue-300",
+  STARTED:
+    "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-300",
+  FINISHED:
+    "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-300",
+  POSTPONED:
+    "border-amber-400/20 bg-amber-400/[0.08] text-amber-300",
+  CANCELLED:
+    "border-red-400/20 bg-red-400/[0.08] text-red-300",
 };
 
 function dateValue(value) {
@@ -68,7 +73,9 @@ function getMatchTimestamp(match) {
     return 0;
   }
 
-  return new Date(`${date}T${time || "00:00"}:00`).getTime();
+  return new Date(
+    `${date}T${time || "00:00"}:00`,
+  ).getTime();
 }
 
 function sortMatches(matches) {
@@ -157,6 +164,38 @@ function SearchIcon() {
   );
 }
 
+function TrophyIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 4h8v4a4 4 0 0 1-8 0V4Z"
+      />
+      <path
+        strokeLinecap="round"
+        d="M8 6H5a2 2 0 0 0 2 5h1M16 6h3a2 2 0 0 1-2 5h-1M12 12v5M9 21h6M10 17h4"
+      />
+    </svg>
+  );
+}
+
+function LiveIcon() {
+  return (
+    <span className="relative flex h-5 w-5 items-center justify-center">
+      <span className="absolute h-5 w-5 animate-ping rounded-full bg-emerald-400/20" />
+      <span className="relative h-2 w-2 rounded-full bg-emerald-400" />
+    </span>
+  );
+}
+
 /* ================================================================
    TEAM LOGO
 ================================================================ */
@@ -175,6 +214,9 @@ function TeamLogo({ team, size = "normal" }) {
         className={`
           mx-auto flex ${sizeClasses}
           items-center justify-center
+          rounded-full
+          border border-white/[0.06]
+          bg-white/[0.025]
           text-base sm:text-lg
         `}
         aria-label={`Sin logo para ${team?.name ?? "equipo"}`}
@@ -185,16 +227,24 @@ function TeamLogo({ team, size = "normal" }) {
   }
 
   return (
-    <img
+    <div
       className={`
-        mx-auto ${sizeClasses}
-        object-contain
+        mx-auto flex ${sizeClasses}
+        items-center justify-center
+        rounded-full
+        border border-white/[0.06]
+        bg-white/[0.025]
+        p-2
       `}
-      src={team.logo}
-      alt={`Logo de ${team.name}`}
-      loading="lazy"
-      onError={() => setHasError(true)}
-    />
+    >
+      <img
+        className="h-full w-full object-contain"
+        src={team.logo}
+        alt={`Logo de ${team.name}`}
+        loading="lazy"
+        onError={() => setHasError(true)}
+      />
+    </div>
   );
 }
 
@@ -361,7 +411,7 @@ function TeamSearch({
 }
 
 /* ================================================================
-   DATE / TIME FIELD
+   DATE / TIME
 ================================================================ */
 
 function DateTimeField({
@@ -414,7 +464,10 @@ function DateTimeField({
    LIVE EVENT PANEL
 ================================================================ */
 
-function LiveEventPanel({ match, blueCardEnabled = true }) {
+function LiveEventPanel({
+  match,
+  blueCardEnabled = true,
+}) {
   const { notify } = useNotifications();
 
   const [teamId, setTeamId] = useState(
@@ -494,7 +547,9 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
     () =>
       new Set(
         (currentMatch.events ?? [])
-          .filter((event) => event.type === "RED_CARD")
+          .filter(
+            (event) => event.type === "RED_CARD",
+          )
           .map((event) => event.playerId),
       ),
     [currentMatch.events],
@@ -506,7 +561,9 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
     return players.filter(
       (item) =>
         !expelled.has(item.id) &&
-        item.name.toLowerCase().includes(normalizedQuery),
+        item.name
+          .toLowerCase()
+          .includes(normalizedQuery),
     );
   }, [players, expelled, query]);
 
@@ -566,6 +623,7 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
 
   async function removeEvent(eventId) {
     setIsRemovingEvent(true);
+
     try {
       const { data } = await api.delete(
         `/matches/${match.id}/events/${eventId}`,
@@ -582,7 +640,6 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
 
   return (
     <div className="mt-4 space-y-2.5 border-t border-white/[0.05] pt-3.5 sm:space-y-3 sm:pt-4">
-      {/* SCORE */}
       <form
         className="
           rounded-xl
@@ -604,21 +661,13 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
         </div>
 
         <p className="mt-1 text-[9px] leading-4 text-slate-500">
-          Usa esto solo para corregir errores. Para anotar goles usa
-          el botón ⚽ / 🔴 de abajo: así quedan enlazados al
-          jugador.
+          Usa esto solo para corregir errores. Para anotar
+          goles usa los eventos.
         </p>
 
         <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <input
-            className="
-              h-10 w-full rounded-lg
-              border border-slate-700
-              bg-slate-950
-              text-center text-xl font-black
-              text-white outline-none
-              focus:border-emerald-400
-            "
+            className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 text-center text-xl font-black text-white outline-none focus:border-emerald-400"
             min="0"
             type="number"
             value={score.homeScore}
@@ -628,7 +677,6 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
                 homeScore: event.target.value,
               }))
             }
-            aria-label={`Marcador de ${match.homeTeam.name}`}
           />
 
           <span className="text-sm font-bold text-slate-600">
@@ -636,14 +684,7 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
           </span>
 
           <input
-            className="
-              h-10 w-full rounded-lg
-              border border-slate-700
-              bg-slate-950
-              text-center text-xl font-black
-              text-white outline-none
-              focus:border-emerald-400
-            "
+            className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 text-center text-xl font-black text-white outline-none focus:border-emerald-400"
             min="0"
             type="number"
             value={score.awayScore}
@@ -653,138 +694,104 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
                 awayScore: event.target.value,
               }))
             }
-            aria-label={`Marcador de ${match.awayTeam.name}`}
           />
         </div>
       </form>
 
-      {/* EVENT */}
       <form
-        className="
-          rounded-xl
-          border border-white/[0.06]
-          bg-slate-950/30
-          p-2.5 sm:p-3
-        "
+        className="rounded-xl border border-white/[0.06] bg-slate-950/30 p-2.5 sm:p-3"
         onSubmit={saveCard}
       >
         <div
           className={`grid gap-1.5 ${
-            blueCardEnabled ? "grid-cols-5" : "grid-cols-4"
+            blueCardEnabled
+              ? "grid-cols-5"
+              : "grid-cols-4"
           }`}
         >
           <button
-            className={`
-              h-9 rounded-lg
-              text-[9px] font-bold
-              transition
-              ${
-                type === "GOAL"
-                  ? "bg-emerald-400 text-slate-950"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-              }
-            `}
+            className={`h-9 rounded-lg text-[9px] font-bold transition ${
+              type === "GOAL"
+                ? "bg-emerald-400 text-slate-950"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+            }`}
             type="button"
             onClick={() => {
               setType("GOAL");
               setPlayer(null);
               setQuery("");
             }}
-            aria-label="Gol"
           >
             ⚽
           </button>
 
           <button
-            className={`
-              flex h-9 items-center justify-center rounded-lg
-              text-[9px] font-bold
-              transition
-              ${
-                type === "OWN_GOAL"
-                  ? "bg-orange-400 text-slate-950"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-              }
-            `}
+            className={`flex h-9 items-center justify-center rounded-lg text-[9px] font-bold transition ${
+              type === "OWN_GOAL"
+                ? "bg-orange-400 text-slate-950"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+            }`}
             type="button"
             onClick={() => {
               setType("OWN_GOAL");
               setPlayer(null);
               setQuery("");
             }}
-            aria-label="Autogol"
-            title="Autogol"
           >
             <FutbolIcon
               className={`h-4 w-4 ${
-                type === "OWN_GOAL" ? "text-red-600" : "text-red-500"
+                type === "OWN_GOAL"
+                  ? "text-red-600"
+                  : "text-red-500"
               }`}
             />
           </button>
 
           <button
-            className={`
-              h-9 rounded-lg
-              text-[9px] font-bold
-              transition
-              ${
-                type === "YELLOW_CARD"
-                  ? "bg-amber-400 text-slate-950"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-              }
-            `}
+            className={`h-9 rounded-lg text-[9px] font-bold transition ${
+              type === "YELLOW_CARD"
+                ? "bg-amber-400 text-slate-950"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+            }`}
             type="button"
             onClick={() => {
               setType("YELLOW_CARD");
               setPlayer(null);
               setQuery("");
             }}
-            aria-label="Tarjeta amarilla"
           >
             🟨
           </button>
 
           <button
-            className={`
-              h-9 rounded-lg
-              text-[9px] font-bold
-              transition
-              ${
-                type === "RED_CARD"
-                  ? "bg-red-500 text-white"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-              }
-            `}
+            className={`h-9 rounded-lg text-[9px] font-bold transition ${
+              type === "RED_CARD"
+                ? "bg-red-500 text-white"
+                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+            }`}
             type="button"
             onClick={() => {
               setType("RED_CARD");
               setPlayer(null);
               setQuery("");
             }}
-            aria-label="Tarjeta roja"
           >
             🟥
           </button>
 
           {blueCardEnabled && (
             <button
-              className={`
-                h-9 rounded-lg
-                text-[9px] font-bold
-                transition
-                ${
-                  type === "BLUE_CARD"
-                    ? "bg-blue-500 text-white"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
-                }
-              `}
+              className={`h-9 rounded-lg text-[9px] font-bold transition ${
+                type === "BLUE_CARD"
+                  ? "bg-blue-500 text-white"
+                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+              }`}
               type="button"
               onClick={() => {
                 setType("BLUE_CARD");
                 setPlayer(null);
                 setQuery("");
               }}
-              aria-label="Tarjeta azul"
             >
               🟦
             </button>
@@ -793,21 +800,13 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
 
         {isOwnGoal && (
           <p className="mt-1.5 text-[9px] leading-4 text-orange-300">
-            Autogol: el equipo seleccionado abajo es el que se
-            beneficia del gol. El jugador debe pertenecer a{" "}
+            Autogol: el jugador debe pertenecer a{" "}
             {rivalTeamName}.
           </p>
         )}
 
         <select
-          className="
-            mt-2 h-10 w-full rounded-lg
-            border border-slate-700
-            bg-slate-950
-            px-2 text-xs text-white
-            outline-none
-            focus:border-emerald-400
-          "
+          className="mt-2 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none focus:border-emerald-400"
           value={teamId}
           onChange={(event) => {
             setTeamId(event.target.value);
@@ -826,15 +825,7 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
 
         <div className="relative">
           <input
-            className="
-              mt-2 h-10 w-full rounded-lg
-              border border-slate-700
-              bg-slate-950
-              px-3 text-xs text-white
-              outline-none
-              placeholder:text-slate-600
-              focus:border-emerald-400
-            "
+            className="mt-2 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-xs text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
             placeholder="Buscar jugador..."
             value={query}
             onChange={(event) => {
@@ -845,23 +836,10 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
           />
 
           {query && !player && (
-            <div
-              className="
-                absolute left-0 right-0 top-full z-20 mt-1
-                max-h-32 overflow-y-auto
-                rounded-lg border border-slate-700
-                bg-slate-950 shadow-xl
-              "
-            >
+            <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-32 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950 shadow-xl">
               {results.map((item) => (
                 <button
-                  className="
-                    block w-full truncate
-                    px-3 py-2.5
-                    text-left text-xs
-                    text-slate-300
-                    hover:bg-slate-800
-                  "
+                  className="block w-full truncate px-3 py-2.5 text-left text-xs text-slate-300 hover:bg-slate-800"
                   key={item.id}
                   type="button"
                   onClick={() => {
@@ -884,35 +862,19 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
 
         <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
           <input
-            className="
-              h-10 min-w-0 rounded-lg
-              border border-slate-700
-              bg-slate-950
-              px-2 text-xs text-white
-              outline-none
-              placeholder:text-slate-600
-              focus:border-emerald-400
-            "
+            className="h-10 min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
             type="number"
             min="0"
             max="130"
             placeholder="Minuto"
             value={minute}
-            onChange={(event) => setMinute(event.target.value)}
+            onChange={(event) =>
+              setMinute(event.target.value)
+            }
           />
 
           <button
-            className="
-              rounded-lg
-              bg-slate-100
-              px-3
-              text-[10px] font-bold
-              text-slate-950
-              transition
-              hover:bg-white
-              disabled:cursor-not-allowed
-              disabled:opacity-40
-            "
+            className="rounded-lg bg-slate-100 px-3 text-[10px] font-bold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!player}
           >
             Registrar
@@ -920,17 +882,10 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
         </div>
       </form>
 
-      {/* EVENTS */}
       <div className="space-y-1.5">
         {(currentMatch.events ?? []).map((event) => (
           <div
-            className="
-              flex min-w-0 items-center gap-2
-              rounded-lg
-              bg-slate-950/50
-              px-2.5 py-2
-              text-[10px]
-            "
+            className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-950/50 px-2.5 py-2 text-[10px]"
             key={event.id}
           >
             <span className="flex shrink-0 items-center">
@@ -941,7 +896,9 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
                   : event.type === "BLUE_CARD"
                     ? "🟦"
                     : event.type === "OWN_GOAL"
-                      ? <FutbolIcon className="h-3.5 w-3.5 text-red-500" />
+                      ? (
+                        <FutbolIcon className="h-3.5 w-3.5 text-red-500" />
+                      )
                       : "⚽"}
             </span>
 
@@ -960,13 +917,16 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
             >
               {event.player?.name ??
                 event.team?.name}
-              {event.type === "OWN_GOAL" && " (autogol)"}
+              {event.type === "OWN_GOAL" &&
+                " (autogol)"}
             </span>
 
             <button
               className="shrink-0 text-[9px] text-red-300 transition hover:text-red-200"
               type="button"
-              onClick={() => setEventToRemove(event)}
+              onClick={() =>
+                setEventToRemove(event)
+              }
             >
               Eliminar
             </button>
@@ -981,14 +941,16 @@ function LiveEventPanel({ match, blueCardEnabled = true }) {
         confirmLabel="Sí, eliminar"
         isLoading={isRemovingEvent}
         onCancel={() => setEventToRemove(null)}
-        onConfirm={() => removeEvent(eventToRemove.id)}
+        onConfirm={() =>
+          removeEvent(eventToRemove.id)
+        }
       />
     </div>
   );
 }
 
 /* ================================================================
-   MATCH CARD
+   MATCH CARD PREMIUM
 ================================================================ */
 
 function MatchCard({
@@ -1000,18 +962,18 @@ function MatchCard({
   changeStatus,
   tournament,
 }) {
-  // Marcador rápido en la tarjeta: estado propio de este partido, no
-  // compartido entre tarjetas (antes usaba un estado global de la página
-  // y escribir el marcador de un partido se reflejaba en todos los demás).
   const [localScore, setLocalScore] = useState({
     homeScore: "",
     awayScore: "",
   });
 
   const isFinished = match.status === "FINISHED";
+  const isLive = match.status === "STARTED";
+  const isPostponed = match.status === "POSTPONED";
+  const isCancelled = match.status === "CANCELLED";
 
   const canEdit =
-    match.status !== "CANCELLED" &&
+    !isCancelled &&
     (!isFinished || canCorrectFinished);
 
   const hasCurrentScore =
@@ -1020,8 +982,7 @@ function MatchCard({
     match.awayScore !== null &&
     match.awayScore !== undefined;
 
-  const showScore =
-    isFinished || match.status === "STARTED";
+  const showScore = isFinished || isLive;
 
   function handleRegisterResult() {
     registerResult(match, localScore);
@@ -1029,47 +990,89 @@ function MatchCard({
 
   return (
     <article
-      className="
+      className={`
         group relative overflow-hidden
-        rounded-xl sm:rounded-2xl
-        border border-white/[0.07]
+        rounded-2xl
+        border
         bg-[#0b111a]
-        shadow-lg shadow-black/10
-        transition-colors duration-200
-        hover:border-white/[0.11]
-        sm:shadow-xl sm:shadow-black/15
-      "
+        shadow-2xl shadow-black/20
+        transition-all duration-300
+        hover:-translate-y-0.5
+        ${
+          isLive
+            ? "border-emerald-400/25 shadow-emerald-950/20"
+            : isPostponed
+              ? "border-amber-400/15"
+              : isCancelled
+                ? "border-red-400/10 opacity-90"
+                : "border-white/[0.07] hover:border-white/[0.12]"
+        }
+      `}
     >
+      {/* PREMIUM GLOW */}
+      <div
+        className={`
+          pointer-events-none absolute -right-20 -top-20
+          h-40 w-40 rounded-full blur-3xl
+          ${
+            isLive
+              ? "bg-emerald-400/10"
+              : isPostponed
+                ? "bg-amber-400/[0.06]"
+                : "bg-cyan-400/[0.025]"
+          }
+        `}
+      />
+
       {/* TOP ACCENT */}
       <div
-        className={`absolute inset-x-0 top-0 h-px ${
-          match.status === "STARTED"
-            ? "bg-emerald-400/70"
-            : match.status === "FINISHED"
-              ? "bg-emerald-400/40"
-              : "bg-white/[0.07]"
-        }`}
+        className={`
+          absolute inset-x-0 top-0 h-[2px]
+          ${
+            isLive
+              ? "bg-gradient-to-r from-transparent via-emerald-400 to-transparent"
+              : isPostponed
+                ? "bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"
+                : isFinished
+                  ? "bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"
+                  : "bg-white/[0.06]"
+          }
+        `}
       />
 
       {/* HEADER */}
-      <div className="border-b border-white/[0.05] px-3.5 py-3 sm:px-4 sm:py-3.5">
-        <div className="flex items-center justify-between gap-2">
+      <div className="relative border-b border-white/[0.05] px-4 py-3.5">
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600">
-              Partido
-            </p>
+            <div className="flex items-center gap-2">
+              {isLive ? (
+                <LiveIcon />
+              ) : (
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white/[0.035] text-[9px]">
+                  ⚽
+                </span>
+              )}
 
-            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] text-slate-500 sm:text-xs">
-              <span className="truncate">
-                {formatMatchDate(match.date)}
+              <span className="truncate text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                {isLive
+                  ? "Partido en vivo"
+                  : isFinished
+                    ? "Partido finalizado"
+                    : isPostponed
+                      ? "Partido aplazado"
+                      : "Próximo partido"}
               </span>
+            </div>
 
-              <span className="shrink-0 text-slate-700">
+            <div className="mt-1.5 flex items-center gap-2 text-[10px] text-slate-500">
+              <span>{formatMatchDate(match.date)}</span>
+
+              <span className="text-slate-700">
                 •
               </span>
 
-              <span className="shrink-0">
-                {timeValue(match.time)}
+              <span className="font-semibold text-slate-400">
+                {timeValue(match.time) || "--:--"}
               </span>
             </div>
           </div>
@@ -1077,13 +1080,10 @@ function MatchCard({
           <span
             className={`
               shrink-0 rounded-full border
-              px-2 py-1
+              px-2.5 py-1.5
               text-[8px] font-bold
-              sm:px-2.5 sm:text-[9px]
-              ${
-                statusStyles[match.status] ??
-                "border-slate-700 bg-slate-800 text-slate-300"
-              }
+              ${statusStyles[match.status] ??
+              "border-slate-700 bg-slate-800 text-slate-300"}
             `}
           >
             {statusLabels[match.status] ??
@@ -1092,60 +1092,39 @@ function MatchCard({
         </div>
       </div>
 
-      {/* TEAMS */}
-      <div className="px-3.5 py-4 sm:px-4 sm:py-5">
-        <div
-          className="
-            grid
-            grid-cols-[minmax(0,1fr)_36px_minmax(0,1fr)]
-            items-start
-            gap-1
-            sm:grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)]
-            sm:gap-2
-          "
-        >
+      {/* MATCH BODY */}
+      <div className="relative px-4 pb-4 pt-5">
+        <div className="grid grid-cols-[1fr_76px_1fr] items-center gap-2">
           {/* HOME */}
           <div className="min-w-0 text-center">
             <TeamLogo team={match.homeTeam} />
 
             <h3
-              className="
-                mx-auto mt-2
-                max-w-[130px]
-                truncate
-                text-xs font-bold leading-5
-                text-slate-100
-                sm:max-w-[160px]
-                sm:text-sm
-              "
+              className="mx-auto mt-3 max-w-[125px] truncate text-xs font-bold text-white sm:max-w-[145px] sm:text-sm"
               title={match.homeTeam.name}
             >
               {match.homeTeam.name}
             </h3>
 
             {showScore ? (
-              <p className="mt-2 text-2xl font-black leading-none text-emerald-300 sm:text-3xl">
+              <p
+                className={`
+                  mt-2 text-3xl font-black leading-none
+                  sm:text-4xl
+                  ${
+                    isLive
+                      ? "text-white"
+                      : "text-emerald-300"
+                  }
+                `}
+              >
                 {hasCurrentScore
                   ? match.homeScore
                   : 0}
               </p>
             ) : canEdit ? (
               <input
-                className="
-                  mx-auto mt-2 block
-                  h-10 w-14
-                  rounded-lg
-                  border border-slate-700
-                  bg-slate-950
-                  px-1
-                  text-center text-lg font-bold
-                  text-slate-100
-                  outline-none
-                  transition
-                  focus:border-emerald-400
-                  focus:ring-2 focus:ring-emerald-500/20
-                  sm:h-11 sm:w-16 sm:text-xl
-                "
+                className="mx-auto mt-2 block h-10 w-14 rounded-xl border border-slate-700 bg-slate-950 text-center text-lg font-black text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
                 type="number"
                 min="0"
                 placeholder="0"
@@ -1153,30 +1132,81 @@ function MatchCard({
                 onChange={(event) =>
                   setLocalScore((current) => ({
                     ...current,
-                    homeScore: event.target.value,
+                    homeScore:
+                      event.target.value,
                   }))
                 }
-                aria-label={`Marcador de ${match.homeTeam.name}`}
               />
             ) : null}
           </div>
 
-          {/* VS */}
-          <div className="flex h-[78px] items-center justify-center sm:h-[98px]">
-            <span
-              className="
-                flex h-7 w-7
-                items-center justify-center
-                rounded-full
-                border border-white/[0.06]
-                bg-slate-950
-                text-[8px] font-black
-                text-slate-600
-                sm:h-8 sm:w-8 sm:text-[9px]
-              "
-            >
-              VS
-            </span>
+          {/* CENTER */}
+          <div className="flex flex-col items-center justify-center">
+            {isLive ? (
+              <>
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-400">
+                  LIVE
+                </span>
+
+                <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-400/10 bg-emerald-400/[0.04]">
+                  <span className="text-sm font-black text-slate-500">
+                    -
+                  </span>
+                </div>
+
+                <span className="text-[8px] font-bold text-slate-600">
+                  EN JUEGO
+                </span>
+              </>
+            ) : isFinished ? (
+              <>
+                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-600">
+                  FINAL
+                </span>
+
+                <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-400/10 bg-emerald-400/[0.03]">
+                  <span className="text-sm font-black text-emerald-400">
+                    VS
+                  </span>
+                </div>
+
+                <span className="text-[8px] font-bold text-slate-600">
+                  RESULTADO
+                </span>
+              </>
+            ) : isPostponed ? (
+              <>
+                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-400">
+                  PAUSA
+                </span>
+
+                <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-amber-400/10 bg-amber-400/[0.04]">
+                  <span className="text-sm">
+                    ⏸
+                  </span>
+                </div>
+
+                <span className="text-[8px] font-bold text-slate-600">
+                  PENDIENTE
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-700">
+                  VS
+                </span>
+
+                <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-slate-950">
+                  <span className="text-[10px] font-black text-slate-500">
+                    VS
+                  </span>
+                </div>
+
+                <span className="text-[8px] font-bold text-slate-700">
+                  PRÓXIMO
+                </span>
+              </>
+            )}
           </div>
 
           {/* AWAY */}
@@ -1184,43 +1214,31 @@ function MatchCard({
             <TeamLogo team={match.awayTeam} />
 
             <h3
-              className="
-                mx-auto mt-2
-                max-w-[130px]
-                truncate
-                text-xs font-bold leading-5
-                text-slate-100
-                sm:max-w-[160px]
-                sm:text-sm
-              "
+              className="mx-auto mt-3 max-w-[125px] truncate text-xs font-bold text-white sm:max-w-[145px] sm:text-sm"
               title={match.awayTeam.name}
             >
               {match.awayTeam.name}
             </h3>
 
             {showScore ? (
-              <p className="mt-2 text-2xl font-black leading-none text-emerald-300 sm:text-3xl">
+              <p
+                className={`
+                  mt-2 text-3xl font-black leading-none
+                  sm:text-4xl
+                  ${
+                    isLive
+                      ? "text-white"
+                      : "text-emerald-300"
+                  }
+                `}
+              >
                 {hasCurrentScore
                   ? match.awayScore
                   : 0}
               </p>
             ) : canEdit ? (
               <input
-                className="
-                  mx-auto mt-2 block
-                  h-10 w-14
-                  rounded-lg
-                  border border-slate-700
-                  bg-slate-950
-                  px-1
-                  text-center text-lg font-bold
-                  text-slate-100
-                  outline-none
-                  transition
-                  focus:border-emerald-400
-                  focus:ring-2 focus:ring-emerald-500/20
-                  sm:h-11 sm:w-16 sm:text-xl
-                "
+                className="mx-auto mt-2 block h-10 w-14 rounded-xl border border-slate-700 bg-slate-950 text-center text-lg font-black text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
                 type="number"
                 min="0"
                 placeholder="0"
@@ -1228,20 +1246,24 @@ function MatchCard({
                 onChange={(event) =>
                   setLocalScore((current) => ({
                     ...current,
-                    awayScore: event.target.value,
+                    awayScore:
+                      event.target.value,
                   }))
                 }
-                aria-label={`Marcador de ${match.awayTeam.name}`}
               />
             ) : null}
           </div>
         </div>
 
-        {/* RESULT */}
+        {/* FINISHED RESULT */}
         {isFinished && hasCurrentScore && (
-          <div className="mt-3 flex justify-center">
-            <span className="rounded-full border border-emerald-500/15 bg-emerald-500/[0.04] px-2.5 py-1 text-[9px] font-bold text-emerald-300 sm:px-3 sm:text-[10px]">
-              Resultado: {match.homeScore} -{" "}
+          <div className="mt-4 flex justify-center">
+            <div className="rounded-full border border-emerald-400/10 bg-emerald-400/[0.035] px-3 py-1.5 text-[9px] font-bold text-emerald-300">
+              Resultado final{" "}
+              <span className="mx-1.5 text-slate-700">
+                •
+              </span>
+              {match.homeScore} -{" "}
               {match.awayScore}
               {match.homePenaltyScore != null &&
                 match.awayPenaltyScore != null && (
@@ -1250,12 +1272,25 @@ function MatchCard({
                     {match.awayPenaltyScore})
                   </span>
                 )}
-            </span>
+            </div>
+          </div>
+        )}
+
+        {/* POSTPONED INFO */}
+        {isPostponed && (
+          <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.035] px-3 py-2.5 text-center">
+            <p className="text-[9px] font-semibold text-amber-200">
+              Este partido está aplazado
+            </p>
+
+            <p className="mt-0.5 text-[8px] text-slate-600">
+              Puedes reprogramarlo cuando tengas nueva fecha.
+            </p>
           </div>
         )}
 
         {/* LIVE */}
-        {match.status === "STARTED" && (
+        {isLive && (
           <LiveEventPanel
             match={match}
             blueCardEnabled={
@@ -1267,17 +1302,11 @@ function MatchCard({
 
       {/* ACTIONS */}
       {isAdmin && canEdit && (
-        <div className="border-t border-white/[0.05] bg-slate-950/20 p-2.5 sm:p-3">
+        <div className="border-t border-white/[0.05] bg-black/10 p-2.5">
           <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center">
             {match.status === "SCHEDULED" && (
               <button
-                className="
-                  rounded-lg bg-red-500
-                  px-2 py-2
-                  text-[9px] font-bold text-white
-                  transition hover:bg-red-400
-                  sm:px-2.5 sm:py-1.5
-                "
+                className="rounded-lg bg-red-500 px-3 py-2 text-[9px] font-bold text-white transition hover:bg-red-400"
                 onClick={() =>
                   changeStatus(match, "start")
                 }
@@ -1289,13 +1318,7 @@ function MatchCard({
 
             {match.status === "STARTED" && (
               <button
-                className="
-                  rounded-lg bg-emerald-500
-                  px-2 py-2
-                  text-[9px] font-bold text-slate-950
-                  transition hover:bg-emerald-400
-                  sm:px-2.5 sm:py-1.5
-                "
+                className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 transition hover:bg-emerald-400"
                 onClick={() =>
                   changeStatus(match, "finish")
                 }
@@ -1308,16 +1331,10 @@ function MatchCard({
             {match.status !== "STARTED" && (
               <>
                 <button
-                  className="
-                    rounded-lg border border-slate-700
-                    px-2 py-2
-                    text-[9px] font-semibold text-slate-300
-                    transition
-                    hover:border-slate-500
-                    hover:text-white
-                    sm:px-2.5 sm:py-1.5
-                  "
-                  onClick={() => startEditing(match)}
+                  className="rounded-lg border border-white/[0.08] px-3 py-2 text-[9px] font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white"
+                  onClick={() =>
+                    startEditing(match)
+                  }
                   type="button"
                 >
                   ✏️{" "}
@@ -1327,14 +1344,10 @@ function MatchCard({
                 </button>
 
                 <button
-                  className="
-                    rounded-lg bg-emerald-500
-                    px-2 py-2
-                    text-[9px] font-bold text-slate-950
-                    transition hover:bg-emerald-400
-                    sm:px-2.5 sm:py-1.5
-                  "
-                  onClick={handleRegisterResult}
+                  className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 transition hover:bg-emerald-400"
+                  onClick={
+                    handleRegisterResult
+                  }
                   type="button"
                 >
                   🏁{" "}
@@ -1348,17 +1361,12 @@ function MatchCard({
             {match.status !== "FINISHED" &&
               match.status !== "POSTPONED" && (
                 <button
-                  className="
-                    rounded-lg border border-amber-800/60
-                    px-2 py-2
-                    text-[9px] font-semibold text-amber-200
-                    transition
-                    hover:border-amber-500
-                    hover:bg-amber-500/10
-                    sm:px-2.5 sm:py-1.5
-                  "
+                  className="rounded-lg border border-amber-800/60 px-3 py-2 text-[9px] font-semibold text-amber-200 transition hover:border-amber-500 hover:bg-amber-500/10"
                   onClick={() =>
-                    changeStatus(match, "postpone")
+                    changeStatus(
+                      match,
+                      "postpone",
+                    )
                   }
                   type="button"
                 >
@@ -1367,15 +1375,7 @@ function MatchCard({
               )}
 
             <button
-              className="
-                rounded-lg border border-red-900/60
-                px-2 py-2
-                text-[9px] font-semibold text-red-300
-                transition
-                hover:border-red-500
-                hover:bg-red-500/10
-                sm:px-2.5 sm:py-1.5
-              "
+              className="rounded-lg border border-red-900/60 px-3 py-2 text-[9px] font-semibold text-red-300 transition hover:border-red-500 hover:bg-red-500/10"
               onClick={() =>
                 changeStatus(match, "cancel")
               }
@@ -1391,7 +1391,7 @@ function MatchCard({
 }
 
 /* ================================================================
-   ACCORDION
+   ACCORDION PREMIUM
 ================================================================ */
 
 function MatchAccordion({
@@ -1408,11 +1408,10 @@ function MatchAccordion({
     <section
       className="
         overflow-hidden
-        rounded-xl sm:rounded-2xl
+        rounded-2xl
         border border-white/[0.07]
         bg-[#0a1018]/90
-        shadow-lg shadow-black/10
-        sm:shadow-xl sm:shadow-black/10
+        shadow-xl shadow-black/10
       "
     >
       <button
@@ -1420,40 +1419,39 @@ function MatchAccordion({
           flex w-full
           items-center justify-between
           gap-3
-          px-3.5 py-3.5
+          px-4 py-4
           text-left
           transition
           hover:bg-white/[0.025]
-          sm:px-5 sm:py-4
+          sm:px-5 sm:py-4.5
         "
         onClick={onToggle}
         type="button"
         aria-expanded={isOpen}
       >
-        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div
             className="
-              flex h-9 w-9 shrink-0
+              flex h-10 w-10 shrink-0
               items-center justify-center
-              rounded-lg
+              rounded-xl
               border border-white/[0.06]
               bg-white/[0.025]
               text-sm
-              sm:h-10 sm:w-10 sm:rounded-xl
             "
           >
             {icon}
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-2">
               <h3
                 className={`truncate text-xs font-bold sm:text-sm ${tone}`}
               >
                 {title}
               </h3>
 
-              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 px-1.5 text-[8px] font-bold text-slate-500 sm:text-[9px]">
+              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-white/[0.05] bg-slate-800/70 px-1.5 text-[8px] font-bold text-slate-400 sm:text-[9px]">
                 {count}
               </span>
             </div>
@@ -1466,13 +1464,13 @@ function MatchAccordion({
 
         <span
           className={`
-            flex h-7 w-7 shrink-0
+            flex h-8 w-8 shrink-0
             items-center justify-center
             rounded-lg
             border border-white/[0.06]
+            bg-white/[0.015]
             text-xs text-slate-500
             transition-transform duration-300
-            sm:h-8 sm:w-8
             ${isOpen ? "rotate-180" : ""}
           `}
         >
@@ -1488,7 +1486,7 @@ function MatchAccordion({
           ease-in-out
           ${
             isOpen
-              ? "max-h-[5000px] opacity-100"
+              ? "max-h-[6000px] opacity-100"
               : "max-h-0 opacity-0"
           }
         `}
@@ -1502,30 +1500,99 @@ function MatchAccordion({
 }
 
 /* ================================================================
-   MAIN PAGE
+   EMPTY SECTION
 ================================================================ */
 
-/* ==================================================================
-   DEFINICIÓN POR PENALES
-================================================================== */
+function EmptySection({ message }) {
+  return (
+    <div className="rounded-xl border border-dashed border-white/[0.06] bg-black/10 px-4 py-8 text-center">
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.025] text-sm">
+        ✦
+      </div>
 
-function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
-  const { match, homeScore, awayScore } = shootout;
+      <p className="mt-2 text-[10px] font-medium text-slate-600 sm:text-xs">
+        {message}
+      </p>
+    </div>
+  );
+}
 
-  const [teamId, setTeamId] = useState(String(match.homeTeamId));
+/* ================================================================
+   PREMIUM STATS
+================================================================ */
+
+function StatCard({
+  label,
+  value,
+  icon,
+  tone = "text-white",
+  accent = "border-white/[0.06]",
+}) {
+  return (
+    <div
+      className={`
+        relative overflow-hidden
+        rounded-2xl
+        border ${accent}
+        bg-[#0a1018]/90
+        p-4
+      `}
+    >
+      <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/[0.02] blur-2xl" />
+
+      <div className="relative flex items-center justify-between">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] text-xs">
+          {icon}
+        </span>
+
+        <span className={`text-2xl font-black ${tone}`}>
+          {value}
+        </span>
+      </div>
+
+      <p className="relative mt-3 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600">
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/* ================================================================
+   PENALTY SHOOTOUT MODAL
+================================================================ */
+
+function PenaltyShootoutModal({
+  shootout,
+  onCancel,
+  onConfirm,
+  isSaving,
+}) {
+  const { match, homeScore, awayScore } =
+    shootout;
+
+  const [teamId, setTeamId] = useState(
+    String(match.homeTeamId),
+  );
+
   const [players, setPlayers] = useState([]);
-  const [selectedPlayerId, setSelectedPlayerId] = useState("");
+  const [selectedPlayerId, setSelectedPlayerId] =
+    useState("");
   const [entries, setEntries] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
 
     api
-      .get(`/tournaments/${match.tournamentId}/teams/${teamId}/players`)
+      .get(
+        `/tournaments/${match.tournamentId}/teams/${teamId}/players`,
+      )
       .then(({ data }) => {
         if (cancelled) return;
+
         setPlayers(
-          data.data.players.filter((item) => item.status === "ACTIVE"),
+          data.data.players.filter(
+            (item) => item.status === "ACTIVE",
+          ),
         );
       })
       .catch(() => {
@@ -1542,20 +1609,30 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
   }, [teamId]);
 
   const homeCount = entries.filter(
-    (entry) => entry.teamId === match.homeTeamId,
+    (entry) =>
+      entry.teamId === match.homeTeamId,
   ).length;
+
   const awayCount = entries.filter(
-    (entry) => entry.teamId === match.awayTeamId,
+    (entry) =>
+      entry.teamId === match.awayTeamId,
   ).length;
-  const canSave = entries.length > 0 && homeCount !== awayCount;
+
+  const canSave =
+    entries.length > 0 &&
+    homeCount !== awayCount;
 
   function addGoal(event) {
     event.preventDefault();
+
     if (!selectedPlayerId) return;
 
     const player = players.find(
-      (item) => String(item.id) === selectedPlayerId,
+      (item) =>
+        String(item.id) ===
+        selectedPlayerId,
     );
+
     if (!player) return;
 
     setEntries((current) => [
@@ -1567,46 +1644,29 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
         playerName: player.name,
       },
     ]);
+
     setSelectedPlayerId("");
   }
 
   function removeEntry(id) {
-    setEntries((current) => current.filter((entry) => entry.id !== id));
+    setEntries((current) =>
+      current.filter(
+        (entry) => entry.id !== id,
+      ),
+    );
   }
 
   return (
-    <div
-      className="
-        fixed inset-0 z-[70]
-        flex items-end justify-center
-        overflow-y-auto
-        bg-slate-950/85
-        px-2 py-2
-        backdrop-blur-sm
-        sm:items-center
-        sm:px-4 sm:py-6
-      "
-      role="presentation"
-    >
+    <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto bg-slate-950/85 px-2 py-2 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
       <div
-        className="
-          my-auto w-full max-w-md
-          max-h-[94vh]
-          overflow-y-auto
-          rounded-2xl
-          border border-amber-500/20
-          bg-slate-900
-          shadow-2xl
-          sm:max-h-[90vh]
-        "
+        className="my-auto w-full max-w-md max-h-[94vh] overflow-y-auto rounded-2xl border border-amber-500/20 bg-slate-900 shadow-2xl sm:max-h-[90vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="penalty-shootout-title"
       >
-        {/* HEADER */}
         <div className="border-b border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-sm sm:h-9 sm:w-9">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/10 bg-amber-400/[0.06] text-sm">
               🥅
             </div>
 
@@ -1619,22 +1679,20 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
               </h2>
 
               <p className="mt-0.5 text-[9px] leading-4 text-slate-500 sm:text-[10px]">
-                El partido {homeScore}-{awayScore} queda empatado:
-                registra quién anota cada penal hasta que haya un
-                ganador.
+                El partido {homeScore}-
+                {awayScore} queda empatado.
               </p>
             </div>
           </div>
         </div>
 
-        {/* CONTENT */}
         <div className="px-4 py-4 sm:px-5 sm:py-5">
-          {/* MARCADOR DE PENALES */}
           <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:gap-3 sm:p-4">
             <div className="min-w-0 text-center">
               <p className="truncate text-[11px] font-bold text-slate-200 sm:text-xs">
                 {match.homeTeam.name}
               </p>
+
               <p className="mt-1 text-2xl font-black text-amber-300 sm:text-3xl">
                 {homeCount}
               </p>
@@ -1648,13 +1706,13 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
               <p className="truncate text-[11px] font-bold text-slate-200 sm:text-xs">
                 {match.awayTeam.name}
               </p>
+
               <p className="mt-1 text-2xl font-black text-amber-300 sm:text-3xl">
                 {awayCount}
               </p>
             </div>
           </div>
 
-          {/* AGREGAR GOL */}
           <form
             className="mt-4 rounded-xl border border-white/[0.06] bg-slate-950/30 p-3"
             onSubmit={addGoal}
@@ -1662,24 +1720,34 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
             <div className="grid grid-cols-2 gap-1.5">
               <button
                 className={`h-9 truncate rounded-lg px-2 text-[11px] font-bold transition ${
-                  String(teamId) === String(match.homeTeamId)
+                  String(teamId) ===
+                  String(match.homeTeamId)
                     ? "bg-emerald-400 text-slate-950"
                     : "bg-slate-800 text-slate-400 hover:bg-slate-700"
                 }`}
                 type="button"
-                onClick={() => setTeamId(String(match.homeTeamId))}
+                onClick={() =>
+                  setTeamId(
+                    String(match.homeTeamId),
+                  )
+                }
               >
                 {match.homeTeam.name}
               </button>
 
               <button
                 className={`h-9 truncate rounded-lg px-2 text-[11px] font-bold transition ${
-                  String(teamId) === String(match.awayTeamId)
+                  String(teamId) ===
+                  String(match.awayTeamId)
                     ? "bg-emerald-400 text-slate-950"
                     : "bg-slate-800 text-slate-400 hover:bg-slate-700"
                 }`}
                 type="button"
-                onClick={() => setTeamId(String(match.awayTeamId))}
+                onClick={() =>
+                  setTeamId(
+                    String(match.awayTeamId),
+                  )
+                }
               >
                 {match.awayTeam.name}
               </button>
@@ -1688,11 +1756,21 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
             <select
               className="mt-2 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 text-xs text-white outline-none transition focus:border-emerald-400"
               value={selectedPlayerId}
-              onChange={(event) => setSelectedPlayerId(event.target.value)}
+              onChange={(event) =>
+                setSelectedPlayerId(
+                  event.target.value,
+                )
+              }
             >
-              <option value="">Selecciona un jugador...</option>
+              <option value="">
+                Selecciona un jugador...
+              </option>
+
               {players.map((player) => (
-                <option key={player.id} value={player.id}>
+                <option
+                  key={player.id}
+                  value={player.id}
+                >
                   {player.name}
                 </option>
               ))}
@@ -1707,19 +1785,21 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
             </button>
           </form>
 
-          {/* PENALES REGISTRADOS */}
           {entries.length > 0 && (
-            <div className="scroll-invisible mt-3 max-h-40 space-y-1.5 overflow-y-auto pr-1">
+            <div className="mt-3 max-h-40 space-y-1.5 overflow-y-auto pr-1">
               {entries.map((entry, index) => (
                 <div
                   className="flex items-center justify-between gap-2 rounded-lg bg-slate-950/50 px-2.5 py-2 text-[10px]"
                   key={entry.id}
                 >
                   <span className="min-w-0 flex-1 truncate text-slate-300">
-                    {index + 1}. {entry.playerName}
+                    {index + 1}.{" "}
+                    {entry.playerName}
+
                     <span className="ml-1 text-slate-600">
                       (
-                      {entry.teamId === match.homeTeamId
+                      {entry.teamId ===
+                      match.homeTeamId
                         ? match.homeTeam.name
                         : match.awayTeam.name}
                       )
@@ -1729,7 +1809,9 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
                   <button
                     className="shrink-0 text-[9px] text-red-300 transition hover:text-red-200"
                     type="button"
-                    onClick={() => removeEntry(entry.id)}
+                    onClick={() =>
+                      removeEntry(entry.id)
+                    }
                   >
                     Quitar
                   </button>
@@ -1738,15 +1820,15 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
             </div>
           )}
 
-          {entries.length > 0 && homeCount === awayCount && (
-            <p className="mt-2 text-[10px] text-amber-300">
-              Sigue registrando penales hasta que un equipo quede
-              arriba en el marcador.
-            </p>
-          )}
+          {entries.length > 0 &&
+            homeCount === awayCount && (
+              <p className="mt-2 text-[10px] text-amber-300">
+                Sigue registrando penales hasta que
+                un equipo quede arriba.
+              </p>
+            )}
         </div>
 
-        {/* FOOTER */}
         <div className="flex items-center justify-end gap-2 border-t border-slate-800 px-4 py-3 sm:px-5 sm:py-4">
           <button
             className="h-10 rounded-xl border border-slate-700 px-4 text-xs font-semibold text-slate-400 transition hover:bg-slate-800"
@@ -1760,10 +1842,14 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
           <button
             className="h-10 rounded-xl bg-emerald-500 px-4 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
-            onClick={() => onConfirm(entries)}
+            onClick={() =>
+              onConfirm(entries)
+            }
             disabled={!canSave || isSaving}
           >
-            {isSaving ? "Guardando..." : "Guardar penales"}
+            {isSaving
+              ? "Guardando..."
+              : "Guardar penales"}
           </button>
         </div>
       </div>
@@ -1771,43 +1857,69 @@ function PenaltyShootoutModal({ shootout, onCancel, onConfirm, isSaving }) {
   );
 }
 
+/* ================================================================
+   MAIN PAGE
+================================================================ */
+
 export default function MatchesPage() {
   const { user } = useAuth();
   const { notify } = useNotifications();
   const [searchParams] = useSearchParams();
 
-  const [tournaments, setTournaments] = useState([]);
+  const [tournaments, setTournaments] =
+    useState([]);
   const [teams, setTeams] = useState([]);
   const [matches, setMatches] = useState([]);
 
   const [selectedTournamentId, setSelectedTournamentId] =
-    useState(searchParams.get("tournamentId") ?? "");
+    useState(
+      searchParams.get("tournamentId") ?? "",
+    );
 
   const [form, setForm] = useState(emptyForm);
-  const [scoreForm, setScoreForm] = useState(emptyScoreForm);
+  const [scoreForm, setScoreForm] =
+    useState(emptyScoreForm);
 
-  const [editingId, setEditingId] = useState(null);
-  const [confirmation, setConfirmation] = useState(null);
-  const [penaltyShootout, setPenaltyShootout] = useState(null);
+  const [editingId, setEditingId] =
+    useState(null);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [confirmation, setConfirmation] =
+    useState(null);
+
+  const [penaltyShootout, setPenaltyShootout] =
+    useState(null);
+
+  const [isLoading, setIsLoading] =
+    useState(true);
+
+  const [isSaving, setIsSaving] =
+    useState(false);
+
   const [isConfirmingResult, setIsConfirmingResult] =
     useState(false);
-  const [isConfirmingAction, setIsConfirmingAction] = useState(false);
+
+  const [isConfirmingAction, setIsConfirmingAction] =
+    useState(false);
+
   const [isConfirmingPenalties, setIsConfirmingPenalties] =
     useState(false);
 
-  const [isScheduleOpen, setIsScheduleOpen] = useState(false);
+  const [isGeneratingFixtures, setIsGeneratingFixtures] =
+    useState(false);
 
-  const [openSections, setOpenSections] = useState({
-    pending: false,
-    finished: false,
-    cancelled: false,
-  });
+  const [isScheduleOpen, setIsScheduleOpen] =
+    useState(false);
+
+  const [openSections, setOpenSections] =
+    useState({
+      pending: true,
+      postponed: false,
+      finished: false,
+      cancelled: false,
+    });
 
   /* ==============================================================
-     LIVE MATCH UPDATES
+     LIVE UPDATES
   ============================================================== */
 
   useEffect(() => {
@@ -1860,16 +1972,17 @@ export default function MatchesPage() {
           await api.get("/tournaments");
 
         const loadedTournaments =
-          tournamentsResponse.data.data.tournaments;
+          tournamentsResponse.data.data
+            .tournaments;
 
         setTournaments(loadedTournaments);
 
         setSelectedTournamentId((current) => {
-          if (current) {
-            return current;
-          }
+          if (current) return current;
 
-          return String(loadedTournaments[0]?.id ?? "");
+          return String(
+            loadedTournaments[0]?.id ?? "",
+          );
         });
       } catch (error) {
         notify(getApiErrorDetails(error));
@@ -1916,7 +2029,8 @@ export default function MatchesPage() {
           teamsResponse.data.data.teams
             .map(({ team }) => team)
             .filter(
-              (team) => team.status === "ACTIVE",
+              (team) =>
+                team.status === "ACTIVE",
             ),
         );
       } catch (error) {
@@ -1934,7 +2048,8 @@ export default function MatchesPage() {
   function updateField(event) {
     setForm((current) => ({
       ...current,
-      [event.target.name]: event.target.value,
+      [event.target.name]:
+        event.target.value,
     }));
   }
 
@@ -2001,8 +2116,12 @@ export default function MatchesPage() {
     try {
       const payload = {
         ...form,
-        homeTeamId: Number(form.homeTeamId),
-        awayTeamId: Number(form.awayTeamId),
+        homeTeamId: Number(
+          form.homeTeamId,
+        ),
+        awayTeamId: Number(
+          form.awayTeamId,
+        ),
       };
 
       const response = editingId
@@ -2049,10 +2168,8 @@ export default function MatchesPage() {
   }
 
   /* ==============================================================
-     GENERATE ROUND-ROBIN FIXTURES
+     GENERATE FIXTURE
   ============================================================== */
-
-  const [isGeneratingFixtures, setIsGeneratingFixtures] = useState(false);
 
   async function generateFixtures() {
     setIsGeneratingFixtures(true);
@@ -2067,12 +2184,15 @@ export default function MatchesPage() {
         `/tournaments/${selectedTournamentId}/matches`,
       );
 
-      setMatches(sortMatches(data.data.matches));
+      setMatches(
+        sortMatches(data.data.matches),
+      );
 
       notify({
         type: "success",
         title: "Fixture generado",
-        message: "Se programaron todos los partidos del torneo.",
+        message:
+          "Se programaron todos los partidos del torneo.",
       });
     } catch (error) {
       notify(getApiErrorDetails(error));
@@ -2085,19 +2205,28 @@ export default function MatchesPage() {
      REGISTER RESULT
   ============================================================== */
 
-  function registerResult(match, currentScore = null) {
-    const homeScore = currentScore?.homeScore !== undefined && currentScore.homeScore !== ''
-      ? currentScore.homeScore
-      : match.homeScore ?? 0;
-    const awayScore = currentScore?.awayScore !== undefined && currentScore.awayScore !== ''
-      ? currentScore.awayScore
-      : match.awayScore ?? 0;
-    const nextScoreForm = {
+  function registerResult(
+    match,
+    currentScore = null,
+  ) {
+    const homeScore =
+      currentScore?.homeScore !==
+        undefined &&
+      currentScore.homeScore !== ""
+        ? currentScore.homeScore
+        : match.homeScore ?? 0;
+
+    const awayScore =
+      currentScore?.awayScore !==
+        undefined &&
+      currentScore.awayScore !== ""
+        ? currentScore.awayScore
+        : match.awayScore ?? 0;
+
+    setScoreForm({
       homeScore: String(homeScore),
       awayScore: String(awayScore),
-    };
-
-    setScoreForm(nextScoreForm);
+    });
 
     setConfirmation({
       type: "result",
@@ -2121,8 +2250,13 @@ export default function MatchesPage() {
 
     const { match } = confirmation;
 
-    const homeScore = Number(scoreForm.homeScore);
-    const awayScore = Number(scoreForm.awayScore);
+    const homeScore = Number(
+      scoreForm.homeScore,
+    );
+
+    const awayScore = Number(
+      scoreForm.awayScore,
+    );
 
     if (
       !Number.isInteger(homeScore) ||
@@ -2160,13 +2294,18 @@ export default function MatchesPage() {
         ),
       );
 
-      if (typeof BroadcastChannel !== "undefined") {
-        const channel = new BroadcastChannel(
-          "deportiva-results",
-        );
+      if (
+        typeof BroadcastChannel !==
+        "undefined"
+      ) {
+        const channel =
+          new BroadcastChannel(
+            "deportiva-results",
+          );
 
         channel.postMessage({
-          tournamentId: match.tournamentId,
+          tournamentId:
+            match.tournamentId,
         });
 
         channel.close();
@@ -2185,11 +2324,22 @@ export default function MatchesPage() {
 
       setConfirmation(null);
     } catch (error) {
-      if (error.response?.data?.code === "PENALTIES_REQUIRED") {
+      if (
+        error.response?.data?.code ===
+        "PENALTIES_REQUIRED"
+      ) {
         setConfirmation(null);
-        setPenaltyShootout({ match, homeScore, awayScore, action: "result" });
+
+        setPenaltyShootout({
+          match,
+          homeScore,
+          awayScore,
+          action: "result",
+        });
       } else {
-        notify(getApiErrorDetails(error));
+        notify(
+          getApiErrorDetails(error),
+        );
       }
     } finally {
       setIsConfirmingResult(false);
@@ -2201,9 +2351,7 @@ export default function MatchesPage() {
   ============================================================== */
 
   async function confirmPostpone() {
-    if (!confirmation) {
-      return;
-    }
+    if (!confirmation) return;
 
     const { match } = confirmation;
 
@@ -2239,10 +2387,12 @@ export default function MatchesPage() {
     }
   }
 
+  /* ==============================================================
+     CANCEL
+  ============================================================== */
+
   async function confirmCancel() {
-    if (!confirmation) {
-      return;
-    }
+    if (!confirmation) return;
 
     const { match } = confirmation;
 
@@ -2256,16 +2406,20 @@ export default function MatchesPage() {
       setMatches((current) =>
         sortMatches(
           current.map((item) =>
-            item.id === match.id ? data.data.match : item,
+            item.id === match.id
+              ? data.data.match
+              : item,
           ),
         ),
       );
 
       setConfirmation(null);
+
       notify({
         type: "success",
         title: "Partido cancelado",
-        message: "El estado del partido fue actualizado.",
+        message:
+          "El estado del partido fue actualizado.",
       });
     } catch (error) {
       notify(getApiErrorDetails(error));
@@ -2274,34 +2428,52 @@ export default function MatchesPage() {
     }
   }
 
+  /* ==============================================================
+     FINISH
+  ============================================================== */
+
   async function confirmFinish() {
-    if (!confirmation || confirmation.type !== "finish") {
+    if (
+      !confirmation ||
+      confirmation.type !== "finish"
+    ) {
       return;
     }
 
     const { match } = confirmation;
+
     setIsConfirmingAction(true);
 
     try {
-      const { data } = await api.patch(`/matches/${match.id}/finish`);
+      const { data } = await api.patch(
+        `/matches/${match.id}/finish`,
+      );
 
       setMatches((current) =>
         sortMatches(
           current.map((item) =>
-            item.id === match.id ? data.data.match : item,
+            item.id === match.id
+              ? data.data.match
+              : item,
           ),
         ),
       );
 
       setConfirmation(null);
+
       notify({
         type: "success",
         title: "Partido finalizado",
-        message: "El resultado quedó confirmado.",
+        message:
+          "El resultado quedó confirmado.",
       });
     } catch (error) {
-      if (error.response?.data?.code === "PENALTIES_REQUIRED") {
+      if (
+        error.response?.data?.code ===
+        "PENALTIES_REQUIRED"
+      ) {
         setConfirmation(null);
+
         setPenaltyShootout({
           match,
           homeScore: match.homeScore ?? 0,
@@ -2309,7 +2481,9 @@ export default function MatchesPage() {
           action: "finish",
         });
       } else {
-        notify(getApiErrorDetails(error));
+        notify(
+          getApiErrorDetails(error),
+        );
       }
     } finally {
       setIsConfirmingAction(false);
@@ -2317,45 +2491,72 @@ export default function MatchesPage() {
   }
 
   /* ==============================================================
-     PENALTY SHOOTOUT
+     PENALTIES
   ============================================================== */
 
-  async function confirmPenaltyShootout(entries) {
-    if (!penaltyShootout) {
-      return;
-    }
+  async function confirmPenaltyShootout(
+    entries,
+  ) {
+    if (!penaltyShootout) return;
 
-    const { match, homeScore, awayScore, action } = penaltyShootout;
-    const penalties = entries.map((entry) => ({
-      teamId: entry.teamId,
-      playerId: entry.playerId,
-    }));
+    const {
+      match,
+      homeScore,
+      awayScore,
+      action,
+    } = penaltyShootout;
+
+    const penalties = entries.map(
+      (entry) => ({
+        teamId: entry.teamId,
+        playerId: entry.playerId,
+      }),
+    );
 
     setIsConfirmingPenalties(true);
 
     try {
       const { data } =
         action === "finish"
-          ? await api.patch(`/matches/${match.id}/finish`, {
-              penalties,
-            })
-          : await api.post(`/matches/${match.id}/result`, {
-              homeScore,
-              awayScore,
-              penalties,
-            });
+          ? await api.patch(
+              `/matches/${match.id}/finish`,
+              {
+                penalties,
+              },
+            )
+          : await api.post(
+              `/matches/${match.id}/result`,
+              {
+                homeScore,
+                awayScore,
+                penalties,
+              },
+            );
 
       setMatches((current) =>
         sortMatches(
           current.map((item) =>
-            item.id === match.id ? data.data.match : item,
+            item.id === match.id
+              ? data.data.match
+              : item,
           ),
         ),
       );
 
-      if (typeof BroadcastChannel !== "undefined") {
-        const channel = new BroadcastChannel("deportiva-results");
-        channel.postMessage({ tournamentId: match.tournamentId });
+      if (
+        typeof BroadcastChannel !==
+        "undefined"
+      ) {
+        const channel =
+          new BroadcastChannel(
+            "deportiva-results",
+          );
+
+        channel.postMessage({
+          tournamentId:
+            match.tournamentId,
+        });
+
         channel.close();
       }
 
@@ -2364,7 +2565,8 @@ export default function MatchesPage() {
 
       notify({
         type: "success",
-        title: "Definición por penales guardada",
+        title:
+          "Definición por penales guardada",
         message: `${match.homeTeam.name} ${data.data.match.homePenaltyScore} - ${data.data.match.awayPenaltyScore} ${match.awayTeam.name} (penales).`,
       });
     } catch (error) {
@@ -2374,12 +2576,18 @@ export default function MatchesPage() {
     }
   }
 
+  /* ==============================================================
+     CONFIRM ACTION
+  ============================================================== */
+
   function confirmPendingAction() {
     if (confirmation?.type === "result") {
       return confirmResult();
     }
 
-    if (confirmation?.type === "postpone") {
+    if (
+      confirmation?.type === "postpone"
+    ) {
       return confirmPostpone();
     }
 
@@ -2398,8 +2606,15 @@ export default function MatchesPage() {
      STATUS
   ============================================================== */
 
-  async function changeStatus(match, action) {
-    if (action === "postpone" || action === "cancel" || action === "finish") {
+  async function changeStatus(
+    match,
+    action,
+  ) {
+    if (
+      action === "postpone" ||
+      action === "cancel" ||
+      action === "finish"
+    ) {
       setConfirmation({
         type: action,
         match,
@@ -2460,18 +2675,31 @@ export default function MatchesPage() {
     user.role === "SUPERADMIN";
 
   /* ==============================================================
-     MATCH GROUPS
+     GROUPS
   ============================================================== */
 
   const pendingMatches = useMemo(
     () =>
       matches
         .filter((match) =>
-          [
-            "SCHEDULED",
-            "STARTED",
-            "POSTPONED",
-          ].includes(match.status),
+          ["SCHEDULED", "STARTED"].includes(
+            match.status,
+          ),
+        )
+        .sort(
+          (a, b) =>
+            getMatchTimestamp(a) -
+            getMatchTimestamp(b),
+        ),
+    [matches],
+  );
+
+  const postponedMatches = useMemo(
+    () =>
+      matches
+        .filter(
+          (match) =>
+            match.status === "POSTPONED",
         )
         .sort(
           (a, b) =>
@@ -2511,26 +2739,34 @@ export default function MatchesPage() {
     [matches],
   );
 
+  const liveMatches = useMemo(
+    () =>
+      matches.filter(
+        (match) =>
+          match.status === "STARTED",
+      ),
+    [matches],
+  );
+
   /* ==============================================================
      RENDER
   ============================================================== */
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
-      {/* ==========================================================
-          BACKGROUND
-      ========================================================== */}
-
+    <main className="min-h-screen bg-[#05090e] text-slate-100">
+      {/* BACKGROUND */}
       <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-72 w-72 rounded-full bg-emerald-500/[0.035] blur-3xl" />
+        <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-emerald-500/[0.045] blur-3xl" />
 
-        <div className="absolute -right-32 top-1/3 h-72 w-72 rounded-full bg-cyan-500/[0.02] blur-3xl" />
+        <div className="absolute right-[-10rem] top-[30%] h-96 w-96 rounded-full bg-cyan-500/[0.025] blur-3xl" />
+
+        <div className="absolute bottom-[-10rem] left-[35%] h-80 w-80 rounded-full bg-blue-500/[0.02] blur-3xl" />
 
         <div
           className="absolute inset-0 opacity-[0.012]"
           style={{
             backgroundImage:
-              "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
+              "linear-gradient(rgba(255,255,255,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.7) 1px, transparent 1px)",
             backgroundSize: "48px 48px",
           }}
         />
@@ -2538,93 +2774,78 @@ export default function MatchesPage() {
 
       <DashboardNavbar />
 
-      {/* ==========================================================
-          CONTENT
-      ========================================================== */}
+      <section className="relative mx-auto max-w-[1500px] px-3 pb-12 pt-24 sm:px-5 sm:pb-16 sm:pt-28 lg:px-8">
+        {/* ======================================================
+            HERO
+        ====================================================== */}
 
-      <section className="relative mx-auto max-w-7xl px-3 pb-10 pt-24 sm:px-5 sm:pb-16 sm:pt-28 lg:px-8">
-        {/* BACK */}
+        <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-[#101923] via-[#0a111a] to-[#070c12] shadow-2xl shadow-black/20">
+          <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400/[0.045] blur-3xl" />
 
-        {/* ========================================================
-            HEADER
-        ======================================================== */}
-
-        <div
-          className="
-            mt-3
-            rounded-xl
-            border border-white/[0.06]
-            bg-white/[0.025]
-            p-4
-            sm:mt-5 sm:rounded-2xl sm:p-6
-          "
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5">
-            <div className="min-w-0">
-              {/* <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/[0.05] px-2 py-1 text-[8px] font-bold uppercase tracking-[0.15em] text-emerald-400 sm:px-2.5 sm:text-[9px]">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Gestión deportiva
-              </div> */}
-
-              <h1 className="mt-2.5 text-xl font-black tracking-tight text-white sm:mt-3 sm:text-3xl">
-                Partidos
-              </h1>
-
-              <p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-500 sm:mt-1.5 sm:text-sm">
-                Programa partidos, registra resultados y
-                administra el calendario de tus torneos.
-              </p>
-            </div>
-
-            {/* {!isLoading && matches.length > 0 && (
-              <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
-                <div className="rounded-lg border border-white/[0.06] bg-black/20 px-3 py-2 text-center sm:rounded-xl sm:px-4 sm:py-2.5">
-                  <p className="text-[8px] font-bold uppercase tracking-wider text-slate-600">
-                    Partidoss
-                  </p>
-
-                  <p className="mt-0.5 text-lg font-black text-white sm:text-xl">
-                    {matches.length}
-                  </p>
+          <div className="relative p-5 sm:p-7 lg:p-8">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <div className="min-w-0">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.05] px-2.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Gestión deportiva
                 </div>
 
-                <div className="rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-3 py-2 text-center sm:rounded-xl sm:px-4 sm:py-2.5">
-                  <p className="text-[8px] font-bold uppercase tracking-wider text-slate-600">
-                    Finalizados
-                  </p>
+                <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+                  Partidos
+                </h1>
 
-                  <p className="mt-0.5 text-lg font-black text-emerald-400 sm:text-xl">
-                    {finishedMatches.length}
-                  </p>
-                </div>
+                <p className="mt-2 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
+                  Controla el calendario, resultados y
+                  partidos en vivo desde un solo lugar.
+                </p>
               </div>
-            )} */}
+
+              {!isLoading &&
+                selectedTournamentId && (
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:min-w-[360px]">
+                    <StatCard
+                      label="Total"
+                      value={matches.length}
+                      icon="⚽"
+                    />
+
+                    <StatCard
+                      label="En vivo"
+                      value={liveMatches.length}
+                      icon="●"
+                      tone="text-emerald-400"
+                      accent="border-emerald-400/10"
+                    />
+
+                    <StatCard
+                      label="Finalizados"
+                      value={
+                        finishedMatches.length
+                      }
+                      icon="✓"
+                      tone="text-cyan-300"
+                      accent="border-cyan-400/10"
+                    />
+                  </div>
+                )}
+            </div>
           </div>
         </div>
 
-        {/* ========================================================
-            TOURNAMENT SELECTOR
-        ======================================================== */}
+        {/* ======================================================
+            TOURNAMENT
+        ====================================================== */}
 
-        <div
-          className="
-            mt-3.5
-            rounded-xl
-            border border-white/[0.06]
-            bg-[#0a1018]/90
-            p-3.5
-            sm:mt-5 sm:rounded-2xl sm:p-5
-          "
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-            {/* <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-400/10 bg-emerald-400/[0.05] text-sm sm:h-9 sm:w-9">
-                🏆
+        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 p-3.5 shadow-xl shadow-black/10 sm:mt-5 sm:p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/10 bg-emerald-400/[0.05] text-emerald-300">
+                <TrophyIcon />
               </div>
 
               <div className="min-w-0">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:text-[9px]">
-                  Torneo
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-400">
+                  Competición
                 </p>
 
                 <h2 className="mt-0.5 truncate text-xs font-bold text-white sm:text-sm">
@@ -2634,23 +2855,11 @@ export default function MatchesPage() {
                     : "Seleccionar torneo"}
                 </h2>
               </div>
-            </div> */}
+            </div>
 
             {!isTournamentLocked ? (
               <select
-                className="
-                  h-10 w-full
-                  rounded-lg
-                  border border-white/[0.08]
-                  bg-black/30
-                  px-3
-                  text-xs text-white
-                  outline-none
-                  transition
-                  focus:border-emerald-400/50
-                  focus:ring-2 focus:ring-emerald-400/10
-                  sm:h-11 sm:max-w-sm sm:rounded-xl
-                "
+                className="h-11 w-full rounded-xl border border-white/[0.08] bg-black/30 px-3 text-xs text-white outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 sm:max-w-sm"
                 value={selectedTournamentId}
                 onChange={(event) => {
                   setSelectedTournamentId(
@@ -2666,17 +2875,19 @@ export default function MatchesPage() {
                   Selecciona un torneo
                 </option>
 
-                {tournaments.map((tournament) => (
-                  <option
-                    key={tournament.id}
-                    value={tournament.id}
-                  >
-                    {tournament.name}
-                  </option>
-                ))}
+                {tournaments.map(
+                  (tournament) => (
+                    <option
+                      key={tournament.id}
+                      value={tournament.id}
+                    >
+                      {tournament.name}
+                    </option>
+                  ),
+                )}
               </select>
             ) : (
-              <div className="max-w-full truncate rounded-lg border border-emerald-400/15 bg-emerald-400/[0.04] px-3 py-2 text-[10px] font-semibold text-emerald-300 sm:text-xs">
+              <div className="max-w-full truncate rounded-xl border border-emerald-400/15 bg-emerald-400/[0.04] px-3 py-2.5 text-[10px] font-semibold text-emerald-300 sm:text-xs">
                 {selectedTournament?.name ||
                   "Cargando..."}
               </div>
@@ -2684,22 +2895,29 @@ export default function MatchesPage() {
           </div>
         </div>
 
-        {/* ========================================================
-            GENERAR FIXTURE (todos contra todos)
-        ======================================================== */}
+        {/* ======================================================
+            GENERATE FIXTURE
+        ====================================================== */}
 
         {isAdmin &&
           selectedTournamentId &&
-          (selectedTournament?.mode ?? "ROUND_ROBIN") ===
+          (selectedTournament?.mode ??
+            "ROUND_ROBIN") ===
             "ROUND_ROBIN" && (
-            <div className="mt-3.5 flex items-center justify-between gap-3 rounded-xl border border-cyan-400/10 bg-cyan-400/[0.04] px-4 py-3 sm:mt-5 sm:rounded-2xl">
-              <p className="text-[11px] text-cyan-200 sm:text-xs">
-                Genera automáticamente todos los partidos de todos
-                contra todos.
-              </p>
+            <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-cyan-400/10 bg-cyan-400/[0.035] px-4 py-3.5 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-cyan-400">
+                  Automatización
+                </p>
+
+                <p className="mt-1 text-[11px] text-cyan-100 sm:text-xs">
+                  Genera automáticamente el fixture
+                  completo de todos contra todos.
+                </p>
+              </div>
 
               <button
-                className="shrink-0 rounded-lg bg-cyan-500 px-3 py-2 text-[10px] font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                className="shrink-0 rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
                 type="button"
                 disabled={isGeneratingFixtures}
                 onClick={generateFixtures}
@@ -2711,32 +2929,14 @@ export default function MatchesPage() {
             </div>
           )}
 
-        {/* ========================================================
-            PROGRAMAR PARTIDO
-        ======================================================== */}
+        {/* ======================================================
+            SCHEDULE
+        ====================================================== */}
 
         {isAdmin && selectedTournamentId && (
-          <div
-            className="
-              mt-3.5
-              overflow-hidden
-              rounded-xl
-              border border-white/[0.06]
-              bg-[#0a1018]/90
-              sm:mt-5 sm:rounded-2xl
-            "
-          >
+          <div className="mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 shadow-xl shadow-black/10 sm:mt-5">
             <button
-              className="
-                flex w-full
-                items-center justify-between
-                gap-3
-                px-3.5 py-3.5
-                text-left
-                transition
-                hover:bg-white/[0.025]
-                sm:px-5 sm:py-4
-              "
+              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-white/[0.025] sm:px-5"
               onClick={() =>
                 setIsScheduleOpen(
                   (current) => !current,
@@ -2745,13 +2945,13 @@ export default function MatchesPage() {
               type="button"
               aria-expanded={isScheduleOpen}
             >
-              <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-blue-400/10 bg-blue-500/[0.06] text-sm sm:h-10 sm:w-10 sm:rounded-xl">
-                  {editingId ? "✏️" : "➕"}
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-400/10 bg-blue-500/[0.06] text-sm">
+                  {editingId ? "✏️" : "＋"}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-300 sm:text-[9px]">
+                  <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-300">
                     Calendario
                   </p>
 
@@ -2762,83 +2962,66 @@ export default function MatchesPage() {
                   </h2>
 
                   <p className="mt-0.5 hidden text-[10px] text-slate-600 sm:block">
-                    {editingId
-                      ? "Modifica la información del encuentro."
-                      : "Agrega un nuevo partido al calendario."}
+                    Añade o modifica encuentros del torneo.
                   </p>
                 </div>
               </div>
 
-              <div className="flex shrink-0 items-center gap-2">
-                {editingId && (
-                  <span className="hidden rounded-full bg-amber-400/[0.08] px-2 py-1 text-[9px] font-bold text-amber-300 sm:inline-flex">
-                    Editando
-                  </span>
-                )}
-
-                <span
-                  className={`
-                    flex h-7 w-7
-                    items-center justify-center
-                    rounded-lg
-                    border border-white/[0.06]
-                    text-xs text-slate-500
-                    transition-transform duration-300
-                    sm:h-8 sm:w-8
-                    ${
-                      isScheduleOpen
-                        ? "rotate-180"
-                        : ""
-                    }
-                  `}
-                >
-                  ↓
-                </span>
-              </div>
+              <span
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] text-xs text-slate-500 transition-transform ${
+                  isScheduleOpen
+                    ? "rotate-180"
+                    : ""
+                }`}
+              >
+                ↓
+              </span>
             </button>
 
             <div
-              className={`
-                overflow-hidden
-                transition-[max-height,opacity]
-                duration-300
-                ease-in-out
-                ${
-                  isScheduleOpen
-                    ? "max-h-[1000px] opacity-100"
-                    : "max-h-0 opacity-0"
-                }
-              `}
+              className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
+                isScheduleOpen
+                  ? "max-h-[1000px] opacity-100"
+                  : "max-h-0 opacity-0"
+              }`}
             >
               <div className="border-t border-white/[0.05] p-3.5 sm:p-5">
                 <form onSubmit={saveMatch}>
-                  <div className="grid gap-3.5 sm:gap-4 md:grid-cols-2">
+                  <div className="grid gap-3.5 md:grid-cols-2">
                     <TeamSearch
                       label="Equipo local"
                       value={form.homeTeamId}
                       teams={teams}
-                      excludeId={form.awayTeamId}
+                      excludeId={
+                        form.awayTeamId
+                      }
                       required
-                      onChange={(homeTeamId) => {
+                      onChange={(
+                        homeTeamId,
+                      ) =>
                         setForm((prev) => ({
                           ...prev,
                           homeTeamId,
-                        }));
-                      }}
+                        }))
+                      }
                     />
 
                     <TeamSearch
                       label="Equipo visitante"
                       value={form.awayTeamId}
                       teams={teams}
-                      excludeId={form.homeTeamId}
+                      excludeId={
+                        form.homeTeamId
+                      }
                       required
-                      onChange={(awayTeamId) => {
+                      onChange={(
+                        awayTeamId,
+                      ) =>
                         setForm((prev) => ({
                           ...prev,
                           awayTeamId,
-                        }));
-                      }}
+                        }))
+                      }
                     />
 
                     <DateTimeField
@@ -2858,20 +3041,10 @@ export default function MatchesPage() {
                     />
                   </div>
 
-                  <div className="mt-4 flex flex-col-reverse gap-2 sm:mt-5 sm:flex-row sm:justify-end">
+                  <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                     {editingId && (
                       <button
-                        className="
-                          h-10 rounded-xl
-                          border border-white/[0.08]
-                          px-4
-                          text-xs font-semibold
-                          text-slate-400
-                          transition
-                          hover:bg-white/[0.03]
-                          hover:text-white
-                          sm:h-11
-                        "
+                        className="h-11 rounded-xl border border-white/[0.08] px-4 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.03] hover:text-white"
                         onClick={() => {
                           cancelEditing();
                           setIsScheduleOpen(false);
@@ -2883,19 +3056,7 @@ export default function MatchesPage() {
                     )}
 
                     <button
-                      className="
-                        h-10 rounded-xl
-                        bg-emerald-500
-                        px-5
-                        text-xs font-bold
-                        text-slate-950
-                        shadow-lg shadow-emerald-500/10
-                        transition
-                        hover:bg-emerald-400
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                        sm:h-11
-                      "
+                      className="h-11 rounded-xl bg-emerald-500 px-5 text-xs font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                       disabled={isSaving}
                       type="submit"
                     >
@@ -2912,104 +3073,181 @@ export default function MatchesPage() {
           </div>
         )}
 
-        {/* ========================================================
-            CALENDARIO
-        ======================================================== */}
+        {/* ======================================================
+            CALENDAR HEADER
+        ====================================================== */}
 
-        <section className="mt-6 sm:mt-7">
-          <div className="mb-3 flex items-end justify-between gap-3 sm:mb-4">
-            <div className="min-w-0">
+        <section className="mt-7 sm:mt-8">
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <div>
               <div className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
 
-                <p className="text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-400 sm:text-[9px]">
-                  Calendario
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-emerald-400">
+                  Centro de partidos
                 </p>
               </div>
 
-              <h2 className="mt-1 text-lg font-black text-white sm:text-xl">
-                Partidos
+              <h2 className="mt-1 text-xl font-black text-white sm:text-2xl">
+                Calendario
               </h2>
 
-              <p className="mt-0.5 hidden text-[10px] text-slate-600 sm:block">
-                Gestiona cada encuentro del torneo.
+              <p className="mt-1 text-[10px] text-slate-600 sm:text-xs">
+                Todos los encuentros organizados por estado.
               </p>
             </div>
 
             {!isLoading && (
-              <span className="shrink-0 rounded-full border border-white/[0.06] bg-white/[0.02] px-2 py-1 text-[9px] font-bold text-slate-500 sm:px-2.5 sm:text-[10px]">
-                {matches.length}{" "}
-                {matches.length === 1
-                  ? "partido"
-                  : "partidos"}
-              </span>
+              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-right">
+                <p className="text-[8px] font-bold uppercase tracking-wider text-slate-600">
+                  Total
+                </p>
+
+                <p className="text-lg font-black text-white">
+                  {matches.length}
+                </p>
+              </div>
             )}
           </div>
 
           {/* LOADING */}
 
           {isLoading ? (
-            <div className="rounded-xl border border-white/[0.06] bg-[#0a1018]/90 p-8 text-center sm:rounded-2xl sm:p-10">
-              <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-slate-700 border-t-emerald-400 sm:h-7 sm:w-7" />
+            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 p-12 text-center">
+              <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-slate-700 border-t-emerald-400" />
 
-              <p className="mt-3 text-[11px] text-slate-500 sm:text-xs">
+              <p className="mt-3 text-xs text-slate-500">
                 Cargando partidos...
               </p>
             </div>
+          ) : !selectedTournamentId ? (
+            <div className="rounded-2xl border border-dashed border-white/[0.07] bg-[#0a1018]/70 p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.03] text-lg">
+                🏆
+              </div>
+
+              <h3 className="mt-3 text-sm font-bold text-slate-200">
+                Selecciona un torneo
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-600">
+                Selecciona una competición para ver sus partidos.
+              </p>
+            </div>
           ) : matches.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/[0.07] bg-[#0a1018]/70 p-8 text-center sm:rounded-2xl sm:p-10">
-              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.03] text-lg">
+            <div className="rounded-2xl border border-dashed border-white/[0.07] bg-[#0a1018]/70 p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.03] text-lg">
                 🏟️
               </div>
 
-              <h3 className="mt-3 text-xs font-bold text-slate-200 sm:text-sm">
+              <h3 className="mt-3 text-sm font-bold text-slate-200">
                 No hay partidos
               </h3>
 
-              <p className="mt-1 text-[10px] text-slate-600 sm:text-xs">
-                No hay partidos programados para este
-                torneo.
+              <p className="mt-1 text-xs text-slate-600">
+                Todavía no hay partidos programados para este torneo.
               </p>
             </div>
           ) : (
-            <div className="space-y-2.5 sm:space-y-3">
+            <div className="space-y-3">
               {/* ==================================================
                   PENDIENTES
               ================================================== */}
 
               <MatchAccordion
-                title="Partidos pendientes"
-                description="Programados, en vivo y aplazados"
+                title="Próximos partidos"
+                description="Encuentros programados y partidos actualmente en vivo"
                 icon="📅"
-                tone="text-amber-300"
+                tone="text-blue-300"
                 count={pendingMatches.length}
-                isOpen={openSections.pending}
+                isOpen={
+                  openSections.pending
+                }
                 onToggle={() =>
                   toggleSection("pending")
                 }
               >
-                {pendingMatches.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-white/[0.06] px-4 py-6 text-center">
-                    <p className="text-[10px] font-medium text-slate-600 sm:text-xs">
-                      No hay partidos pendientes.
-                    </p>
-                  </div>
+                {pendingMatches.length ===
+                0 ? (
+                  <EmptySection message="No hay partidos pendientes." />
                 ) : (
-                  <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3 2xl:grid-cols-4">
-                    {pendingMatches.map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        match={match}
-                        isAdmin={isAdmin}
-                        canCorrectFinished={
-                          canCorrectFinished
-                        }
-                        startEditing={startEditing}
-                        registerResult={registerResult}
-                        changeStatus={changeStatus}
-                        tournament={selectedTournament}
-                      />
-                    ))}
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {pendingMatches.map(
+                      (match) => (
+                        <MatchCard
+                          key={match.id}
+                          match={match}
+                          isAdmin={isAdmin}
+                          canCorrectFinished={
+                            canCorrectFinished
+                          }
+                          startEditing={
+                            startEditing
+                          }
+                          registerResult={
+                            registerResult
+                          }
+                          changeStatus={
+                            changeStatus
+                          }
+                          tournament={
+                            selectedTournament
+                          }
+                        />
+                      ),
+                    )}
+                  </div>
+                )}
+              </MatchAccordion>
+
+              {/* ==================================================
+                  APLAZADOS
+              ================================================== */}
+
+              <MatchAccordion
+                title="Partidos aplazados"
+                description="Encuentros pendientes de nueva programación"
+                icon="⏸️"
+                tone="text-amber-300"
+                count={
+                  postponedMatches.length
+                }
+                isOpen={
+                  openSections.postponed
+                }
+                onToggle={() =>
+                  toggleSection("postponed")
+                }
+              >
+                {postponedMatches.length ===
+                0 ? (
+                  <EmptySection message="No hay partidos aplazados." />
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {postponedMatches.map(
+                      (match) => (
+                        <MatchCard
+                          key={match.id}
+                          match={match}
+                          isAdmin={isAdmin}
+                          canCorrectFinished={
+                            canCorrectFinished
+                          }
+                          startEditing={
+                            startEditing
+                          }
+                          registerResult={
+                            registerResult
+                          }
+                          changeStatus={
+                            changeStatus
+                          }
+                          tournament={
+                            selectedTournament
+                          }
+                        />
+                      ),
+                    )}
                   </div>
                 )}
               </MatchAccordion>
@@ -3020,37 +3258,48 @@ export default function MatchesPage() {
 
               <MatchAccordion
                 title="Partidos finalizados"
-                description="Resultados registrados · más recientes primero"
+                description="Resultados registrados, mostrando los más recientes primero"
                 icon="🏁"
                 tone="text-emerald-300"
-                count={finishedMatches.length}
-                isOpen={openSections.finished}
+                count={
+                  finishedMatches.length
+                }
+                isOpen={
+                  openSections.finished
+                }
                 onToggle={() =>
                   toggleSection("finished")
                 }
               >
-                {finishedMatches.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-white/[0.06] px-4 py-6 text-center">
-                    <p className="text-[10px] font-medium text-slate-600 sm:text-xs">
-                      No hay partidos finalizados.
-                    </p>
-                  </div>
+                {finishedMatches.length ===
+                0 ? (
+                  <EmptySection message="No hay partidos finalizados." />
                 ) : (
-                  <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3 2xl:grid-cols-4">
-                    {finishedMatches.map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        match={match}
-                        isAdmin={isAdmin}
-                        canCorrectFinished={
-                          canCorrectFinished
-                        }
-                        startEditing={startEditing}
-                        registerResult={registerResult}
-                        changeStatus={changeStatus}
-                        tournament={selectedTournament}
-                      />
-                    ))}
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {finishedMatches.map(
+                      (match) => (
+                        <MatchCard
+                          key={match.id}
+                          match={match}
+                          isAdmin={isAdmin}
+                          canCorrectFinished={
+                            canCorrectFinished
+                          }
+                          startEditing={
+                            startEditing
+                          }
+                          registerResult={
+                            registerResult
+                          }
+                          changeStatus={
+                            changeStatus
+                          }
+                          tournament={
+                            selectedTournament
+                          }
+                        />
+                      ),
+                    )}
                   </div>
                 )}
               </MatchAccordion>
@@ -3061,37 +3310,48 @@ export default function MatchesPage() {
 
               <MatchAccordion
                 title="Partidos cancelados"
-                description="Partidos que no se disputarán"
+                description="Encuentros que no se disputarán"
                 icon="✕"
                 tone="text-red-300"
-                count={cancelledMatches.length}
-                isOpen={openSections.cancelled}
+                count={
+                  cancelledMatches.length
+                }
+                isOpen={
+                  openSections.cancelled
+                }
                 onToggle={() =>
                   toggleSection("cancelled")
                 }
               >
-                {cancelledMatches.length === 0 ? (
-                  <div className="rounded-lg border border-dashed border-white/[0.06] px-4 py-6 text-center">
-                    <p className="text-[10px] font-medium text-slate-600 sm:text-xs">
-                      No hay partidos cancelados.
-                    </p>
-                  </div>
+                {cancelledMatches.length ===
+                0 ? (
+                  <EmptySection message="No hay partidos cancelados." />
                 ) : (
-                  <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 xl:grid-cols-3 2xl:grid-cols-4">
-                    {cancelledMatches.map((match) => (
-                      <MatchCard
-                        key={match.id}
-                        match={match}
-                        isAdmin={isAdmin}
-                        canCorrectFinished={
-                          canCorrectFinished
-                        }
-                        startEditing={startEditing}
-                        registerResult={registerResult}
-                        changeStatus={changeStatus}
-                        tournament={selectedTournament}
-                      />
-                    ))}
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {cancelledMatches.map(
+                      (match) => (
+                        <MatchCard
+                          key={match.id}
+                          match={match}
+                          isAdmin={isAdmin}
+                          canCorrectFinished={
+                            canCorrectFinished
+                          }
+                          startEditing={
+                            startEditing
+                          }
+                          registerResult={
+                            registerResult
+                          }
+                          changeStatus={
+                            changeStatus
+                          }
+                          tournament={
+                            selectedTournament
+                          }
+                        />
+                      ),
+                    )}
                   </div>
                 )}
               </MatchAccordion>
@@ -3101,48 +3361,28 @@ export default function MatchesPage() {
       </section>
 
       {/* ==========================================================
-          MODAL
+          CONFIRMATION MODAL
       ========================================================== */}
 
       {confirmation && (
-        <div
-          className="
-            fixed inset-0 z-[60]
-            flex items-end justify-center
-            overflow-y-auto
-            bg-slate-950/80
-            px-2 py-2
-            backdrop-blur-sm
-            sm:items-center
-            sm:px-4 sm:py-6
-          "
-          role="presentation"
-        >
+        <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-slate-950/80 px-2 py-2 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div
-            className="
-              my-auto w-full max-w-md
-              max-h-[94vh]
-              overflow-y-auto
-              rounded-2xl
-              border border-slate-700
-              bg-slate-900
-              shadow-2xl
-              sm:max-h-[90vh]
-            "
+            className="my-auto w-full max-w-md max-h-[94vh] overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl sm:max-h-[90vh]"
             role="dialog"
             aria-modal="true"
             aria-labelledby="match-confirmation-title"
           >
-            {/* HEADER */}
-
             <div className="border-b border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
               <div className="flex items-center gap-2.5 sm:gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-sm sm:h-9 sm:w-9">
-                  {confirmation.type === "result"
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/10 bg-amber-400/[0.05] text-sm">
+                  {confirmation.type ===
+                  "result"
                     ? "🏁"
-                    : confirmation.type === "postpone"
-                      ? "⚠️"
-                      : confirmation.type === "finish"
+                    : confirmation.type ===
+                        "postpone"
+                      ? "⏸️"
+                      : confirmation.type ===
+                          "finish"
                         ? "🏁"
                         : "✕"}
                 </div>
@@ -3152,19 +3392,24 @@ export default function MatchesPage() {
                     id="match-confirmation-title"
                     className="text-sm font-bold text-white sm:text-base"
                   >
-                    {confirmation.type === "result"
-                      ? confirmation.match.status ===
+                    {confirmation.type ===
+                    "result"
+                      ? confirmation.match
+                          .status ===
                         "FINISHED"
                         ? "Corregir marcador"
                         : "Confirmar resultado"
-                      : confirmation.type === "postpone"
+                      : confirmation.type ===
+                          "postpone"
                         ? "Confirmar aplazamiento"
-                        : confirmation.type === "finish"
+                        : confirmation.type ===
+                            "finish"
                           ? "Confirmar finalización"
                           : "Confirmar cancelación"}
                   </h2>
 
-                  {confirmation.type === "result" && (
+                  {confirmation.type ===
+                    "result" && (
                     <p className="mt-0.5 text-[9px] text-slate-500 sm:text-[10px]">
                       Puedes modificar el marcador
                       antes de confirmar.
@@ -3174,304 +3419,218 @@ export default function MatchesPage() {
               </div>
             </div>
 
-            {/* CONTENT */}
-
             <div className="px-4 py-4 sm:px-5 sm:py-5">
-              {confirmation.type === "result" ? (
+              {confirmation.type ===
+              "result" ? (
                 <>
                   <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
-                    {confirmation.match.status ===
-                    "FINISHED"
+                    {confirmation.match
+                      .status === "FINISHED"
                       ? "Modifica el marcador actual y confirma el nuevo resultado."
                       : "Ingresa el marcador final del partido."}
                   </p>
 
                   <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:mt-4 sm:p-4">
                     <div className="grid grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-3">
-                      {/* HOME */}
-
                       <div className="min-w-0 text-center">
                         <TeamLogo
-                          team={confirmation.match.homeTeam}
+                          team={
+                            confirmation
+                              .match.homeTeam
+                          }
                           size="large"
                         />
 
-                        <p
-                          className="
-                            mx-auto mt-2
-                            max-w-[110px]
-                            truncate
-                            text-[10px] font-bold
-                            leading-4 text-slate-100
-                            sm:max-w-[130px]
-                            sm:text-xs
-                          "
-                          title={
-                            confirmation.match.homeTeam.name
-                          }
-                        >
+                        <p className="mx-auto mt-2 max-w-[130px] truncate text-xs font-bold text-slate-100">
                           {
-                            confirmation.match
-                              .homeTeam.name
+                            confirmation
+                              .match.homeTeam
+                              .name
                           }
                         </p>
 
                         <input
-                          className="
-                            mx-auto mt-2 block
-                            h-11 w-16
-                            rounded-xl
-                            border border-slate-700
-                            bg-slate-900
-                            px-1
-                            text-center text-xl
-                            font-black
-                            text-emerald-300
-                            outline-none
-                            transition
-                            focus:border-emerald-400
-                            focus:ring-2
-                            focus:ring-emerald-500/20
-                            sm:h-12 sm:w-20 sm:text-2xl
-                          "
+                          className="mx-auto mt-2 block h-11 w-16 rounded-xl border border-slate-700 bg-slate-900 text-center text-xl font-black text-emerald-300 outline-none transition focus:border-emerald-400 sm:h-12 sm:w-20 sm:text-2xl"
                           type="number"
                           min="0"
-                          value={scoreForm.homeScore}
-                          onChange={(event) => {
+                          value={
+                            scoreForm.homeScore
+                          }
+                          onChange={(event) =>
                             setScoreForm(
                               (current) => ({
                                 ...current,
                                 homeScore:
-                                  event.target.value,
+                                  event.target
+                                    .value,
                               }),
-                            );
-                          }}
-                          aria-label={`Nuevo marcador de ${confirmation.match.homeTeam.name}`}
+                            )
+                          }
                         />
-
-                        {confirmation.match.status ===
-                          "FINISHED" && (
-                          <p className="mt-1 text-[8px] text-slate-600 sm:text-[9px]">
-                            Actual:{" "}
-                            {
-                              confirmation.match
-                                .homeScore
-                            }
-                          </p>
-                        )}
                       </div>
 
-                      {/* SEPARATOR */}
-
                       <div className="flex h-[115px] items-center justify-center sm:h-[135px]">
-                        <span className="text-base font-black text-slate-700 sm:text-lg">
+                        <span className="text-base font-black text-slate-700">
                           -
                         </span>
                       </div>
 
-                      {/* AWAY */}
-
                       <div className="min-w-0 text-center">
                         <TeamLogo
-                          team={confirmation.match.awayTeam}
+                          team={
+                            confirmation
+                              .match.awayTeam
+                          }
                           size="large"
                         />
 
-                        <p
-                          className="
-                            mx-auto mt-2
-                            max-w-[110px]
-                            truncate
-                            text-[10px] font-bold
-                            leading-4 text-slate-100
-                            sm:max-w-[130px]
-                            sm:text-xs
-                          "
-                          title={
-                            confirmation.match.awayTeam.name
-                          }
-                        >
+                        <p className="mx-auto mt-2 max-w-[130px] truncate text-xs font-bold text-slate-100">
                           {
-                            confirmation.match
-                              .awayTeam.name
+                            confirmation
+                              .match.awayTeam
+                              .name
                           }
                         </p>
 
                         <input
-                          className="
-                            mx-auto mt-2 block
-                            h-11 w-16
-                            rounded-xl
-                            border border-slate-700
-                            bg-slate-900
-                            px-1
-                            text-center text-xl
-                            font-black
-                            text-emerald-300
-                            outline-none
-                            transition
-                            focus:border-emerald-400
-                            focus:ring-2
-                            focus:ring-emerald-500/20
-                            sm:h-12 sm:w-20 sm:text-2xl
-                          "
+                          className="mx-auto mt-2 block h-11 w-16 rounded-xl border border-slate-700 bg-slate-900 text-center text-xl font-black text-emerald-300 outline-none transition focus:border-emerald-400 sm:h-12 sm:w-20 sm:text-2xl"
                           type="number"
                           min="0"
-                          value={scoreForm.awayScore}
-                          onChange={(event) => {
+                          value={
+                            scoreForm.awayScore
+                          }
+                          onChange={(event) =>
                             setScoreForm(
                               (current) => ({
                                 ...current,
                                 awayScore:
-                                  event.target.value,
+                                  event.target
+                                    .value,
                               }),
-                            );
-                          }}
-                          aria-label={`Nuevo marcador de ${confirmation.match.awayTeam.name}`}
+                            )
+                          }
                         />
-
-                        {confirmation.match.status ===
-                          "FINISHED" && (
-                          <p className="mt-1 text-[8px] text-slate-600 sm:text-[9px]">
-                            Actual:{" "}
-                            {
-                              confirmation.match
-                                .awayScore
-                            }
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
 
-                  {confirmation.match.status ===
-                    "FINISHED" && (
-                    <div className="mt-2.5 rounded-xl border border-amber-900/40 bg-amber-500/5 p-2.5 sm:mt-3 sm:p-3">
-                      <p className="text-[10px] leading-5 text-amber-200 sm:text-xs">
-                        ⚠️ El marcador actual es{" "}
-                        <strong>
-                          {
-                            confirmation.match
-                              .homeScore
-                          }{" "}
-                          -{" "}
-                          {
-                            confirmation.match
-                              .awayScore
-                          }
-                        </strong>
-                        . Puedes cambiarlo antes de
-                        confirmar.
-                      </p>
-                    </div>
-                  )}
-
-                  <p className="mt-2.5 text-[9px] leading-5 text-slate-600 sm:mt-3 sm:text-[10px]">
+                  <p className="mt-3 text-[9px] leading-5 text-slate-600 sm:text-[10px]">
                     Al confirmar, el resultado se
                     guardará y afectará la tabla de
                     posiciones.
                   </p>
                 </>
-              ) : confirmation.type === "postpone" ? (
+              ) : confirmation.type ===
+                "postpone" ? (
                 <>
                   <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
-                    ¿Confirmas aplazar el partido entre{" "}
+                    ¿Confirmas aplazar el partido
+                    entre{" "}
                     <strong className="text-amber-200">
-                      {confirmation.match.homeTeam.name}
+                      {
+                        confirmation.match
+                          .homeTeam.name
+                      }
                     </strong>{" "}
                     y{" "}
                     <strong className="text-amber-200">
-                      {confirmation.match.awayTeam.name}
+                      {
+                        confirmation.match
+                          .awayTeam.name
+                      }
                     </strong>
                     ?
                   </p>
 
-                  <div className="mt-3 rounded-xl border border-amber-900/40 bg-amber-500/5 p-2.5 sm:mt-4 sm:p-3">
+                  <div className="mt-4 rounded-xl border border-amber-900/40 bg-amber-500/5 p-3">
                     <p className="text-[10px] leading-5 text-amber-200 sm:text-xs">
-                      ℹ️ El partido quedará como aplazado
-                      y no afectará la tabla de
-                      posiciones.
+                      El partido pasará a la sección
+                      independiente de aplazados y no
+                      afectará la tabla.
                     </p>
                   </div>
                 </>
-              ) : confirmation.type === "finish" ? (
+              ) : confirmation.type ===
+                "finish" ? (
                 <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
-                  ¿Confirmas finalizar el partido entre{" "}
+                  ¿Confirmas finalizar el partido
+                  entre{" "}
                   <strong className="text-emerald-200">
-                    {confirmation.match.homeTeam.name}
+                    {
+                      confirmation.match
+                        .homeTeam.name
+                    }
                   </strong>{" "}
                   y{" "}
                   <strong className="text-emerald-200">
-                    {confirmation.match.awayTeam.name}
+                    {
+                      confirmation.match
+                        .awayTeam.name
+                    }
                   </strong>
-                  ? El marcador actual quedará registrado como resultado final.
+                  ?
                 </p>
               ) : (
                 <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
-                  ¿Confirmas cancelar el partido entre{" "}
+                  ¿Confirmas cancelar el partido
+                  entre{" "}
                   <strong className="text-red-200">
-                    {confirmation.match.homeTeam.name}
+                    {
+                      confirmation.match
+                        .homeTeam.name
+                    }
                   </strong>{" "}
                   y{" "}
                   <strong className="text-red-200">
-                    {confirmation.match.awayTeam.name}
+                    {
+                      confirmation.match
+                        .awayTeam.name
+                    }
                   </strong>
-                  ? El partido quedará cancelado y no afectará la tabla de
-                  posiciones.
+                  ?
                 </p>
               )}
             </div>
 
-            {/* BUTTONS */}
-
             <div className="grid grid-cols-2 gap-2 border-t border-slate-800 bg-slate-950/30 px-4 py-3 sm:flex sm:justify-end sm:px-5">
               <button
-                className="
-                  h-10 rounded-xl
-                  border border-slate-700
-                  px-3
-                  text-[10px] font-semibold
-                  text-slate-300
-                  transition
-                  hover:border-slate-500
-                  hover:text-white
-                  disabled:opacity-50
-                  sm:px-4 sm:text-xs
-                "
+                className="h-10 rounded-xl border border-slate-700 px-3 text-[10px] font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white sm:px-4 sm:text-xs"
                 type="button"
                 onClick={() => {
                   setConfirmation(null);
-                  setScoreForm(emptyScoreForm);
+                  setScoreForm(
+                    emptyScoreForm,
+                  );
                 }}
-                disabled={isConfirmingResult || isConfirmingAction}
+                disabled={
+                  isConfirmingResult ||
+                  isConfirmingAction
+                }
               >
                 Cancelar
               </button>
 
               <button
-                className="
-                  h-10 rounded-xl
-                  bg-emerald-500
-                  px-3
-                  text-[10px] font-bold
-                  text-slate-950
-                  transition
-                  hover:bg-emerald-400
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                  sm:px-4 sm:text-xs
-                "
+                className="h-10 rounded-xl bg-emerald-500 px-3 text-[10px] font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-xs"
                 type="button"
-                onClick={confirmPendingAction}
-                disabled={isConfirmingResult || isConfirmingAction}
+                onClick={
+                  confirmPendingAction
+                }
+                disabled={
+                  isConfirmingResult ||
+                  isConfirmingAction
+                }
               >
                 {isConfirmingResult
                   ? "Guardando..."
-                  : confirmation.type === "result"
+                  : confirmation.type ===
+                      "result"
                     ? "Confirmar marcador"
-                    : confirmation.type === "postpone"
+                    : confirmation.type ===
+                        "postpone"
                       ? "Aplazar partido"
-                      : confirmation.type === "finish"
+                      : confirmation.type ===
+                          "finish"
                         ? "Finalizar partido"
                         : "Cancelar partido"}
               </button>
@@ -3480,12 +3639,22 @@ export default function MatchesPage() {
         </div>
       )}
 
+      {/* ==========================================================
+          PENALTY MODAL
+      ========================================================== */}
+
       {penaltyShootout && (
         <PenaltyShootoutModal
           shootout={penaltyShootout}
-          onCancel={() => setPenaltyShootout(null)}
-          onConfirm={confirmPenaltyShootout}
-          isSaving={isConfirmingPenalties}
+          onCancel={() =>
+            setPenaltyShootout(null)
+          }
+          onConfirm={
+            confirmPenaltyShootout
+          }
+          isSaving={
+            isConfirmingPenalties
+          }
         />
       )}
     </main>
