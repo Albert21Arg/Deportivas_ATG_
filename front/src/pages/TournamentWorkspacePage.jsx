@@ -150,6 +150,15 @@ export default function TournamentWorkspacePage() {
       number: '04',
       color: 'emerald',
     },
+    {
+      to: `/dashboard/tarjetas?tournamentId=${tournamentId}`,
+      title: 'Multas por tarjetas',
+      description:
+        'Revisa por equipo quién tiene tarjetas pendientes y marca los pagos.',
+      icon: '🟨',
+      number: '05',
+      color: 'amber',
+    },
   ];
 
   const colorStyles = {
@@ -175,6 +184,14 @@ export default function TournamentWorkspacePage() {
       border: 'hover:border-violet-400/30',
       text: 'text-violet-400',
       cta: 'border-violet-400/20 bg-violet-400/[0.07] group-hover:border-violet-400/30 group-hover:bg-violet-400/[0.13]',
+    },
+
+    amber: {
+      icon: 'border-amber-400/15 bg-amber-400/[0.06] text-amber-400 group-hover:border-amber-400/30 group-hover:bg-amber-400/[0.10]',
+      glow: 'bg-amber-400/[0.07]',
+      border: 'hover:border-amber-400/30',
+      text: 'text-amber-400',
+      cta: 'border-amber-400/20 bg-amber-400/[0.07] group-hover:border-amber-400/30 group-hover:bg-amber-400/[0.13]',
     },
   };
 

@@ -1,5 +1,6 @@
 import * as repository from '../repositories/bracket-repository.js';
 import { HttpError } from '../utils/http-error.js';
+import { publish } from './realtime-service.js';
 import * as tournamentService from './tournament-service.js';
 
 const STAGE_NAMES = { 1: 'FINAL', 2: 'SEMI', 4: 'QUARTER', 8: 'ROUND_OF_16', 16: 'ROUND_OF_32' };
@@ -47,6 +48,7 @@ export async function listBracket(tournamentId) {
 
 export async function resetBracket(tournamentId) {
   await repository.clearBracket(tournamentId);
+  publish(tournamentId, { type: 'bracket.reset' });
 }
 
 export async function createBracket(tournamentId, { teamIds, startDate, time = '15:00' }) {
@@ -84,6 +86,7 @@ export async function createBracket(tournamentId, { teamIds, startDate, time = '
     await repository.createTie(tournamentId, 'THIRD_PLACE', 0);
   }
 
+  publish(tournamentId, { type: 'bracket.created' });
   return repository.findByTournament(tournamentId);
 }
 
@@ -189,5 +192,6 @@ export async function setWinnerManually(tournamentId, tieId, winnerTeamId) {
   if (![tie.homeTeamId, tie.awayTeamId].includes(winnerTeamId)) throw new HttpError(422, 'El ganador debe ser uno de los equipos de la llave');
   const tournament = await repository.findTournament(tournamentId);
   await setTieWinner(tie, winnerTeamId, tournament);
+  publish(tournamentId, { type: 'bracket.winner_set' });
   return repository.findTieById(tieId);
 }

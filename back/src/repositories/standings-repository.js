@@ -75,6 +75,14 @@ export function findGoalTotals(tournamentId) {
   });
 }
 
+export function findPlayerCardTotals(tournamentId) {
+  return prisma.matchEvent.groupBy({
+    by: ['playerId', 'type'],
+    where: { match: { tournamentId }, type: { in: ['YELLOW_CARD', 'RED_CARD', 'BLUE_CARD'] }, playerId: { not: null } },
+    _count: { _all: true },
+  });
+}
+
 export function findPlayersWithTeams(playerIds) {
   return prisma.player.findMany({
     where: { id: { in: playerIds } },
@@ -82,6 +90,11 @@ export function findPlayersWithTeams(playerIds) {
       id: true,
       name: true,
       photo: true,
+      jerseyNumber: true,
+      paidUntil: true,
+      yellowCardFinePaidCount: true,
+      redCardFinePaidCount: true,
+      blueCardFinePaidCount: true,
       teams: { select: { team: { select: { id: true, name: true, logo: true, paidUntil: true, logoExpiresAt: true } } } },
     },
   });

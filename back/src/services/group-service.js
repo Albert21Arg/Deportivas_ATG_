@@ -1,5 +1,6 @@
 import * as repository from '../repositories/group-repository.js';
 import { HttpError } from '../utils/http-error.js';
+import { publish } from './realtime-service.js';
 
 function shuffle(array) {
   const copy = [...array];
@@ -18,12 +19,15 @@ export async function listGroups(tournamentId) {
 export async function createGroup(tournamentId, name) {
   if (!await repository.findTournament(tournamentId)) throw new HttpError(404, 'Torneo no encontrado');
   const existing = await repository.findByTournament(tournamentId);
-  return repository.create(tournamentId, name, existing.length);
+  const group = await repository.create(tournamentId, name, existing.length);
+  publish(tournamentId, { type: 'group.created' });
+  return group;
 }
 
 export async function deleteGroup(tournamentId, groupId) {
   const deleted = await repository.deleteGroup(groupId, tournamentId);
   if (!deleted) throw new HttpError(404, 'Grupo no encontrado');
+  publish(tournamentId, { type: 'group.deleted' });
 }
 
 async function assertGroupInTournament(tournamentId, groupId) {
@@ -33,13 +37,16 @@ async function assertGroupInTournament(tournamentId, groupId) {
 
 export async function assignTeamToGroup(tournamentId, groupId, teamId, pot) {
   await assertGroupInTournament(tournamentId, groupId);
-  return repository.assignTeam(groupId, teamId, pot ?? 1);
+  const assignment = await repository.assignTeam(groupId, teamId, pot ?? 1);
+  publish(tournamentId, { type: 'group.team_assigned' });
+  return assignment;
 }
 
 export async function removeTeamFromGroup(tournamentId, groupId, teamId) {
   await assertGroupInTournament(tournamentId, groupId);
   const removed = await repository.removeTeam(groupId, teamId);
   if (!removed) throw new HttpError(404, 'El equipo no está en este grupo');
+  publish(tournamentId, { type: 'group.team_removed' });
 }
 
 export async function drawGroups(tournamentId, { groupCount, pots }) {
@@ -64,5 +71,7 @@ export async function drawGroups(tournamentId, { groupCount, pots }) {
     });
   }
 
-  return repository.createDraw(tournamentId, groupNames, assignments);
+  const draw = await repository.createDraw(tournamentId, groupNames, assignments);
+  publish(tournamentId, { type: 'group.draw' });
+  return draw;
 }

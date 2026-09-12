@@ -2,6 +2,7 @@ import {
   createTournament,
   getTournament,
   listTournaments,
+  moveTournament,
   setChampion,
   updateTournament,
   updateTournamentStatus,
@@ -56,6 +57,16 @@ export async function statusController(request, response, next) {
   try {
     const tournament = await updateTournamentStatus(request.tournamentId, request.validatedBody.status);
     return response.json({ success: true, data: { tournament } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function moveController(request, response, next) {
+  try {
+    await moveTournament(request.tournamentId, request.validatedBody.direction);
+    const tournaments = await listTournaments(request.user);
+    return response.json({ success: true, data: { tournaments } });
   } catch (error) {
     return next(error);
   }

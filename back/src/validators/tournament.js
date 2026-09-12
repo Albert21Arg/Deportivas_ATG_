@@ -3,6 +3,13 @@ import { HttpError } from '../utils/http-error.js';
 const VALID_STATUSES = new Set(['ACTIVE', 'INACTIVE']);
 export const VALID_MODES = new Set(['ROUND_ROBIN', 'GROUP_STAGE', 'KNOCKOUT_SINGLE', 'KNOCKOUT_TWO_LEG']);
 
+function validateExpiryDate(value, field) {
+  if (value === null || value === undefined || value === '') return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) throw new HttpError(422, `${field} no es una fecha válida`);
+  return date;
+}
+
 function readTournamentPayload(body, { partial = false } = {}) {
   const payload = {};
 
@@ -18,6 +25,24 @@ function readTournamentPayload(body, { partial = false } = {}) {
       throw new HttpError(422, 'La descripción debe tener como máximo 2000 caracteres');
     }
     payload.description = body.description?.trim() || null;
+  }
+
+  if (body.logo !== undefined) {
+    if (body.logo !== null && body.logo !== '' && (typeof body.logo !== 'string' || body.logo.length > 500)) {
+      throw new HttpError(422, 'El logo debe ser una URL o ruta de máximo 500 caracteres');
+    }
+    payload.logo = body.logo?.trim() || null;
+  }
+
+  if (body.expiresAt !== undefined) {
+    payload.expiresAt = validateExpiryDate(body.expiresAt, 'expiresAt');
+  }
+
+  if (body.championLabel !== undefined) {
+    if (body.championLabel !== null && body.championLabel !== '' && (typeof body.championLabel !== 'string' || body.championLabel.trim().length > 60)) {
+      throw new HttpError(422, 'El texto del campeón debe tener como máximo 60 caracteres');
+    }
+    payload.championLabel = body.championLabel?.trim() || null;
   }
 
   if (body.mode !== undefined) {
@@ -101,6 +126,17 @@ export function validateUpdateTournamentMode(request, _response, next) {
   } catch (error) {
     return next(error);
   }
+}
+
+export function validateMove(request, _response, next) {
+  const { direction } = request.body ?? {};
+
+  if (direction !== 'up' && direction !== 'down') {
+    return next(new HttpError(422, 'direction debe ser "up" o "down"'));
+  }
+
+  request.validatedBody = { direction };
+  return next();
 }
 
 export function validateStatus(request, _response, next) {

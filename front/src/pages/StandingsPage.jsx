@@ -620,46 +620,13 @@ export default function StandingsPage() {
                               <div className="relative shrink-0">
                                 {row.team.logo ? (
                                   <img
-                                    className={`
-                                      h-8
-                                      w-8
-                                      rounded-lg
-                                      object-cover
-                                      ${
-                                        isLeader
-                                          ? `
-                                            ring-2
-                                            ring-amber-400/50
-                                            shadow-[0_0_18px_rgba(251,191,36,0.2)]
-                                          `
-                                          : isSecond
-                                            ? 'ring-2 ring-slate-300/30'
-                                            : 'ring-1 ring-white/5'
-                                      }
-                                    `}
+                                    className="h-10 w-10 object-contain"
                                     src={row.team.logo}
                                     alt={`Logo de ${row.team.name}`}
                                   />
                                 ) : (
                                   <div
-                                    className={`
-                                      flex
-                                      h-8
-                                      w-8
-                                      items-center
-                                      justify-center
-                                      rounded-lg
-                                      bg-slate-800
-                                      text-[10px]
-                                      font-semibold
-                                      ${
-                                        isLeader
-                                          ? 'ring-2 ring-amber-400/40'
-                                          : isSecond
-                                            ? 'ring-2 ring-slate-300/30'
-                                            : ''
-                                      }
-                                    `}
+                                    className="flex h-10 w-10 items-center justify-center text-[10px] font-semibold"
                                     aria-hidden="true"
                                   >
                                     {row.team.name
@@ -1125,46 +1092,13 @@ export default function StandingsPage() {
                             <div className="relative shrink-0">
                               {row.team.logo ? (
                                 <img
-                                  className={`
-                                    h-9
-                                    w-9
-                                    rounded-lg
-                                    object-cover
-                                    ${
-                                      isLeader
-                                        ? `
-                                          ring-2
-                                          ring-amber-400/50
-                                          shadow-[0_0_18px_rgba(251,191,36,0.2)]
-                                        `
-                                        : isSecond
-                                          ? 'ring-2 ring-slate-300/30'
-                                          : 'ring-1 ring-white/5'
-                                    }
-                                  `}
+                                  className="h-11 w-11 object-contain"
                                   src={row.team.logo}
                                   alt={`Logo de ${row.team.name}`}
                                 />
                               ) : (
                                 <div
-                                  className={`
-                                    flex
-                                    h-9
-                                    w-9
-                                    items-center
-                                    justify-center
-                                    rounded-lg
-                                    bg-slate-800
-                                    text-xs
-                                    font-semibold
-                                    ${
-                                      isLeader
-                                        ? 'ring-2 ring-amber-400/40'
-                                        : isSecond
-                                          ? 'ring-2 ring-slate-300/30'
-                                          : ''
-                                    }
-                                  `}
+                                  className="flex h-11 w-11 items-center justify-center text-xs font-semibold"
                                   aria-hidden="true"
                                 >
                                   {row.team.name

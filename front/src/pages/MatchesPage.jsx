@@ -166,8 +166,8 @@ function TeamLogo({ team, size = "normal" }) {
 
   const sizeClasses =
     size === "large"
-      ? "h-14 w-14 sm:h-16 sm:w-16"
-      : "h-10 w-10 sm:h-12 sm:w-12 lg:h-14 lg:w-14";
+      ? "h-16 w-16 sm:h-20 sm:w-20"
+      : "h-11 w-11 sm:h-14 sm:w-14 lg:h-16 lg:w-16";
 
   if (!team?.logo || hasError) {
     return (
@@ -175,8 +175,6 @@ function TeamLogo({ team, size = "normal" }) {
         className={`
           mx-auto flex ${sizeClasses}
           items-center justify-center
-          rounded-full border border-slate-700
-          bg-slate-800
           text-base sm:text-lg
         `}
         aria-label={`Sin logo para ${team?.name ?? "equipo"}`}
@@ -190,8 +188,7 @@ function TeamLogo({ team, size = "normal" }) {
     <img
       className={`
         mx-auto ${sizeClasses}
-        rounded-full border border-slate-700
-        bg-slate-950 object-cover p-0.5
+        object-contain
       `}
       src={team.logo}
       alt={`Logo de ${team.name}`}
@@ -306,11 +303,11 @@ function TeamSearch({
                   <img
                     src={team.logo}
                     alt=""
-                    className="h-6 w-6 shrink-0 rounded-full object-cover"
+                    className="h-6 w-6 shrink-0 object-contain"
                     loading="lazy"
                   />
                 ) : (
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center">
                     ⚽
                   </span>
                 )}
@@ -334,11 +331,11 @@ function TeamSearch({
             <img
               src={selectedTeam.logo}
               alt=""
-              className="h-6 w-6 shrink-0 rounded-full object-cover"
+              className="h-6 w-6 shrink-0 object-contain"
               loading="lazy"
             />
           ) : (
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center text-xs">
               ⚽
             </span>
           )}

@@ -11,6 +11,7 @@ import TeamsPage from '../pages/TeamsPage.jsx';
 import MatchesPage from '../pages/MatchesPage.jsx';
 import StandingsPage from '../pages/StandingsPage.jsx';
 import GoleadoresPage from '../pages/GoleadoresPage.jsx';
+import TarjetasPage from '../pages/TarjetasPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import HomePage from '../pages/HomePage.jsx';
 import PublicTournamentPage from '../pages/PublicTournamentPage.jsx';
@@ -42,6 +43,7 @@ export default function AppRoutes() {
                 <Route path="/dashboard/matches" element={<MatchesPage />} />
                 <Route path="/dashboard/standings" element={<StandingsPage />} />
                 <Route path="/dashboard/goleadores" element={<GoleadoresPage />} />
+                <Route path="/dashboard/tarjetas" element={<TarjetasPage />} />
                 <Route path="/dashboard/groups" element={<GroupsPage />} />
                 <Route path="/dashboard/bracket" element={<BracketPage />} />
                 <Route path="/dashboard/announcements" element={<AnnouncementsPage />} />

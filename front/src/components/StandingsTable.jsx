@@ -14,6 +14,54 @@ const COLUMNS = [
   ['points', 'PTS'],
 ];
 
+function TeamCellBody({ row, expired, logoHidden, isLeader, isSecond }) {
+  return (
+    <>
+      <div className="relative shrink-0">
+        {row.team.logo && !logoHidden ? (
+          <img
+            className={`h-10 w-10 object-contain ${expired ? EXPIRED_CLASS : ''}`}
+            src={row.team.logo}
+            alt={expired ? '' : `Logo de ${row.team.name}`}
+          />
+        ) : (
+          <div
+            className={`flex h-10 w-10 items-center justify-center text-[10px] font-semibold ${expired ? EXPIRED_CLASS : ''}`}
+            aria-hidden="true"
+          >
+            {expired ? '' : row.team.name?.slice(0, 2).toUpperCase()}
+          </div>
+        )}
+
+        {isLeader && !expired && (
+          <span
+            className="absolute -right-2 -top-3 text-base leading-none drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]"
+            title="Primer lugar"
+            aria-label="Primer lugar"
+          >
+            👑
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0">
+        <p
+          className={`truncate text-xs font-semibold sm:text-sm ${
+            isLeader ? 'text-amber-100' : isSecond ? 'text-slate-200' : 'text-slate-300'
+          }`}
+          title={row.team.name}
+        >
+          {row.team.name}
+        </p>
+
+        {row.groupName && (
+          <p className="truncate text-[10px] text-slate-600">{row.groupName}</p>
+        )}
+      </div>
+    </>
+  );
+}
+
 /*
 |--------------------------------------------------------------------------
 | Tabla de posiciones reutilizable
@@ -24,7 +72,7 @@ const COLUMNS = [
 | (ej. una tabla por bombo).
 */
 
-export default function StandingsTable({ standings, emptyMessage = 'No hay datos disponibles todavía.', respectPaymentStatus = false }) {
+export default function StandingsTable({ standings, emptyMessage = 'No hay datos disponibles todavía.', respectPaymentStatus = false, onSelectTeam }) {
   if (!standings || standings.length === 0) {
     return <p className="px-3 py-4 text-xs text-slate-600">{emptyMessage}</p>;
   }
@@ -85,57 +133,19 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
 
                   {/* EQUIPO */}
                   <td className="px-3 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="relative shrink-0">
-                        {row.team.logo && !logoHidden ? (
-                          <img
-                            className={`h-8 w-8 rounded-lg object-cover ${
-                              isLeader
-                                ? 'ring-2 ring-amber-400/50 shadow-[0_0_18px_rgba(251,191,36,0.2)]'
-                                : isSecond
-                                  ? 'ring-2 ring-slate-300/30'
-                                  : 'ring-1 ring-white/5'
-                            } ${expired ? EXPIRED_CLASS : ''}`}
-                            src={row.team.logo}
-                            alt={expired ? '' : `Logo de ${row.team.name}`}
-                          />
-                        ) : (
-                          <div
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-[10px] font-semibold ${
-                              isLeader ? 'ring-2 ring-amber-400/40' : isSecond ? 'ring-2 ring-slate-300/30' : ''
-                            } ${expired ? EXPIRED_CLASS : ''}`}
-                            aria-hidden="true"
-                          >
-                            {expired ? '' : row.team.name?.slice(0, 2).toUpperCase()}
-                          </div>
-                        )}
-
-                        {isLeader && !expired && (
-                          <span
-                            className="absolute -right-2 -top-3 text-base leading-none drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]"
-                            title="Primer lugar"
-                            aria-label="Primer lugar"
-                          >
-                            👑
-                          </span>
-                        )}
+                    {onSelectTeam ? (
+                      <button
+                        type="button"
+                        onClick={() => onSelectTeam(row)}
+                        className="flex w-full items-center gap-2.5 text-left transition hover:opacity-80"
+                      >
+                        <TeamCellBody row={row} expired={expired} logoHidden={logoHidden} isLeader={isLeader} isSecond={isSecond} />
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2.5">
+                        <TeamCellBody row={row} expired={expired} logoHidden={logoHidden} isLeader={isLeader} isSecond={isSecond} />
                       </div>
-
-                      <div className="min-w-0">
-                        <p
-                          className={`truncate text-xs font-semibold sm:text-sm ${
-                            isLeader ? 'text-amber-100' : isSecond ? 'text-slate-200' : 'text-slate-300'
-                          }`}
-                          title={row.team.name}
-                        >
-                          {row.team.name}
-                        </p>
-
-                        {row.groupName && (
-                          <p className="truncate text-[10px] text-slate-600">{row.groupName}</p>
-                        )}
-                      </div>
-                    </div>
+                    )}
                   </td>
 
                   {/* ESTADÍSTICAS */}

@@ -141,6 +141,7 @@ export default function GoleadoresPage() {
             <ScorersTable
               scorers={scorers}
               emptyMessage="Todavía no hay goles registrados en este torneo."
+              blueCardEnabled={Boolean(selectedTournament?.blueCardEnabled)}
             />
           )}
         </div>

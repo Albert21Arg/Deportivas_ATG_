@@ -13,6 +13,7 @@ const emptyForm = {
   birthDate: '',
   documentNumber: '',
   jerseyNumber: '',
+  paidUntil: '',
   status: 'ACTIVE',
   photo: null,
 };
@@ -21,6 +22,10 @@ const mediaUrl = (path) =>
   path?.startsWith('http')
     ? path
     : `${api.defaults.baseURL.replace(/\/api\/?$/, '')}${path}`;
+
+function toDateInputValue(value) {
+  return value ? String(value).slice(0, 10) : '';
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -111,6 +116,7 @@ export default function PlayersPage() {
       birthDate: player.birthDate.slice(0, 10),
       documentNumber: player.documentNumber ?? '',
       jerseyNumber: player.jerseyNumber ?? '',
+      paidUntil: toDateInputValue(player.paidUntil),
       status: player.status,
       photo: null,
     });
@@ -138,7 +144,7 @@ export default function PlayersPage() {
 
     const payload = new FormData();
 
-    ['name', 'birthDate', 'documentNumber', 'jerseyNumber', 'status'].forEach(
+    ['name', 'birthDate', 'documentNumber', 'jerseyNumber', 'paidUntil', 'status'].forEach(
       (key) => payload.append(key, form[key])
     );
 
@@ -481,6 +487,21 @@ export default function PlayersPage() {
                     </label>
                   )}
 
+                  {/* Pago (foto visible en público hasta esta fecha) */}
+                  {isSuperAdmin && (
+                    <label className="text-sm font-semibold text-slate-300">
+                      Foto pagada hasta
+
+                      <input
+                        name="paidUntil"
+                        type="date"
+                        value={form.paidUntil}
+                        onChange={updateField}
+                        className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      />
+                    </label>
+                  )}
+
                   {/* Estado */}
                   <label className="text-sm font-semibold text-slate-300">
                     Estado
@@ -645,7 +666,7 @@ export default function PlayersPage() {
                           </div>
 
                           {/* Estado */}
-                          <div className="mt-2.5">
+                          <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                                 isActive
@@ -665,6 +686,15 @@ export default function PlayersPage() {
                                 ? 'Activo'
                                 : 'Inhabilitado'}
                             </span>
+
+                            {player.paidUntil && new Date(player.paidUntil).getTime() < Date.now() && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-full border border-red-400/20 bg-red-400/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-300"
+                                title={`Foto vencida desde ${toDateInputValue(player.paidUntil)}`}
+                              >
+                                Foto vencida
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>

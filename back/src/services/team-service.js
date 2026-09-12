@@ -1,5 +1,6 @@
 import * as teamRepository from '../repositories/team-repository.js';
 import { HttpError } from '../utils/http-error.js';
+import { publish } from './realtime-service.js';
 
 export function listTeams() {
   return teamRepository.findAll();
@@ -18,7 +19,10 @@ export async function createTeam(data, role) {
 
 export async function updateTeam(id, data) {
   await getTeam(id);
-  return teamRepository.update(id, data);
+  const updated = await teamRepository.update(id, data);
+  const assignment = await teamRepository.findAnyAssignment(id);
+  if (assignment) publish(assignment.tournamentId, { type: 'team.updated' });
+  return updated;
 }
 
 export async function listTournamentTeams(tournamentId) {
@@ -45,11 +49,14 @@ export async function assignTeam(tournamentId, teamId) {
     );
   }
 
-  return teamRepository.createAssignment(tournamentId, teamId);
+  const created = await teamRepository.createAssignment(tournamentId, teamId);
+  publish(tournamentId, { type: 'team.assigned' });
+  return created;
 }
 
 export async function removeTeam(tournamentId, teamId) {
   const assignment = await teamRepository.findAssignment(tournamentId, teamId);
   if (!assignment) throw new HttpError(404, 'El equipo no pertenece a este torneo');
   await teamRepository.deleteAssignment(tournamentId, teamId);
+  publish(tournamentId, { type: 'team.removed' });
 }

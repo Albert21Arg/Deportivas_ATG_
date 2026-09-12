@@ -4,12 +4,14 @@ import { Link, useParams } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
-import { EXPIRED_CLASS, isLogoHidden, isTeamExpired } from '../utils/team-expiry.js';
+import { EXPIRED_CLASS, isLogoHidden, isPlayerExpired, isTeamExpired } from '../utils/team-expiry.js';
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
 import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import FutbolIcon from '../components/FutbolIcon.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
+import ScorersTable from '../components/ScorersTable.jsx';
 import StandingsTable from '../components/StandingsTable.jsx';
+import TeamDetailModal from '../components/TeamDetailModal.jsx';
 
 function dateValue(value) {
   return String(value).slice(0, 10);
@@ -94,7 +96,7 @@ function TeamLogo({
   if (!team?.logo || isLogoHidden(team)) {
     return (
       <div
-        className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs text-slate-400 ${className} ${expiredClass}`}
+        className={`flex ${size} shrink-0 items-center justify-center text-xs text-slate-400 ${className} ${expiredClass}`}
         aria-label={expired ? undefined : `Sin escudo para ${team?.name ?? 'equipo'}`}
       >
         ⚽
@@ -104,7 +106,7 @@ function TeamLogo({
 
   return (
     <img
-      className={`${size} shrink-0 rounded-full border border-slate-700 bg-slate-950 object-cover ${className} ${expiredClass}`}
+      className={`${size} shrink-0 object-contain ${className} ${expiredClass}`}
       src={team.logo}
       alt={expired ? '' : `Escudo de ${team.name}`}
     />
@@ -183,7 +185,7 @@ function MatchRow({ match, onClick }) {
         <div className="mt-2 flex min-w-0 items-center sm:mt-2.5">
           <TeamLogo
             team={match.homeTeam}
-            size="h-6 w-6 sm:h-7 sm:w-7"
+            size="h-7 w-7 sm:h-9 sm:w-9"
           />
 
           <span className="ml-1.5 min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-300 sm:ml-2 sm:max-w-none sm:text-base sm:text-slate-200">
@@ -212,7 +214,7 @@ function MatchRow({ match, onClick }) {
 
           <TeamLogo
             team={match.awayTeam}
-            size="h-6 w-6 sm:h-7 sm:w-7"
+            size="h-7 w-7 sm:h-9 sm:w-9"
             className="ml-1.5 sm:ml-2"
           />
         </div>
@@ -267,7 +269,7 @@ function HistoryMatchCard({ match }) {
         <div className="flex w-[90px] min-w-0 flex-col items-center text-center sm:w-[150px]">
           <TeamLogo
             team={match.homeTeam}
-            size="h-12 w-12 sm:h-16 sm:w-16"
+            size="h-14 w-14 sm:h-20 sm:w-20"
           />
 
           <p className="mt-2 w-full truncate text-[11px] font-bold text-slate-200 sm:text-sm">
@@ -292,7 +294,7 @@ function HistoryMatchCard({ match }) {
         <div className="flex w-[90px] min-w-0 flex-col items-center text-center sm:w-[150px]">
           <TeamLogo
             team={match.awayTeam}
-            size="h-12 w-12 sm:h-16 sm:w-16"
+            size="h-14 w-14 sm:h-20 sm:w-20"
           />
 
           <p className="mt-2 w-full truncate text-[11px] font-bold text-slate-200 sm:text-sm">
@@ -436,7 +438,7 @@ function MatchDetailModal({
           <div className="w-[120px] min-w-0 text-center sm:w-[165px]">
             <TeamLogo
               team={match.homeTeam}
-              size="h-20 w-20 sm:h-28 sm:w-28"
+              size="h-24 w-24 sm:h-32 sm:w-32"
               className="mx-auto"
             />
 
@@ -500,7 +502,7 @@ function MatchDetailModal({
           <div className="w-[120px] min-w-0 text-center sm:w-[165px]">
             <TeamLogo
               team={match.awayTeam}
-              size="h-20 w-20 sm:h-28 sm:w-28"
+              size="h-24 w-24 sm:h-32 sm:w-32"
               className="mx-auto"
             />
 
@@ -584,7 +586,7 @@ function MatchDetailModal({
                             : '—'}
                         </span>
 
-                        <span className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${isTeamExpired(event.team) ? EXPIRED_CLASS : ''}`}>
+                        <span className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${(event.player ? isPlayerExpired(event.player) : isTeamExpired(event.team)) ? EXPIRED_CLASS : ''}`}>
                           {event.player?.name ?? event.team.name}
                           {event.type === 'OWN_GOAL' && ' (autogol)'}
                         </span>
@@ -599,7 +601,7 @@ function MatchDetailModal({
                           {event.team.name}
                         </span>
 
-                        <span className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${isTeamExpired(event.team) ? EXPIRED_CLASS : ''}`}>
+                        <span className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${(event.player ? isPlayerExpired(event.player) : isTeamExpired(event.team)) ? EXPIRED_CLASS : ''}`}>
                           {event.player?.name ?? event.team.name}
                           {event.type === 'OWN_GOAL' && ' (autogol)'}
                         </span>
@@ -622,7 +624,7 @@ function MatchDetailModal({
                             : '—'}
                         </span>
 
-                        <span className={`truncate font-semibold ${isTeamExpired(event.team) ? EXPIRED_CLASS : ''}`}>
+                        <span className={`truncate font-semibold ${(event.player ? isPlayerExpired(event.player) : isTeamExpired(event.team)) ? EXPIRED_CLASS : ''}`}>
                           {event.player?.name ?? event.team.name}
                           {event.type === 'OWN_GOAL' && ' (autogol)'}
                         </span>
@@ -670,10 +672,29 @@ export default function PublicTournamentPage() {
 
   const [data, setData] = useState(null);
   const [history, setHistory] = useState([]);
-  const [showHistory, setShowHistory] = useState(false);
-  const [showStandings, setShowStandings] = useState(true);
+  // Acordeón: una sola sección abierta a la vez, todas cerradas al inicio.
+  // Valores: 'standings' (tabla/llaves), 'upcoming' (próximos + goleadores),
+  // 'history' (historial), o null si no hay ninguna abierta.
+  const [openSection, setOpenSection] = useState(null);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Una vez que se abre el historial, se mantiene actualizado en cada
+  // refresco (junto con el resto), aunque el usuario cierre el acordeón.
+  const historyLoadedRef = useRef(false);
+
+  const loadHistory = useCallback(async () => {
+    try {
+      const { data: response } = await api.get(
+        `/public/tournaments/${id}/history`
+      );
+
+      setHistory(response.data.matches);
+      historyLoadedRef.current = true;
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    }
+  }, [id, notify]);
 
   const loadTournament = useCallback(async () => {
     try {
@@ -682,12 +703,16 @@ export default function PublicTournamentPage() {
       );
 
       setData(response.data);
+
+      if (historyLoadedRef.current) {
+        loadHistory();
+      }
     } catch (error) {
       notify(getApiErrorDetails(error));
     } finally {
       setIsLoading(false);
     }
-  }, [id, notify]);
+  }, [id, notify, loadHistory]);
 
   useEffect(() => {
     loadTournament();
@@ -720,32 +745,27 @@ export default function PublicTournamentPage() {
   }, [data, selectedMatch]);
 
   async function toggleHistory() {
-    if (!showHistory && history.length === 0) {
-      try {
-        const { data: response } = await api.get(
-          `/public/tournaments/${id}/history`
-        );
-
-        setHistory(response.data.matches);
-      } catch (error) {
-        notify(getApiErrorDetails(error));
-        return;
-      }
+    if (openSection !== 'history' && history.length === 0) {
+      await loadHistory();
     }
 
-    setShowHistory((current) => {
-      const nextValue = !current;
-
-      if (nextValue) {
-        setShowStandings(false);
-      }
-
-      return nextValue;
-    });
+    setOpenSection((current) => (current === 'history' ? null : 'history'));
   }
 
   function toggleStandings() {
-    setShowStandings((current) => !current);
+    setOpenSection((current) => (current === 'standings' ? null : 'standings'));
+  }
+
+  function toggleUpcoming() {
+    setOpenSection((current) => (current === 'upcoming' ? null : 'upcoming'));
+  }
+
+  function toggleScorers() {
+    setOpenSection((current) => (current === 'scorers' ? null : 'scorers'));
+  }
+
+  function toggleCards() {
+    setOpenSection((current) => (current === 'cards' ? null : 'cards'));
   }
 
   if (isLoading) {
@@ -914,7 +934,7 @@ export default function PublicTournamentPage() {
                 text-left
                 sm:px-6 sm:py-5
               "
-              aria-expanded={showStandings}
+              aria-expanded={openSection === 'standings'}
               aria-controls="standings-content"
             >
               <div className="flex items-center justify-between gap-2">
@@ -984,7 +1004,7 @@ export default function PublicTournamentPage() {
                       text-slate-400
                       transition-transform duration-200
                       ${
-                        showStandings
+                        openSection === 'standings'
                           ? 'rotate-180'
                           : 'rotate-0'
                       }
@@ -997,7 +1017,7 @@ export default function PublicTournamentPage() {
               </div>
             </button>
 
-            {showStandings && (
+            {openSection === 'standings' && (
               <div id="standings-content" className="w-full">
                 {/* DESKTOP */}
 
@@ -1095,18 +1115,30 @@ export default function PublicTournamentPage() {
                             </td>
 
                             <td className="relative px-4 py-3.5">
-                              <div className="flex min-w-0 items-center gap-3">
+                              <div
+                                className="flex min-w-0 cursor-pointer items-center gap-3"
+                                role="button"
+                                tabIndex={0}
+                                onClick={() =>
+                                  setSelectedTeam({
+                                    row,
+                                    recentForm: data.recentFormByTeam?.[row.team.id] ?? [],
+                                  })
+                                }
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    setSelectedTeam({
+                                      row,
+                                      recentForm: data.recentFormByTeam?.[row.team.id] ?? [],
+                                    });
+                                  }
+                                }}
+                              >
                                 <div className="relative shrink-0">
                                   <TeamLogo
                                     team={row.team}
-                                    size="h-9 w-9"
-                                    className={
-                                      isLeader
-                                        ? 'rounded-lg ring-2 ring-amber-400/50'
-                                        : isSecond
-                                          ? 'rounded-lg ring-1 ring-slate-300/20'
-                                          : 'rounded-lg ring-1 ring-white/[0.06]'
-                                    }
+                                    size="h-11 w-11"
                                   />
 
                                   {isLeader && (
@@ -1404,18 +1436,30 @@ export default function PublicTournamentPage() {
                             </td>
 
                             <td className="relative min-w-0 px-1 py-3">
-                              <div className="flex min-w-0 items-center gap-2">
+                              <div
+                                className="flex min-w-0 cursor-pointer items-center gap-2"
+                                role="button"
+                                tabIndex={0}
+                                onClick={() =>
+                                  setSelectedTeam({
+                                    row,
+                                    recentForm: data.recentFormByTeam?.[row.team.id] ?? [],
+                                  })
+                                }
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    setSelectedTeam({
+                                      row,
+                                      recentForm: data.recentFormByTeam?.[row.team.id] ?? [],
+                                    });
+                                  }
+                                }}
+                              >
                                 <div className="relative shrink-0">
                                   <TeamLogo
                                     team={row.team}
-                                    size="h-7 w-7"
-                                    className={
-                                      isLeader
-                                        ? 'rounded-md ring-1 ring-amber-400/50'
-                                        : isSecond
-                                          ? 'rounded-md ring-1 ring-slate-300/20'
-                                          : 'rounded-md ring-1 ring-white/[0.05]'
-                                    }
+                                    size="h-9 w-9"
                                   />
 
                                   {isLeader && (
@@ -1667,52 +1711,109 @@ export default function PublicTournamentPage() {
               rounded-xl
               border border-white/[0.05]
               bg-slate-900/90
-              p-3
               sm:rounded-2xl
-              sm:p-6
             "
           >
-            <div className="mb-4">
-              <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:text-[10px]">
-                Fase de grupos
-              </p>
-
-              <h2 className="mt-1 text-lg font-black text-white sm:text-2xl">
-                Tabla de posiciones por bombo
-              </h2>
-
-              <p className="mt-1.5 text-xs leading-5 text-slate-500">
-                Compara a los equipos que comparten bombo usando lo que ya jugaron en su propio grupo, aunque no se enfrenten directamente entre ellos.
-              </p>
-            </div>
-
-            {!data.pots || data.pots.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-white/[0.08] px-4 py-8 text-center text-xs text-slate-500">
-                Los grupos aún no han sido generados.
-              </p>
-            ) : (
-              /*
-              |--------------------------------------------------------------------------
-              | CAMBIO:
-              | Cada bombo ocupa el 100% y aparece debajo del anterior.
-              |--------------------------------------------------------------------------
-              */
-
-              <div className="grid w-full grid-cols-1 gap-6">
-                {data.pots.map(({ pot, standings }) => (
+            <button
+              type="button"
+              onClick={toggleStandings}
+              className="
+                w-full
+                border-b border-white/[0.05]
+                px-3 py-3.5
+                text-left
+                sm:px-6 sm:py-5
+              "
+              aria-expanded={openSection === 'standings'}
+              aria-controls="pots-content"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
                   <div
-                    key={pot}
-                    className="min-w-0 w-full"
+                    className="
+                      mb-1.5
+                      inline-flex items-center gap-1.5
+                      rounded-full
+                      border border-emerald-400/15
+                      bg-emerald-400/[0.07]
+                      px-2 py-1
+                      text-[8px]
+                      font-bold
+                      uppercase
+                      tracking-[0.16em]
+                      text-emerald-300
+                      sm:mb-2 sm:gap-2 sm:px-2.5 sm:py-1
+                      sm:text-[10px]
+                    "
                   >
-                    <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-                      Bombo {pot}
-                    </h3>
-
-                    <div className="w-full min-w-0">
-                      <StandingsTable standings={standings} respectPaymentStatus />
-                    </div>
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Fase de grupos
                   </div>
-                ))}
+
+                  <h2 className="text-lg font-black tracking-tight text-white sm:text-2xl">
+                    Tabla de posiciones por bombo
+                  </h2>
+                </div>
+
+                <span
+                  className={`
+                    flex h-8 w-8 shrink-0
+                    items-center justify-center
+                    rounded-full
+                    border border-white/[0.06]
+                    bg-slate-950/50
+                    text-slate-400
+                    transition-transform duration-200
+                    ${
+                      openSection === 'standings'
+                        ? 'rotate-180'
+                        : 'rotate-0'
+                    }
+                  `}
+                  aria-hidden="true"
+                >
+                  ▼
+                </span>
+              </div>
+            </button>
+
+            {openSection === 'standings' && (
+              <div id="pots-content" className="p-3 sm:p-6">
+                <p className="mb-4 text-xs leading-5 text-slate-500">
+                  Compara a los equipos que comparten bombo usando lo que ya jugaron en su propio grupo, aunque no se enfrenten directamente entre ellos.
+                </p>
+
+                {!data.pots || data.pots.length === 0 ? (
+                  <p className="rounded-xl border border-dashed border-white/[0.08] px-4 py-8 text-center text-xs text-slate-500">
+                    Los grupos aún no han sido generados.
+                  </p>
+                ) : (
+                  <div className="grid w-full grid-cols-1 gap-6">
+                    {data.pots.map(({ pot, standings }) => (
+                      <div
+                        key={pot}
+                        className="min-w-0 w-full"
+                      >
+                        <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+                          Bombo {pot}
+                        </h3>
+
+                        <div className="w-full min-w-0">
+                          <StandingsTable
+                            standings={standings}
+                            respectPaymentStatus
+                            onSelectTeam={(row) =>
+                              setSelectedTeam({
+                                row,
+                                recentForm: data.recentFormByTeam?.[row.team.id] ?? [],
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1730,29 +1831,83 @@ export default function PublicTournamentPage() {
               rounded-xl
               border border-white/[0.05]
               bg-slate-900/90
-              p-3
               sm:rounded-2xl
-              sm:p-6
             "
           >
-            <div className="mb-4">
-              <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:text-[10px]">
-                Eliminación
-              </p>
+            <button
+              type="button"
+              onClick={toggleStandings}
+              className="
+                w-full
+                border-b border-white/[0.05]
+                px-3 py-3.5
+                text-left
+                sm:px-6 sm:py-5
+              "
+              aria-expanded={openSection === 'standings'}
+              aria-controls="bracket-content"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div
+                    className="
+                      mb-1.5
+                      inline-flex items-center gap-1.5
+                      rounded-full
+                      border border-emerald-400/15
+                      bg-emerald-400/[0.07]
+                      px-2 py-1
+                      text-[8px]
+                      font-bold
+                      uppercase
+                      tracking-[0.16em]
+                      text-emerald-300
+                      sm:mb-2 sm:gap-2 sm:px-2.5 sm:py-1
+                      sm:text-[10px]
+                    "
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Eliminación
+                  </div>
 
-              <h2 className="mt-1 text-lg font-black text-white sm:text-2xl">
-                Llaves del torneo
-              </h2>
-            </div>
+                  <h2 className="text-lg font-black tracking-tight text-white sm:text-2xl">
+                    Llaves del torneo
+                  </h2>
+                </div>
 
-            <div className="w-full min-w-0">
-              <CompetitionOverview
-                mode={competitionMode}
-                groups={data.groups}
-                ties={data.ties}
-                onSelectMatch={setSelectedMatch}
-              />
-            </div>
+                <span
+                  className={`
+                    flex h-8 w-8 shrink-0
+                    items-center justify-center
+                    rounded-full
+                    border border-white/[0.06]
+                    bg-slate-950/50
+                    text-slate-400
+                    transition-transform duration-200
+                    ${
+                      openSection === 'standings'
+                        ? 'rotate-180'
+                        : 'rotate-0'
+                    }
+                  `}
+                  aria-hidden="true"
+                >
+                  ▼
+                </span>
+              </div>
+            </button>
+
+            {openSection === 'standings' && (
+              <div id="bracket-content" className="w-full p-3 sm:p-6">
+                <CompetitionOverview
+                  mode={competitionMode}
+                  groups={data.groups}
+                  ties={data.ties}
+                  championLabel={data.tournament.championLabel}
+                  onSelectMatch={setSelectedMatch}
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -1760,8 +1915,223 @@ export default function PublicTournamentPage() {
         |--------------------------------------------------------------------------
         | PRÓXIMOS PARTIDOS
         |--------------------------------------------------------------------------
+        */}
+
+        <div
+          className="
+            min-w-0
+            w-full
+            rounded-xl
+            border border-white/[0.05]
+            bg-slate-900/90
+            sm:rounded-2xl
+          "
+        >
+          <button
+            type="button"
+            onClick={toggleUpcoming}
+            className="
+              w-full
+              border-b border-white/[0.05]
+              px-3 py-3.5
+              text-left
+              sm:px-6 sm:py-5
+            "
+            aria-expanded={openSection === 'upcoming'}
+            aria-controls="upcoming-content"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div
+                  className="
+                    mb-1.5
+                    inline-flex items-center gap-1.5
+                    rounded-full
+                    border border-emerald-400/15
+                    bg-emerald-400/[0.07]
+                    px-2 py-1
+                    text-[8px]
+                    font-bold
+                    uppercase
+                    tracking-[0.16em]
+                    text-emerald-300
+                    sm:mb-2 sm:gap-2 sm:px-2.5 sm:py-1
+                    sm:text-[10px]
+                  "
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Calendario
+                </div>
+
+                <h2 className="text-lg font-black tracking-tight text-white sm:text-2xl">
+                  Próximos partidos
+                </h2>
+              </div>
+
+              <span
+                className={`
+                  flex h-8 w-8 shrink-0
+                  items-center justify-center
+                  rounded-full
+                  border border-white/[0.06]
+                  bg-slate-950/50
+                  text-slate-400
+                  transition-transform duration-200
+                  ${
+                    openSection === 'upcoming'
+                      ? 'rotate-180'
+                      : 'rotate-0'
+                  }
+                `}
+                aria-hidden="true"
+              >
+                ▼
+              </span>
+            </div>
+          </button>
+
+          {openSection === 'upcoming' && (
+            <div id="upcoming-content" className="w-full p-3 sm:p-5">
+              <p className="mb-2 text-[10px] text-slate-500 sm:mb-3 sm:text-xs">
+                Haz clic en un partido para ver sus detalles.
+              </p>
+
+              <div className="scroll-invisible max-h-[25rem] overflow-y-auto pr-1">
+                {data.upcomingMatches.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-slate-500">
+                    No hay próximos partidos.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {groupMatchesByDate(data.upcomingMatches).map(
+                      ([date, matches]) => (
+                        <section key={date}>
+                          <h3 className="mb-1.5 border-b border-slate-800 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-300 sm:mb-2 sm:pb-2 sm:text-xs">
+                            {formatDate(date)}
+                          </h3>
+
+                          <div>
+                            {matches.map((match) => (
+                              <MatchRow
+                                key={match.id}
+                                match={match}
+                                onClick={() => setSelectedMatch(match)}
+                              />
+                            ))}
+                          </div>
+                        </section>
+                      )
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/*
+        |--------------------------------------------------------------------------
+        | GOLEADORES
+        |--------------------------------------------------------------------------
+        */}
+
+        <div
+          className="
+            min-w-0
+            w-full
+            rounded-xl
+            border border-white/[0.05]
+            bg-slate-900/90
+            sm:rounded-2xl
+          "
+        >
+          <button
+            type="button"
+            onClick={toggleScorers}
+            className="
+              w-full
+              border-b border-white/[0.05]
+              px-3 py-3.5
+              text-left
+              sm:px-6 sm:py-5
+            "
+            aria-expanded={openSection === 'scorers'}
+            aria-controls="scorers-content"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div
+                  className="
+                    mb-1.5
+                    inline-flex items-center gap-1.5
+                    rounded-full
+                    border border-emerald-400/15
+                    bg-emerald-400/[0.07]
+                    px-2 py-1
+                    text-[8px]
+                    font-bold
+                    uppercase
+                    tracking-[0.16em]
+                    text-emerald-300
+                    sm:mb-2 sm:gap-2 sm:px-2.5 sm:py-1
+                    sm:text-[10px]
+                  "
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Goleadores
+                </div>
+
+                <h2 className="text-lg font-black tracking-tight text-white sm:text-2xl">
+                  Goleadores
+                </h2>
+              </div>
+
+              <span
+                className={`
+                  flex h-8 w-8 shrink-0
+                  items-center justify-center
+                  rounded-full
+                  border border-white/[0.06]
+                  bg-slate-950/50
+                  text-slate-400
+                  transition-transform duration-200
+                  ${
+                    openSection === 'scorers'
+                      ? 'rotate-180'
+                      : 'rotate-0'
+                  }
+                `}
+                aria-hidden="true"
+              >
+                ▼
+              </span>
+            </div>
+          </button>
+
+          {openSection === 'scorers' && (
+            <div id="scorers-content" className="w-full p-3 sm:p-5">
+              <p className="mb-2 text-[10px] text-slate-500 sm:mb-3 sm:text-xs">
+                Jugadores con más goles del torneo.
+              </p>
+
+              <div className="scroll-invisible max-h-[25rem] overflow-y-auto pr-1">
+                <ScorersTable
+                  scorers={data.scorers}
+                  respectPaymentStatus
+                  blueCardEnabled={data.tournament.blueCardEnabled}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/*
+        |--------------------------------------------------------------------------
+        | TARJETAS
+        |--------------------------------------------------------------------------
         |
-        | También ocupa ahora el 100% del ancho.
+        | Un ranking por cada tipo de tarjeta: amarillas y rojas siempre,
+        | azules solo si el torneo las tiene habilitadas.
         |
         */}
 
@@ -1770,127 +2140,256 @@ export default function PublicTournamentPage() {
             min-w-0
             w-full
             rounded-xl
-            border border-slate-800
-            bg-slate-900
-            p-3
-            sm:p-5
+            border border-white/[0.05]
+            bg-slate-900/90
+            sm:rounded-2xl
           "
         >
-          <h2 className="text-base font-bold sm:text-xl">
-            Próximos partidos
-          </h2>
+          <button
+            type="button"
+            onClick={toggleCards}
+            className="
+              w-full
+              border-b border-white/[0.05]
+              px-3 py-3.5
+              text-left
+              sm:px-6 sm:py-5
+            "
+            aria-expanded={openSection === 'cards'}
+            aria-controls="cards-content"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div
+                  className="
+                    mb-1.5
+                    inline-flex items-center gap-1.5
+                    rounded-full
+                    border border-emerald-400/15
+                    bg-emerald-400/[0.07]
+                    px-2 py-1
+                    text-[8px]
+                    font-bold
+                    uppercase
+                    tracking-[0.16em]
+                    text-emerald-300
+                    sm:mb-2 sm:gap-2 sm:px-2.5 sm:py-1
+                    sm:text-[10px]
+                  "
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Disciplina
+                </div>
 
-          <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
-            Haz clic en un partido para ver sus detalles.
-          </p>
+                <h2 className="text-lg font-black tracking-tight text-white sm:text-2xl">
+                  Tarjetas
+                </h2>
+              </div>
 
-          <div className="scroll-invisible mt-2 max-h-[25rem] overflow-y-auto pr-1 sm:mt-3">
-            {data.upcomingMatches.length === 0 ? (
-              <p className="py-8 text-center text-sm text-slate-500">
-                No hay próximos partidos.
-              </p>
-            ) : (
-              <div className="space-y-4">
-                {groupMatchesByDate(data.upcomingMatches).map(
-                  ([date, matches]) => (
+              <span
+                className={`
+                  flex h-8 w-8 shrink-0
+                  items-center justify-center
+                  rounded-full
+                  border border-white/[0.06]
+                  bg-slate-950/50
+                  text-slate-400
+                  transition-transform duration-200
+                  ${
+                    openSection === 'cards'
+                      ? 'rotate-180'
+                      : 'rotate-0'
+                  }
+                `}
+                aria-hidden="true"
+              >
+                ▼
+              </span>
+            </div>
+          </button>
+
+          {openSection === 'cards' && (
+            <div
+              id="cards-content"
+              className={`grid min-w-0 w-full grid-cols-1 gap-3 p-3 sm:p-5 ${
+                data.tournament.blueCardEnabled ? 'lg:grid-cols-3 lg:gap-4' : 'sm:grid-cols-2 sm:gap-4'
+              }`}
+            >
+              <div className="min-w-0">
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-amber-400">
+                  🟨 Amarillas
+                </h3>
+
+                <div className="scroll-invisible max-h-[25rem] overflow-y-auto pr-1">
+                  <ScorersTable
+                    scorers={data.cards.yellowCards}
+                    emptyMessage="Todavía no hay amarillas registradas."
+                    respectPaymentStatus
+                    blueCardEnabled={data.tournament.blueCardEnabled}
+                    valueKey="yellowCards"
+                    valueLabel="Amarillas"
+                    leaderTitle="Más amarillas"
+                    leaderIcon="🥊"
+                  />
+                </div>
+              </div>
+
+              {data.tournament.blueCardEnabled && (
+                <div className="min-w-0">
+                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-blue-400">
+                    🟦 Azules
+                  </h3>
+
+                  <div className="scroll-invisible max-h-[25rem] overflow-y-auto pr-1">
+                    <ScorersTable
+                      scorers={data.cards.blueCards}
+                      emptyMessage="Todavía no hay azules registradas."
+                      respectPaymentStatus
+                      blueCardEnabled={data.tournament.blueCardEnabled}
+                      valueKey="blueCards"
+                      valueLabel="Azules"
+                      leaderTitle="Más azules"
+                      leaderIcon="🪓"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="min-w-0">
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-red-400">
+                  🟥 Rojas
+                </h3>
+
+                <div className="scroll-invisible max-h-[25rem] overflow-y-auto pr-1">
+                  <ScorersTable
+                    scorers={data.cards.redCards}
+                    emptyMessage="Todavía no hay rojas registradas."
+                    respectPaymentStatus
+                    blueCardEnabled={data.tournament.blueCardEnabled}
+                    valueKey="redCards"
+                    valueLabel="Rojas"
+                    leaderTitle="Más rojas"
+                    leaderIcon="🪓🥊"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div
+          className="
+            min-w-0
+            w-full
+            rounded-xl
+            border border-white/[0.05]
+            bg-slate-900/90
+            sm:rounded-2xl
+          "
+        >
+          <button
+            type="button"
+            onClick={toggleHistory}
+            className="
+              w-full
+              border-b border-white/[0.05]
+              px-3 py-3.5
+              text-left
+              sm:px-6 sm:py-5
+            "
+            aria-expanded={openSection === 'history'}
+            aria-controls="history-content"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <div
+                  className="
+                    mb-1.5
+                    inline-flex items-center gap-1.5
+                    rounded-full
+                    border border-emerald-400/15
+                    bg-emerald-400/[0.07]
+                    px-2 py-1
+                    text-[8px]
+                    font-bold
+                    uppercase
+                    tracking-[0.16em]
+                    text-emerald-300
+                    sm:mb-2 sm:gap-2 sm:px-2.5 sm:py-1
+                    sm:text-[10px]
+                  "
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  Resultados
+                </div>
+
+                <h2 className="text-lg font-black tracking-tight text-white sm:text-2xl">
+                  Historial de partidos
+                </h2>
+              </div>
+
+              <span
+                className={`
+                  flex h-8 w-8 shrink-0
+                  items-center justify-center
+                  rounded-full
+                  border border-white/[0.06]
+                  bg-slate-950/50
+                  text-slate-400
+                  transition-transform duration-200
+                  ${
+                    openSection === 'history'
+                      ? 'rotate-180'
+                      : 'rotate-0'
+                  }
+                `}
+                aria-hidden="true"
+              >
+                ▼
+              </span>
+            </div>
+          </button>
+
+          {openSection === 'history' && (
+            <div id="history-content" className="p-3 sm:p-5">
+              {history.length === 0 ? (
+                <p className="py-8 text-center text-sm text-slate-500">
+                  Aún no hay partidos jugados.
+                </p>
+              ) : (
+                <div className="space-y-5">
+                  {groupMatchesByDate(history).map(([date, matches]) => (
                     <section key={date}>
-                      <h3 className="mb-1.5 border-b border-slate-800 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-300 sm:mb-2 sm:pb-2 sm:text-xs">
+                      <h3 className="mb-2 border-b border-slate-800 pb-2 text-xs font-bold uppercase tracking-[0.14em] text-emerald-300 sm:mb-3 sm:text-sm">
                         {formatDate(date)}
                       </h3>
 
-                      <div>
+                      <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
                         {matches.map((match) => (
-                          <MatchRow
+                          <HistoryMatchCard
                             key={match.id}
                             match={match}
-                            onClick={() => setSelectedMatch(match)}
                           />
                         ))}
                       </div>
                     </section>
-                  )
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <button
-          className="
-            col-span-full
-            mx-auto
-            mt-0
-            w-full
-            max-w-7xl
-            rounded-lg
-            border border-slate-700
-            px-3 py-2.5
-            text-[10px]
-            font-semibold
-            text-slate-300
-            sm:px-4 sm:py-3 sm:text-sm
-          "
-          type="button"
-          onClick={toggleHistory}
-        >
-          {showHistory
-            ? 'Ocultar historial'
-            : 'Ver historial de partidos'}
-        </button>
-      </section>
-
-      {showHistory && (
-        <section
-          className="
-            mx-auto mt-3 max-w-7xl
-            rounded-xl
-            border border-slate-800
-            bg-slate-900
-            p-3
-            sm:mt-6 sm:p-5
-          "
-        >
-          <div className="mb-3 sm:mb-5">
-            <h2 className="text-base font-bold sm:text-xl">
-              Historial de resultados
-            </h2>
-
-            <p className="mt-1 text-[10px] text-slate-500 sm:text-xs">
-              Partidos finalizados del torneo.
-            </p>
-          </div>
-
-          {history.length === 0 ? (
-            <p className="py-8 text-center text-sm text-slate-500">
-              Aún no hay partidos jugados.
-            </p>
-          ) : (
-            <div className="space-y-5">
-              {groupMatchesByDate(history).map(([date, matches]) => (
-                <section key={date}>
-                  <h3 className="mb-2 border-b border-slate-800 pb-2 text-xs font-bold uppercase tracking-[0.14em] text-emerald-300 sm:mb-3 sm:text-sm">
-                    {formatDate(date)}
-                  </h3>
-
-                  <div className="grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
-                    {matches.map((match) => (
-                      <HistoryMatchCard
-                        key={match.id}
-                        match={match}
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
+                  ))}
+                </div>
+              )}
             </div>
           )}
-        </section>
-      )}
+        </div>
+      </section>
 
       <MatchDetailModal
         match={selectedMatch}
         recentFormByTeam={data.recentFormByTeam}
         onClose={() => setSelectedMatch(null)}
+      />
+
+      <TeamDetailModal
+        selection={selectedTeam}
+        onClose={() => setSelectedTeam(null)}
       />
     </main>
   );

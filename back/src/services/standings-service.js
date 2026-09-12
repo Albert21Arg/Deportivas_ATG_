@@ -1,6 +1,6 @@
 import * as standingsRepository from '../repositories/standings-repository.js';
 import { HttpError } from '../utils/http-error.js';
-import { withExpiryFlags } from '../utils/team-expiry.js';
+import { withExpiryFlags, withPlayerExpiryFlags } from '../utils/team-expiry.js';
 
 function rankStandings(rows) {
   return [...rows]
@@ -120,24 +120,140 @@ export async function getStandingsByPot(tournamentId) {
     .map(([pot, rows]) => ({ pot, standings: rankStandings(rows) }));
 }
 
-// Tabla de goleadores: goles (no autogoles) por jugador en el torneo.
-export async function getTopScorers(tournamentId) {
-  const totals = await standingsRepository.findGoalTotals(tournamentId);
-  if (!totals.length) return [];
+// Trae goles y tarjetas por jugador del torneo, ya hidratados con los datos
+// del jugador y su equipo (goleadores y tarjetas comparten esta base, cada
+// uno arma su propio ranking a partir de ella).
+async function buildPlayerStatRows(tournamentId) {
+  const [goalTotals, cardTotals] = await Promise.all([
+    standingsRepository.findGoalTotals(tournamentId),
+    standingsRepository.findPlayerCardTotals(tournamentId),
+  ]);
 
-  const players = await standingsRepository.findPlayersWithTeams(totals.map((row) => row.playerId));
+  const goalsByPlayer = new Map(goalTotals.map((row) => [row.playerId, row._count._all]));
+
+  const cardsByPlayer = new Map();
+  for (const row of cardTotals) {
+    const entry = cardsByPlayer.get(row.playerId) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
+    if (row.type === 'YELLOW_CARD') entry.yellowCards = row._count._all;
+    if (row.type === 'RED_CARD') entry.redCards = row._count._all;
+    if (row.type === 'BLUE_CARD') entry.blueCards = row._count._all;
+    cardsByPlayer.set(row.playerId, entry);
+  }
+
+  const playerIds = [...new Set([...goalsByPlayer.keys(), ...cardsByPlayer.keys()])];
+  if (!playerIds.length) return [];
+
+  const players = await standingsRepository.findPlayersWithTeams(playerIds);
   const playersById = new Map(players.map((player) => [player.id, player]));
 
-  const rows = totals.map((row) => {
-    const player = playersById.get(row.playerId);
+  return playerIds.map((playerId) => {
+    const player = playersById.get(playerId);
+    const team = withExpiryFlags(player?.teams[0]?.team) ?? null;
+    const cards = cardsByPlayer.get(playerId) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
     return {
-      player: { id: row.playerId, name: player?.name ?? 'Jugador', photo: player?.photo ?? null },
-      team: withExpiryFlags(player?.teams[0]?.team) ?? null,
-      goals: row._count._all,
+      player: withPlayerExpiryFlags(
+        {
+          id: playerId,
+          name: player?.name ?? 'Jugador',
+          photo: player?.photo ?? null,
+          jerseyNumber: player?.jerseyNumber ?? null,
+          paidUntil: player?.paidUntil,
+        }
+      ),
+      team,
+      goals: goalsByPlayer.get(playerId) ?? 0,
+      ...cards,
     };
   });
+}
 
+function rankBy(rows, key) {
   return rows
-    .sort((left, right) => right.goals - left.goals || left.player.name.localeCompare(right.player.name))
+    .filter((row) => row[key] > 0)
+    .sort((left, right) => right[key] - left[key] || left.player.name.localeCompare(right.player.name))
     .map((row, index) => ({ ...row, position: index + 1 }));
+}
+
+// Tabla de goleadores: goles (no autogoles), amarillas y rojas por jugador
+// en el torneo (para la lista y la tarjeta de jugador).
+export async function getTopScorers(tournamentId) {
+  const rows = await buildPlayerStatRows(tournamentId);
+  return rankBy(rows, 'goals');
+}
+
+// Tabla de tarjetas: un ranking por cada tipo (amarillas, rojas y azules si
+// el torneo las tiene habilitadas), cada jugador solo aparece en el ranking
+// de la tarjeta que efectivamente recibió al menos una vez.
+export async function getTopCards(tournamentId) {
+  const rows = await buildPlayerStatRows(tournamentId);
+  return {
+    yellowCards: rankBy(rows, 'yellowCards'),
+    redCards: rankBy(rows, 'redCards'),
+    blueCards: rankBy(rows, 'blueCards'),
+  };
+}
+
+// Vista admin: multas por tarjeta agrupadas por equipo. Solo incluye
+// jugadores con al menos una tarjeta; cardFinePaidCount se compara contra
+// el total real (no un simple sí/no), así que si un jugador ya marcado
+// como pagado recibe una tarjeta nueva, vuelve a aparecer con pendiente.
+// A diferencia de getTopScorers/getTopCards, esto es solo para el panel
+// admin: no aplica distorsión por pago (nombre/equipo siempre en claro).
+export async function getCardFines(tournamentId) {
+  const cardTotals = await standingsRepository.findPlayerCardTotals(tournamentId);
+  if (!cardTotals.length) return [];
+
+  const cardsByPlayer = new Map();
+  for (const row of cardTotals) {
+    const entry = cardsByPlayer.get(row.playerId) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
+    if (row.type === 'YELLOW_CARD') entry.yellowCards = row._count._all;
+    if (row.type === 'RED_CARD') entry.redCards = row._count._all;
+    if (row.type === 'BLUE_CARD') entry.blueCards = row._count._all;
+    cardsByPlayer.set(row.playerId, entry);
+  }
+
+  const playerIds = [...cardsByPlayer.keys()];
+  const players = await standingsRepository.findPlayersWithTeams(playerIds);
+  const playersById = new Map(players.map((player) => [player.id, player]));
+
+  const cardTypes = [
+    { type: 'YELLOW_CARD', countKey: 'yellowCards', paidField: 'yellowCardFinePaidCount' },
+    { type: 'RED_CARD', countKey: 'redCards', paidField: 'redCardFinePaidCount' },
+    { type: 'BLUE_CARD', countKey: 'blueCards', paidField: 'blueCardFinePaidCount' },
+  ];
+
+  const teamsById = new Map();
+  for (const playerId of playerIds) {
+    const player = playersById.get(playerId);
+    const team = player?.teams[0]?.team;
+    if (!player || !team) continue;
+
+    const cards = cardsByPlayer.get(playerId);
+
+    // Cada tipo de tarjeta se paga por separado: pagar amarillas no cubre
+    // rojas ni azules, cada una tiene su propio conteo pagado/pendiente.
+    const fines = cardTypes
+      .filter(({ countKey }) => cards[countKey] > 0)
+      .map(({ type, countKey, paidField }) => {
+        const count = cards[countKey];
+        const paidCount = Math.min(player[paidField] ?? 0, count);
+        return { type, count, paidCount, pendingCount: count - paidCount, finePaid: paidCount >= count };
+      });
+
+    const row = {
+      player: { id: player.id, name: player.name, jerseyNumber: player.jerseyNumber },
+      fines,
+      hasPending: fines.some((fine) => !fine.finePaid),
+    };
+
+    if (!teamsById.has(team.id)) teamsById.set(team.id, { team: { id: team.id, name: team.name }, players: [] });
+    teamsById.get(team.id).players.push(row);
+  }
+
+  return [...teamsById.values()]
+    .map((entry) => ({
+      ...entry,
+      players: entry.players.sort((left, right) => left.player.name.localeCompare(right.player.name)),
+    }))
+    .sort((left, right) => left.team.name.localeCompare(right.team.name));
 }

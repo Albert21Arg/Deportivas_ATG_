@@ -17,3 +17,15 @@ export function withExpiryFlags(team) {
   const logoExpired = teamExpired || isPast(logoExpiresAt);
   return { ...rest, teamExpired, logoExpired };
 }
+
+// El jugador debe tener un pago individual vigente para mostrar su foto y
+// nombre. Ese pago también le permite aparecer aunque su equipo esté moroso.
+// Sin paidUntil (o ya vencido), su información queda expirada aunque el
+// equipo sí haya pagado.
+export function withPlayerExpiryFlags(player) {
+  if (!player) return player;
+  const { paidUntil, ...rest } = player;
+  const hasIndividualPayment = Boolean(paidUntil) && !isPast(paidUntil);
+  const playerExpired = !hasIndividualPayment;
+  return { ...rest, playerExpired };
+}

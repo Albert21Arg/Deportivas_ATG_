@@ -4,7 +4,11 @@ import { Link } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
-import { EXPIRED_CLASS, isLogoHidden, isTeamExpired } from '../utils/team-expiry.js';
+import {
+  EXPIRED_CLASS,
+  isLogoHidden,
+  isTeamExpired,
+} from '../utils/team-expiry.js';
 
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
 import CompetitionOverview from '../components/CompetitionOverview.jsx';
@@ -25,7 +29,7 @@ const formStyles = {
 
 function TeamLogo({
   team,
-  size = 'h-8 w-8',
+  size = 'h-9 w-9',
   className = '',
 }) {
   const expired = isTeamExpired(team);
@@ -34,7 +38,7 @@ function TeamLogo({
   if (!team.logo || isLogoHidden(team)) {
     return (
       <div
-        className={`flex ${size} shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs text-slate-400 ${className} ${expiredClass}`}
+        className={`flex ${size} shrink-0 items-center justify-center text-xs text-slate-400 ${className} ${expiredClass}`}
         aria-label={expired ? undefined : `Sin escudo para ${team.name}`}
       >
         ⚽
@@ -44,7 +48,7 @@ function TeamLogo({
 
   return (
     <img
-      className={`${size} shrink-0 rounded-full border border-slate-700 bg-slate-950 object-cover ${className} ${expiredClass}`}
+      className={`${size} shrink-0 object-contain ${className} ${expiredClass}`}
       src={team.logo}
       alt={expired ? '' : `Escudo de ${team.name}`}
     />
@@ -70,7 +74,7 @@ function TeamModal({ selection, onClose }) {
       onMouseDown={onClose}
     >
       <section
-        className="max-h-[94vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 shadow-xl shadow-black/30 sm:max-h-[92vh] sm:rounded-3xl sm:shadow-2xl sm:shadow-black/40"
+        className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-700 bg-gradient-to-b from-slate-900 to-slate-950 shadow-xl shadow-black/30 sm:max-h-[92vh] sm:rounded-3xl sm:shadow-2xl sm:shadow-black/40"
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-modal-title"
@@ -91,12 +95,7 @@ function TeamModal({ selection, onClose }) {
           <div className="relative mx-auto w-fit">
             <TeamLogo
               team={row.team}
-              size="h-20 w-20 sm:h-24 sm:w-24"
-              className={
-                isLeader
-                  ? 'border-amber-400/40 ring-2 ring-amber-400/30 shadow-[0_0_18px_rgba(251,191,36,0.18)] sm:shadow-[0_0_30px_rgba(251,191,36,0.2)]'
-                  : ''
-              }
+              size="h-24 w-24 sm:h-28 sm:w-28"
             />
 
             {isLeader && (
@@ -121,28 +120,6 @@ function TeamModal({ selection, onClose }) {
           <p className="mt-1 text-xs text-slate-400 sm:text-sm">
             Posición #{row.position} · {row.points} puntos
           </p>
-
-          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-3">
-            <div className="rounded-xl border border-emerald-400/10 bg-emerald-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-emerald-300 sm:text-2xl">
-                {row.goalsFor}
-              </p>
-
-              <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
-                Goles marcados
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-red-400/10 bg-red-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-red-300 sm:text-2xl">
-                {row.goalsAgainst}
-              </p>
-
-              <p className="mt-1 text-[11px] text-slate-400 sm:text-xs">
-                Goles recibidos
-              </p>
-            </div>
-          </div>
 
           <div className="mt-5 sm:mt-6">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">
@@ -228,20 +205,30 @@ function TournamentCard({
         <div className="pointer-events-none absolute -right-12 -top-14 h-32 w-32 rounded-full bg-emerald-400/[0.05] blur-2xl sm:-right-16 sm:-top-20 sm:h-48 sm:w-48 sm:blur-3xl" />
 
         <div className="relative flex w-full items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:px-3 sm:text-xs sm:tracking-[0.18em]">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399] sm:shadow-[0_0_8px_#34d399]" />
-              Torneo activo
+          <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+            {tournament.tournament.logo && (
+              <img
+                className="h-12 w-12 shrink-0 rounded-xl border border-white/[0.08] bg-slate-950/50 object-cover shadow-md sm:h-16 sm:w-16 sm:rounded-2xl"
+                src={tournament.tournament.logo}
+                alt=""
+              />
+            )}
+
+            <div className="min-w-0 flex-1">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:px-3 sm:text-xs sm:tracking-[0.18em]">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399] sm:shadow-[0_0_8px_#34d399]" />
+                Torneo activo
+              </div>
+
+              <h2 className="mt-3 text-lg font-black tracking-tight text-white sm:text-2xl">
+                {tournament.tournament.name}
+              </h2>
+
+              <p className="mt-1.5 max-w-3xl text-xs leading-5 text-slate-400 sm:mt-2 sm:text-sm sm:leading-6">
+                {tournament.tournament.description ||
+                  'Consulta la clasificación y el calendario.'}
+              </p>
             </div>
-
-            <h2 className="mt-3 text-lg font-black tracking-tight text-white sm:text-2xl">
-              {tournament.tournament.name}
-            </h2>
-
-            <p className="mt-1.5 max-w-3xl text-xs leading-5 text-slate-500 sm:mt-2 sm:text-sm sm:leading-6">
-              {tournament.tournament.description ||
-                'Consulta la clasificación y el calendario.'}
-            </p>
           </div>
 
           <span
@@ -344,7 +331,7 @@ function TournamentCard({
                   </thead>
 
                   <tbody className="divide-y divide-slate-800">
-                    {standings.map((row, index) => {
+                    {standings.map((row) => {
                       const isLeader = row.position === 1;
                       const expired = isTeamExpired(row.team);
 
@@ -430,12 +417,7 @@ function TournamentCard({
                               <div className="relative shrink-0">
                                 <TeamLogo
                                   team={row.team}
-                                  size="h-7 w-7 sm:h-9 sm:w-9"
-                                  className={
-                                    isLeader
-                                      ? 'border-amber-400/40 ring-2 ring-amber-400/40 shadow-[0_0_10px_rgba(251,191,36,0.12)]'
-                                      : 'border-slate-700'
-                                  }
+                                  size="h-9 w-9 sm:h-11 sm:w-11"
                                 />
 
                                 {isLeader && (
@@ -595,6 +577,7 @@ function TournamentCard({
                   mode={mode}
                   groups={tournament.groups}
                   ties={tournament.ties}
+                  championLabel={tournament.tournament.championLabel}
                 />
               </div>
             </div>
@@ -606,7 +589,7 @@ function TournamentCard({
 
       <div className="w-full border-t border-white/[0.06] p-2.5 sm:p-4">
         <Link
-          className="group/link flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-2.5 text-center text-xs font-black text-slate-950 transition hover:bg-emerald-400 sm:px-4 sm:py-3 sm:text-sm"
+          className="group/link flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-2.5 text-center text-xs font-black text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 hover:shadow-emerald-500/20 sm:px-4 sm:py-3 sm:text-sm"
           to={`/tournaments/${tournament.tournament.id}`}
         >
           Ver torneo y próximos partidos
@@ -632,6 +615,7 @@ export default function HomePage() {
   const [tournaments, setTournaments] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   /*
   |--------------------------------------------------------------------------
@@ -680,6 +664,10 @@ export default function HomePage() {
     loadTournaments();
   }, [notify]);
 
+  const filteredTournaments = tournaments.filter((tournament) =>
+    tournament.tournament.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
+  );
+
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
       {/* Navegación */}
@@ -692,21 +680,30 @@ export default function HomePage() {
 
       {/* Hero */}
 
-      <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.11),_transparent_38%)] px-4 pb-10 pt-24 sm:px-6 sm:pb-20 sm:pt-32">
-        <div className="pointer-events-none absolute -left-24 top-20 h-48 w-48 rounded-full bg-emerald-400/[0.04] blur-2xl sm:-left-32 sm:h-72 sm:w-72 sm:bg-emerald-400/[0.05] sm:blur-3xl" />
+      <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.13),_transparent_38%)] px-4 pb-10 pt-24 sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px)',
+            backgroundSize: '42px 42px',
+          }}
+        />
 
-        <div className="pointer-events-none absolute -right-24 top-0 h-52 w-52 rounded-full bg-cyan-400/[0.025] blur-2xl sm:-right-32 sm:h-80 sm:w-80 sm:bg-cyan-400/[0.04] sm:blur-3xl" />
+        <div className="pointer-events-none absolute -left-24 top-20 h-48 w-48 rounded-full bg-emerald-400/[0.05] blur-2xl sm:-left-32 sm:h-72 sm:w-72 sm:bg-emerald-400/[0.06] sm:blur-3xl" />
+
+        <div className="pointer-events-none absolute -right-24 top-0 h-52 w-52 rounded-full bg-cyan-400/[0.03] blur-2xl sm:-right-32 sm:h-80 sm:w-80 sm:bg-cyan-400/[0.045] sm:blur-3xl" />
 
         <div className="relative mx-auto w-full max-w-7xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.17em] text-emerald-300 sm:px-3 sm:text-xs sm:tracking-[0.2em]">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399]" />
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399]" />
 
             Resultados en un solo lugar
           </div>
 
           <h1 className="mt-4 max-w-3xl text-[2rem] font-black leading-[1.08] tracking-tight text-white sm:mt-6 sm:text-5xl sm:leading-tight md:text-6xl">
             Torneos que se viven
-            <span className="text-emerald-400">
+            <span className="text-emerald-400 drop-shadow-[0_0_18px_rgba(52,211,153,0.35)]">
               {' '}
               partido a partido.
             </span>
@@ -716,16 +713,19 @@ export default function HomePage() {
             Consulta tablas de posiciones, próximos encuentros y
             resultados de los torneos activos.
           </p>
+
+          <div className="mt-6 h-px w-20 bg-gradient-to-r from-emerald-400 to-transparent sm:mt-8 sm:w-24" />
         </div>
       </section>
 
       {/* Torneos */}
 
-      <section className="w-full px-3.5 py-8 sm:px-6 sm:py-14">
+      <section className="w-full px-3.5 py-8 sm:px-6 sm:py-14 lg:px-12 xl:px-20">
         <div className="mx-auto w-full max-w-7xl">
-          <div className="mb-5 flex items-end justify-between gap-3 sm:mb-8">
+          <div className="mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600 sm:text-sm sm:tracking-[0.18em]">
+              <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-600 sm:text-sm sm:tracking-[0.18em]">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
                 En vivo
               </p>
 
@@ -734,12 +734,31 @@ export default function HomePage() {
               </h2>
             </div>
 
-            <span className="shrink-0 rounded-full border border-white/[0.06] bg-slate-900 px-2.5 py-1.5 text-[9px] font-bold text-slate-500 sm:px-4 sm:py-2 sm:text-xs">
-              {tournaments.length}{' '}
-              {tournaments.length === 1
-                ? 'disponible'
-                : 'disponibles'}
-            </span>
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {tournaments.length > 0 && (
+                <div className="relative w-full sm:w-64">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                    🔍
+                  </span>
+
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Buscar torneo por nombre..."
+                    className="w-full rounded-xl border border-slate-800 bg-slate-900 py-2.5 pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
+                  />
+                </div>
+              )}
+
+              <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/[0.06] bg-slate-900 px-2.5 py-1.5 text-[9px] font-bold text-slate-400 sm:px-4 sm:py-2 sm:text-xs">
+                <span aria-hidden="true">🏆</span>
+                {tournaments.length}{' '}
+                {tournaments.length === 1
+                  ? 'disponible'
+                  : 'disponibles'}
+              </span>
+            </div>
           </div>
 
           {isLoading ? (
@@ -760,6 +779,16 @@ export default function HomePage() {
                 No hay torneos activos disponibles.
               </p>
             </div>
+          ) : filteredTournaments.length === 0 ? (
+            <div className="w-full rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 p-8 text-center sm:rounded-3xl sm:p-14">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-lg sm:h-14 sm:w-14 sm:rounded-2xl sm:text-xl">
+                🔍
+              </div>
+
+              <p className="mt-4 text-xs font-medium text-slate-400 sm:text-sm">
+                {`Ningún torneo coincide con "${searchQuery}".`}
+              </p>
+            </div>
           ) : (
             /*
             |--------------------------------------------------------------------------
@@ -773,7 +802,7 @@ export default function HomePage() {
             */
 
             <div className="flex w-full flex-col gap-4 lg:gap-6">
-              {tournaments.map((tournament) => {
+              {filteredTournaments.map((tournament) => {
                 const tournamentId =
                   tournament.tournament.id;
 

@@ -127,13 +127,16 @@ export async function generateFixtures(tournamentId, options = {}) {
     });
   });
   const { count } = await matchRepository.createMany(matchesData);
+  publish(tournamentId, { type: 'fixtures.generated' });
   return { created: count };
 }
 
 export async function createMatch(tournamentId, data) {
   if (!await matchRepository.findTournament(tournamentId)) throw new HttpError(404, 'Torneo no encontrado');
   await validateTeamsBelongToTournament(tournamentId, data.homeTeamId, data.awayTeamId);
-  return matchRepository.create({ ...data, tournamentId });
+  const match = await matchRepository.create({ ...data, tournamentId });
+  publish(tournamentId, { type: 'match.created' });
+  return match;
 }
 
 export async function updateMatch(id, data) {
@@ -151,7 +154,9 @@ export async function updateMatch(id, data) {
     updateData.status = 'SCHEDULED';
   }
 
-  return matchRepository.update(id, updateData);
+  const updated = await matchRepository.update(id, updateData);
+  publish(updated.tournamentId, { type: 'match.rescheduled' });
+  return updated;
 }
 
 export async function registerResult(id, { homeScore, awayScore, penalties }, user) {

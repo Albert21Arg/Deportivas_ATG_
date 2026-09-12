@@ -25,13 +25,13 @@ function TieCard({ tie }) {
   function TeamShield({ team }) {
     return team?.logo ? (
       <img
-        className="h-8 w-8 shrink-0 rounded-full border border-white/[0.1] bg-slate-950 object-cover p-0.5 sm:h-9 sm:w-9"
+        className="h-10 w-10 shrink-0 object-contain sm:h-11 sm:w-11"
         src={team.logo}
         alt={`Escudo de ${team.name}`}
         loading="lazy"
       />
     ) : (
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center text-lg sm:h-9 sm:w-9" aria-hidden="true">
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center text-lg sm:h-11 sm:w-11" aria-hidden="true">
         🛡️
       </span>
     );

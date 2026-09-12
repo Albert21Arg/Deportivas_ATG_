@@ -10,6 +10,7 @@ import {
   createController,
   getController,
   listController,
+  moveController,
   statusController,
   updateController,
   updateModeController,
@@ -21,6 +22,7 @@ import {
   parseTournamentId,
   validateChampion,
   validateCreateTournament,
+  validateMove,
   validateStatus,
   validateUpdateTournament,
   validateUpdateTournamentMode,
@@ -40,6 +42,7 @@ router.get('/:id', parseTournamentId, requireTournamentAccess, getController);
 router.put('/:id', authorize('SUPERADMIN'), parseTournamentId, validateUpdateTournament, updateController);
 router.patch('/:id/mode', parseTournamentId, requireTournamentAccess, validateUpdateTournamentMode, updateModeController);
 router.patch('/:id/status', authorize('SUPERADMIN'), parseTournamentId, validateStatus, statusController);
+router.patch('/:id/move', authorize('SUPERADMIN'), parseTournamentId, validateMove, moveController);
 router.patch('/:id/champion', parseTournamentId, requireTournamentAccess, validateChampion, championController);
 
 export default router;

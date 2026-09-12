@@ -695,12 +695,12 @@ export default function TeamsPage() {
 
                                     {team.logo ? (
                                       <img
-                                        className="h-8 w-8 shrink-0 rounded-lg border border-white/[0.07] object-cover"
+                                        className="h-9 w-9 shrink-0 object-contain"
                                         src={team.logo}
                                         alt=""
                                       />
                                     ) : (
-                                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-xs">
+                                      <div className="flex h-9 w-9 shrink-0 items-center justify-center text-xs">
                                         ⚽
                                       </div>
                                     )}
@@ -879,12 +879,12 @@ export default function TeamsPage() {
                     {/* Logo */}
                     {team.logo ? (
                       <img
-                        className="h-14 w-14 shrink-0 rounded-xl border border-white/[0.08] bg-slate-950 object-cover shadow-md sm:h-16 sm:w-16 sm:rounded-2xl"
+                        className="h-16 w-16 shrink-0 object-contain sm:h-20 sm:w-20"
                         src={team.logo}
                         alt={`Logo de ${team.name}`}
                       />
                     ) : (
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] text-lg sm:h-16 sm:w-16 sm:rounded-2xl sm:text-xl">
+                      <div className="flex h-16 w-16 shrink-0 items-center justify-center text-lg sm:h-20 sm:w-20 sm:text-xl">
                         ⚽
                       </div>
                     )}

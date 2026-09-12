@@ -1,14 +1,18 @@
 import * as publicRepository from '../repositories/public-repository.js';
-import { getStandings, getStandingsByPot } from './standings-service.js';
+import { expireOverdue } from '../repositories/tournament-repository.js';
+import { getStandings, getStandingsByPot, getTopCards, getTopScorers } from './standings-service.js';
 import { HttpError } from '../utils/http-error.js';
-import { withExpiryFlags } from '../utils/team-expiry.js';
+import { withExpiryFlags, withPlayerExpiryFlags } from '../utils/team-expiry.js';
 
 function withPublicMatch(match) {
   return {
     ...match,
     homeTeam: withExpiryFlags(match.homeTeam),
     awayTeam: withExpiryFlags(match.awayTeam),
-    events: match.events?.map((event) => ({ ...event, team: withExpiryFlags(event.team) })),
+    events: match.events?.map((event) => {
+      const team = withExpiryFlags(event.team);
+      return { ...event, team, player: withPlayerExpiryFlags(event.player) };
+    }),
   };
 }
 
@@ -29,22 +33,34 @@ function withPublicGroup(group) {
   };
 }
 
-export function listPublicTournaments() {
+export async function listPublicTournaments() {
+  await expireOverdue();
   return publicRepository.findActiveTournaments();
 }
 
 export async function getPublicTournament(id) {
+  await expireOverdue();
   const tournament = await publicRepository.findActiveTournament(id);
   if (!tournament) throw new HttpError(404, 'Torneo público no encontrado');
 
-  const [standings, pots, upcomingMatches, finishedMatches, groups, ties] = await Promise.all([
+  const [standings, pots, scorers, cards, upcomingMatches, finishedMatches, groups, ties, tournamentPlayers] = await Promise.all([
     getStandings(id),
     getStandingsByPot(id),
+    getTopScorers(id),
+    getTopCards(id),
     publicRepository.findUpcomingMatches(id),
     publicRepository.findFinishedMatches(id),
     publicRepository.findGroups(id),
     publicRepository.findTies(id),
+    publicRepository.findTournamentPlayers(id),
   ]);
+
+  const playersByTeam = new Map(
+    tournamentPlayers.map(({ team }) => [
+      team.id,
+      team.players.map(({ player }) => withPlayerExpiryFlags(player)),
+    ])
+  );
 
   const recentFormByTeam = {};
 
@@ -61,8 +77,19 @@ export async function getPublicTournament(id) {
 
   return {
     tournament,
-    standings,
-    pots,
+    standings: standings.map((row) => ({
+      ...row,
+      players: playersByTeam.get(row.team.id) ?? [],
+    })),
+    pots: pots.map((bucket) => ({
+      ...bucket,
+      standings: bucket.standings.map((row) => ({
+        ...row,
+        players: playersByTeam.get(row.team.id) ?? [],
+      })),
+    })),
+    scorers,
+    cards,
     upcomingMatches: upcomingMatches.map(withPublicMatch),
     recentFormByTeam,
     groups: groups.map(withPublicGroup),

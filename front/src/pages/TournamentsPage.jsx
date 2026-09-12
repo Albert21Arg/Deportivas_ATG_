@@ -10,6 +10,9 @@ import DashboardNavbar from '../components/DashboardNavbar.jsx';
 const emptyForm = {
   name: '',
   description: '',
+  logo: '',
+  expiresAt: '',
+  championLabel: '',
   mode: 'ROUND_ROBIN',
   hasThirdPlace: false,
   blueCardEnabled: true,
@@ -33,6 +36,10 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('es-CO', {
     dateStyle: 'medium',
   }).format(new Date(value));
+}
+
+function toDateInputValue(value) {
+  return value ? String(value).slice(0, 10) : '';
 }
 
 export default function TournamentsPage() {
@@ -86,6 +93,9 @@ export default function TournamentsPage() {
     setForm({
       name: tournament.name,
       description: tournament.description ?? '',
+      logo: tournament.logo ?? '',
+      expiresAt: toDateInputValue(tournament.expiresAt),
+      championLabel: tournament.championLabel ?? '',
       mode: tournament.mode ?? 'ROUND_ROBIN',
       hasThirdPlace: Boolean(tournament.hasThirdPlace),
       blueCardEnabled: tournament.blueCardEnabled ?? true,
@@ -234,6 +244,19 @@ export default function TournamentsPage() {
     } catch (error) {
       const details = getApiErrorDetails(error);
       notify(details);
+    }
+  }
+
+  async function moveTournament(tournament, direction) {
+    try {
+      const { data } = await api.patch(
+        `/tournaments/${tournament.id}/move`,
+        { direction }
+      );
+
+      setTournaments(data.data.tournaments);
+    } catch (error) {
+      notify(getApiErrorDetails(error));
     }
   }
 
@@ -477,7 +500,7 @@ export default function TournamentsPage() {
           {!isLoading && tournaments.length > 0 && (
             <div className="grid gap-3 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
 
-              {tournaments.map((tournament) => {
+              {tournaments.map((tournament, index) => {
                 const isActive = tournament.status === 'ACTIVE';
 
                 return (
@@ -610,6 +633,24 @@ export default function TournamentsPage() {
                         </span>
                       </div>
 
+                      {tournament.expiresAt && (
+                        <div
+                          className={`mt-1.5 flex items-center gap-1.5 text-[10px] sm:gap-2 sm:text-[11px] ${
+                            new Date(tournament.expiresAt).getTime() < Date.now()
+                              ? 'text-red-400'
+                              : 'text-slate-600'
+                          }`}
+                        >
+                          <span className="text-xs sm:text-sm">⏳</span>
+
+                          <span>
+                            {new Date(tournament.expiresAt).getTime() < Date.now()
+                              ? `Venció el ${formatDate(tournament.expiresAt)}`
+                              : `Vence el ${formatDate(tournament.expiresAt)}`}
+                          </span>
+                        </div>
+                      )}
+
                       {/* CTA */}
                       <div className="mt-auto pt-4 sm:pt-5">
 
@@ -652,6 +693,26 @@ export default function TournamentsPage() {
                               type="button"
                             >
                               {isActive ? 'Desactivar' : 'Activar'}
+                            </button>
+
+                            <button
+                              className="min-h-10 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              onClick={() => moveTournament(tournament, 'up')}
+                              disabled={index === 0}
+                              type="button"
+                              title="Subir en la portada"
+                            >
+                              ↑ Subir
+                            </button>
+
+                            <button
+                              className="min-h-10 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              onClick={() => moveTournament(tournament, 'down')}
+                              disabled={index === tournaments.length - 1}
+                              type="button"
+                              title="Bajar en la portada"
+                            >
+                              ↓ Bajar
                             </button>
 
                           </div>
@@ -771,6 +832,55 @@ export default function TournamentsPage() {
                     onChange={updateField}
                     placeholder="Describe brevemente el torneo, su categoría, temporada..."
                   />
+                </label>
+
+                <label className="block text-sm font-semibold text-slate-200">
+                  Logo o banner (URL)
+
+                  <input
+                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    name="logo"
+                    value={form.logo}
+                    onChange={updateField}
+                    placeholder="https://..."
+                  />
+
+                  <span className="mt-1.5 block text-xs font-normal text-slate-500">
+                    Se muestra junto al nombre del torneo en la página pública.
+                  </span>
+                </label>
+
+                <label className="block text-sm font-semibold text-slate-200">
+                  Fecha de caducidad
+
+                  <input
+                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    name="expiresAt"
+                    type="date"
+                    value={form.expiresAt}
+                    onChange={updateField}
+                  />
+
+                  <span className="mt-1.5 block text-xs font-normal text-slate-500">
+                    Al llegar esta fecha el torneo se inhabilita automáticamente. Déjalo vacío para que no caduque.
+                  </span>
+                </label>
+
+                <label className="block text-sm font-semibold text-slate-200">
+                  Texto del campeón
+
+                  <input
+                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    name="championLabel"
+                    maxLength="60"
+                    value={form.championLabel}
+                    onChange={updateField}
+                    placeholder="Ej. 2026"
+                  />
+
+                  <span className="mt-1.5 block text-xs font-normal text-slate-500">
+                    Se muestra junto a la palabra &quot;Campeón&quot; en la llave y en la ficha del equipo ganador (por ejemplo, el año o la temporada).
+                  </span>
                 </label>
 
                 <label className="block text-sm font-semibold text-slate-200">

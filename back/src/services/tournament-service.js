@@ -2,10 +2,12 @@ import * as tournamentRepository from '../repositories/tournament-repository.js'
 import { HttpError } from '../utils/http-error.js';
 
 export async function listTournaments(user) {
+  await tournamentRepository.expireOverdue();
   return tournamentRepository.findAllForUser(user);
 }
 
 export async function getTournament(id) {
+  await tournamentRepository.expireOverdue();
   const tournament = await tournamentRepository.findById(id);
 
   if (!tournament) {
@@ -15,8 +17,9 @@ export async function getTournament(id) {
   return tournament;
 }
 
-export function createTournament(data) {
-  return tournamentRepository.create(data);
+export async function createTournament(data) {
+  const position = await tournamentRepository.getNextPosition();
+  return tournamentRepository.create({ ...data, position });
 }
 
 export async function updateTournament(id, data) {
@@ -57,4 +60,22 @@ export async function setChampion(id, { championTeamId, runnerUpTeamId, thirdPla
 export async function updateTournamentStatus(id, status) {
   await getTournament(id);
   return tournamentRepository.update(id, { status });
+}
+
+// Sube o baja un torneo un puesto en el orden de la portada, intercambiando
+// su posición con la del vecino inmediato. Si ya está en el extremo no hace
+// nada (no es un error, simplemente no hay a dónde moverse).
+export async function moveTournament(id, direction) {
+  await getTournament(id);
+  const ordered = await tournamentRepository.findOrderedIds();
+  const index = ordered.findIndex((tournament) => tournament.id === id);
+  const neighborIndex = direction === 'up' ? index - 1 : index + 1;
+
+  if (neighborIndex < 0 || neighborIndex >= ordered.length) {
+    return;
+  }
+
+  const current = ordered[index];
+  const neighbor = ordered[neighborIndex];
+  await tournamentRepository.swapPositions(current.id, current.position, neighbor.id, neighbor.position);
 }
