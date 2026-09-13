@@ -178,7 +178,7 @@ function MatchRow({ match, onClick }) {
   return (
     <button
       className="
-        group flex w-full items-center justify-between gap-2
+        group flex w-full min-w-0 items-center justify-between gap-2
         border-b border-white/[0.05]
         py-3 text-left
         transition-colors duration-200
@@ -595,7 +595,6 @@ function MatchDetailModal({
           <div className="flex items-center justify-center px-3 pt-10 sm:px-6 sm:pt-14">
             <div className="relative flex h-14 w-14 items-center justify-center sm:h-[72px] sm:w-[72px]">
               <div className="absolute inset-0 rounded-full bg-amber-400/20 blur-xl" />
-
               <div className="absolute inset-0 rounded-full border border-amber-400/30 shadow-[0_0_25px_rgba(245,158,11,0.18)]" />
 
               <div
@@ -811,7 +810,7 @@ function MatchDetailModal({
 
 /*
 |--------------------------------------------------------------------------
-| HEADER DE SECCIÓN — NUEVO DISEÑO
+| HEADER DE SECCIÓN
 |--------------------------------------------------------------------------
 */
 
@@ -1044,6 +1043,8 @@ function SectionCard({
           id={contentId}
           className="
             relative z-10
+            min-w-0 max-w-full
+            overflow-hidden
             border-t border-white/[0.055]
             bg-black/[0.08]
           "
@@ -1054,6 +1055,47 @@ function SectionCard({
     </div>
   );
 }
+
+/*
+|--------------------------------------------------------------------------
+| Clases responsive para ScorersTable
+|--------------------------------------------------------------------------
+*/
+
+const responsiveScorersTableClass = `
+  min-w-0
+  max-w-full
+  overflow-hidden
+
+  [&_table]:!w-full
+  [&_table]:!min-w-0
+  [&_table]:!max-w-full
+  [&_table]:table-fixed
+
+  [&_thead]:w-full
+  [&_tbody]:w-full
+
+  [&_tr]:w-full
+  [&_th]:min-w-0
+  [&_td]:min-w-0
+
+  [&_th]:overflow-hidden
+  [&_td]:overflow-hidden
+
+  [&_th]:text-ellipsis
+  [&_td]:text-ellipsis
+
+  [&_th]:whitespace-nowrap
+
+  [&_td]:break-words
+
+  [&_img]:max-w-full
+
+  [&_*]:max-w-full
+
+  sm:[&_table]:table-auto
+  sm:[&_table]:!min-w-0
+`;
 
 /*
 |--------------------------------------------------------------------------
@@ -1076,6 +1118,23 @@ export default function PublicTournamentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const historyLoadedRef = useRef(false);
+
+  /*
+  |--------------------------------------------------------------------------
+  | NUEVO
+  |--------------------------------------------------------------------------
+  | Si Tarjetas está abierta, el modal de jugador queda completamente
+  | bloqueado desde esta página.
+  |--------------------------------------------------------------------------
+  */
+
+  const cardsSectionOpen = openSection === 'cards';
+
+  useEffect(() => {
+    if (cardsSectionOpen && selectedTeam) {
+      setSelectedTeam(null);
+    }
+  }, [cardsSectionOpen, selectedTeam]);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -1182,6 +1241,13 @@ export default function PublicTournamentPage() {
   }
 
   function toggleCards() {
+    /*
+     * IMPORTANTE:
+     * Al entrar a Tarjetas se elimina cualquier jugador seleccionado.
+     * De esta forma nunca queda abierto el modal del jugador.
+     */
+    setSelectedTeam(null);
+
     setOpenSection((current) =>
       current === 'cards'
         ? null
@@ -1230,17 +1296,6 @@ export default function PublicTournamentPage() {
   const competitionMode =
     data.tournament.mode ?? 'ROUND_ROBIN';
 
-  const isKnockout = [
-    'KNOCKOUT_SINGLE',
-    'KNOCKOUT_TWO_LEG',
-  ].includes(competitionMode);
-
-  /*
-  |--------------------------------------------------------------------------
-  | PARTIDO ACTUAL EN VIVO
-  |--------------------------------------------------------------------------
-  */
-
   const liveMatch =
     data.upcomingMatches?.find(
       (match) => match.status === 'STARTED'
@@ -1253,6 +1308,9 @@ export default function PublicTournamentPage() {
     <main
       className="
         min-h-screen
+        w-full
+        max-w-full
+        overflow-x-hidden
         bg-slate-50
         dark:bg-[#05070b]
         px-2.5 pb-8 pt-20
@@ -1264,7 +1322,7 @@ export default function PublicTournamentPage() {
       <AnnouncementModal />
       <PublicNavbar />
 
-      <header className="mx-auto max-w-7xl">
+      <header className="mx-auto max-w-7xl min-w-0">
         <Link
           className="
             inline-flex items-center gap-1
@@ -1292,14 +1350,14 @@ export default function PublicTournamentPage() {
 
       <section
         className="
-          relative mx-auto max-w-7xl
+          relative mx-auto max-w-7xl min-w-0
           py-6
           sm:py-12
         "
       >
         <div className="pointer-events-none absolute left-0 top-0 -z-0 h-40 w-40 rounded-full bg-emerald-500/[0.06] blur-3xl" />
 
-        <div className="relative">
+        <div className="relative min-w-0">
           <div className="mb-3 flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)]" />
 
@@ -1341,7 +1399,9 @@ export default function PublicTournamentPage() {
         className="
           mx-auto
           grid
+          w-full
           max-w-7xl
+          min-w-0
           grid-cols-1
           gap-3
           sm:gap-4
@@ -1356,19 +1416,13 @@ export default function PublicTournamentPage() {
         )}
 
         {competitionMode === 'ROUND_ROBIN' ? (
-          /*
-          |--------------------------------------------------------------------------
-          | TABLA DE POSICIONES
-          |--------------------------------------------------------------------------
-          */
-
           <SectionCard
             section="standings"
             open={openSection === 'standings'}
             onToggle={toggleStandings}
             contentId="standings-content"
           >
-            <div id="standings-content" className="w-full">
+            <div id="standings-content" className="w-full min-w-0">
               <div className="scroll-invisible hidden max-h-[31rem] w-full overflow-y-auto sm:block">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 z-20 border-b border-white/[0.05] bg-slate-950/95 backdrop-blur">
@@ -1417,14 +1471,10 @@ export default function PublicTournamentPage() {
 
                   <tbody className="divide-y divide-white/[0.04]">
                     {data.standings.map((row) => {
-                      const isLeader =
-                        row.position === 1;
-                      const isSecond =
-                        row.position === 2;
-                      const isThird =
-                        row.position === 3;
-                      const expired =
-                        isTeamExpired(row.team);
+                      const isLeader = row.position === 1;
+                      const isSecond = row.position === 2;
+                      const isThird = row.position === 3;
+                      const expired = isTeamExpired(row.team);
 
                       return (
                         <tr
@@ -1442,9 +1492,7 @@ export default function PublicTournamentPage() {
                           `}
                         >
                           <td className="px-4 py-3.5 text-center">
-                            {isLeader ||
-                            isSecond ||
-                            isThird ? (
+                            {isLeader || isSecond || isThird ? (
                               <span
                                 className={`
                                   mx-auto flex h-8 w-8
@@ -1486,8 +1534,7 @@ export default function PublicTournamentPage() {
                               }
                               onKeyDown={(event) => {
                                 if (
-                                  event.key ===
-                                    'Enter' ||
+                                  event.key === 'Enter' ||
                                   event.key === ' '
                                 ) {
                                   event.preventDefault();
@@ -1495,8 +1542,7 @@ export default function PublicTournamentPage() {
                                   setSelectedTeam({
                                     row,
                                     recentForm:
-                                      data
-                                        .recentFormByTeam?.[
+                                      data.recentFormByTeam?.[
                                         row.team.id
                                       ] ?? [],
                                   });
@@ -1556,9 +1602,7 @@ export default function PublicTournamentPage() {
 
                           <td
                             className={`px-2 py-3.5 text-center text-slate-500 ${
-                              expired
-                                ? EXPIRED_CLASS
-                                : ''
+                              expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.played}
@@ -1566,9 +1610,7 @@ export default function PublicTournamentPage() {
 
                           <td
                             className={`px-2 py-3.5 text-center text-amber-300 ${
-                              expired
-                                ? EXPIRED_CLASS
-                                : ''
+                              expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.yellowCards}
@@ -1576,9 +1618,7 @@ export default function PublicTournamentPage() {
 
                           <td
                             className={`px-2 py-3.5 text-center text-red-300 ${
-                              expired
-                                ? EXPIRED_CLASS
-                                : ''
+                              expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.redCards}
@@ -1586,9 +1626,7 @@ export default function PublicTournamentPage() {
 
                           <td
                             className={`px-2 py-3.5 text-center text-blue-300 ${
-                              expired
-                                ? EXPIRED_CLASS
-                                : ''
+                              expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.blueCards}
@@ -1596,9 +1634,7 @@ export default function PublicTournamentPage() {
 
                           <td
                             className={`px-2 py-3.5 text-center text-slate-500 ${
-                              expired
-                                ? EXPIRED_CLASS
-                                : ''
+                              expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.goalsFor}
@@ -1621,9 +1657,7 @@ export default function PublicTournamentPage() {
                                     : 'text-slate-500'
                               }
                               ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
+                                expired ? EXPIRED_CLASS : ''
                               }
                             `}
                           >
@@ -1646,9 +1680,7 @@ export default function PublicTournamentPage() {
                                     : 'text-emerald-300'
                               }
                               ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
+                                expired ? EXPIRED_CLASS : ''
                               }
                             `}
                           >
@@ -1689,14 +1721,10 @@ export default function PublicTournamentPage() {
 
                   <tbody className="divide-y divide-white/[0.035]">
                     {data.standings.map((row) => {
-                      const isLeader =
-                        row.position === 1;
-                      const isSecond =
-                        row.position === 2;
-                      const isThird =
-                        row.position === 3;
-                      const expired =
-                        isTeamExpired(row.team);
+                      const isLeader = row.position === 1;
+                      const isSecond = row.position === 2;
+                      const isThird = row.position === 3;
+                      const expired = isTeamExpired(row.team);
 
                       return (
                         <tr
@@ -1715,9 +1743,7 @@ export default function PublicTournamentPage() {
                           `}
                         >
                           <td className="px-0.5 py-3 text-center">
-                            {isLeader ||
-                            isSecond ||
-                            isThird ? (
+                            {isLeader || isSecond || isThird ? (
                               <span
                                 className={`
                                   mx-auto flex h-6 w-6
@@ -1758,8 +1784,7 @@ export default function PublicTournamentPage() {
                               }
                               onKeyDown={(event) => {
                                 if (
-                                  event.key ===
-                                    'Enter' ||
+                                  event.key === 'Enter' ||
                                   event.key === ' '
                                 ) {
                                   event.preventDefault();
@@ -1767,8 +1792,7 @@ export default function PublicTournamentPage() {
                                   setSelectedTeam({
                                     row,
                                     recentForm:
-                                      data
-                                        .recentFormByTeam?.[
+                                      data.recentFormByTeam?.[
                                         row.team.id
                                       ] ?? [],
                                   });
@@ -1783,11 +1807,7 @@ export default function PublicTournamentPage() {
 
                                 {isLeader && (
                                   <span
-                                    className="
-                                      absolute -right-2 -top-3
-                                      z-10 text-xs
-                                      leading-none
-                                    "
+                                    className="absolute -right-2 -top-3 z-10 text-xs leading-none"
                                     aria-label="Primer lugar"
                                   >
                                     👑
@@ -1796,11 +1816,7 @@ export default function PublicTournamentPage() {
 
                                 {isSecond && (
                                   <span
-                                    className="
-                                      absolute -right-2 -top-3
-                                      z-10 text-xs
-                                      leading-none
-                                    "
+                                    className="absolute -right-2 -top-3 z-10 text-xs leading-none"
                                     aria-label="Segundo lugar"
                                   >
                                     🥈
@@ -1829,9 +1845,7 @@ export default function PublicTournamentPage() {
 
                           <td
                             className={`px-0.5 py-3 text-center text-[10px] font-medium text-slate-500 ${
-                              expired
-                                ? EXPIRED_CLASS
-                                : ''
+                              expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.played}
@@ -1853,9 +1867,7 @@ export default function PublicTournamentPage() {
                                     : 'text-slate-500'
                               }
                               ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
+                                expired ? EXPIRED_CLASS : ''
                               }
                             `}
                           >
@@ -1878,9 +1890,7 @@ export default function PublicTournamentPage() {
                                     : 'text-emerald-300'
                               }
                               ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
+                                expired ? EXPIRED_CLASS : ''
                               }
                             `}
                           >
@@ -1906,42 +1916,28 @@ export default function PublicTournamentPage() {
                 "
               >
                 <span>
-                  <strong className="text-slate-500">
-                    PJ
-                  </strong>{' '}
+                  <strong className="text-slate-500">PJ</strong>{' '}
                   Partidos
                 </span>
 
                 <span>
-                  <strong className="text-slate-500">
-                    GF/GC
-                  </strong>{' '}
+                  <strong className="text-slate-500">GF/GC</strong>{' '}
                   Goles
                 </span>
 
                 <span>
-                  <strong className="text-slate-500">
-                    DG
-                  </strong>{' '}
+                  <strong className="text-slate-500">DG</strong>{' '}
                   Diferencia
                 </span>
 
                 <span>
-                  <strong className="text-emerald-500">
-                    PTS
-                  </strong>{' '}
+                  <strong className="text-emerald-500">PTS</strong>{' '}
                   Puntos
                 </span>
               </div>
             </div>
           </SectionCard>
         ) : competitionMode === 'GROUP_STAGE' ? (
-          /*
-          |--------------------------------------------------------------------------
-          | FASE DE GRUPOS
-          |--------------------------------------------------------------------------
-          */
-
           <SectionCard
             section="groups"
             open={openSection === 'standings'}
@@ -1950,7 +1946,7 @@ export default function PublicTournamentPage() {
           >
             <div
               id="pots-content"
-              className="p-3 sm:p-5 lg:p-6"
+              className="min-w-0 p-3 sm:p-5 lg:p-6"
             >
               <p className="mb-4 text-xs leading-5 text-slate-500">
                 Compara a los equipos que comparten
@@ -1959,53 +1955,44 @@ export default function PublicTournamentPage() {
                 directamente entre ellos.
               </p>
 
-              {!data.pots ||
-              data.pots.length === 0 ? (
+              {!data.pots || data.pots.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-white/[0.08] px-4 py-8 text-center text-xs text-slate-500">
                   Los grupos aún no han sido generados.
                 </p>
               ) : (
-                <div className="grid w-full grid-cols-1 gap-6">
-                  {data.pots.map(
-                    ({ pot, standings }) => (
-                      <div
-                        key={pot}
-                        className="min-w-0 w-full"
-                      >
-                        <h3 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                          Bombo {pot}
-                        </h3>
+                <div className="grid w-full min-w-0 grid-cols-1 gap-6">
+                  {data.pots.map(({ pot, standings }) => (
+                    <div
+                      key={pot}
+                      className="min-w-0 w-full"
+                    >
+                      <h3 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        Bombo {pot}
+                      </h3>
 
-                        <div className="w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.05]">
-                          <StandingsTable
-                            standings={standings}
-                            respectPaymentStatus
-                            onSelectTeam={(row) =>
-                              setSelectedTeam({
-                                row,
-                                recentForm:
-                                  data.recentFormByTeam?.[
-                                    row.team.id
-                                  ] ?? [],
-                              })
-                            }
-                          />
-                        </div>
+                      <div className="w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.05]">
+                        <StandingsTable
+                          standings={standings}
+                          respectPaymentStatus
+                          onSelectTeam={(row) =>
+                            setSelectedTeam({
+                              row,
+                              recentForm:
+                                data.recentFormByTeam?.[
+                                  row.team.id
+                                ] ?? [],
+                            })
+                          }
+                        />
                       </div>
-                    )
-                  )}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </SectionCard>
         ) : (
-          /*
-          |--------------------------------------------------------------------------
-          | LLAVES
-          |--------------------------------------------------------------------------
-          */
-
           <SectionCard
             section="bracket"
             open={openSection === 'standings'}
@@ -2014,7 +2001,7 @@ export default function PublicTournamentPage() {
           >
             <div
               id="bracket-content"
-              className="w-full p-3 sm:p-5 lg:p-6"
+              className="w-full min-w-0 p-3 sm:p-5 lg:p-6"
             >
               <CompetitionOverview
                 mode={competitionMode}
@@ -2029,11 +2016,7 @@ export default function PublicTournamentPage() {
           </SectionCard>
         )}
 
-        {/*
-        |--------------------------------------------------------------------------
-        | PRÓXIMOS PARTIDOS
-        |--------------------------------------------------------------------------
-        */}
+        {/* Próximos partidos */}
 
         <SectionCard
           section="upcoming"
@@ -2043,14 +2026,13 @@ export default function PublicTournamentPage() {
         >
           <div
             id="upcoming-content"
-            className="w-full p-3 sm:p-5"
+            className="w-full min-w-0 p-3 sm:p-5"
           >
             <p className="mb-2 text-[10px] text-slate-500 sm:mb-3 sm:text-xs">
-              Haz clic en un partido para ver sus
-              detalles.
+              Haz clic en un partido para ver sus detalles.
             </p>
 
-            <div className="scroll-invisible max-h-[25rem] overflow-y-auto rounded-xl border border-white/[0.04] bg-black/[0.12] px-3 sm:px-4">
+            <div className="scroll-invisible max-h-[25rem] overflow-y-auto overflow-x-hidden rounded-xl border border-white/[0.04] bg-black/[0.12] px-3 sm:px-4">
               {data.upcomingMatches.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-500">
                   No hay próximos partidos.
@@ -2060,13 +2042,13 @@ export default function PublicTournamentPage() {
                   {groupMatchesByDate(
                     data.upcomingMatches
                   ).map(([date, matches]) => (
-                    <section key={date}>
+                    <section key={date} className="min-w-0">
                       <h3 className="mb-1.5 flex items-center gap-2 border-b border-white/[0.05] pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-300 sm:mb-2 sm:pb-2 sm:text-xs">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                         {formatDate(date)}
                       </h3>
 
-                      <div>
+                      <div className="min-w-0">
                         {matches.map((match) => (
                           <MatchRow
                             key={match.id}
@@ -2085,11 +2067,7 @@ export default function PublicTournamentPage() {
           </div>
         </SectionCard>
 
-        {/*
-        |--------------------------------------------------------------------------
-        | GOLEADORES
-        |--------------------------------------------------------------------------
-        */}
+        {/* Goleadores */}
 
         <SectionCard
           section="scorers"
@@ -2099,13 +2077,24 @@ export default function PublicTournamentPage() {
         >
           <div
             id="scorers-content"
-            className="w-full p-3 sm:p-5"
+            className="w-full min-w-0 max-w-full overflow-hidden p-2.5 sm:p-5"
           >
-            <p className="mb-3 text-[10px] text-slate-500 sm:text-xs">
+            <p className="mb-3 px-0.5 text-[10px] text-slate-500 sm:text-xs">
               Jugadores con más goles del torneo.
             </p>
 
-            <div className="scroll-invisible max-h-[25rem] overflow-y-auto rounded-xl border border-white/[0.04] bg-black/[0.12]">
+            <div
+              className={`
+                ${responsiveScorersTableClass}
+                scroll-invisible
+                max-h-[25rem]
+                rounded-xl
+                border border-white/[0.04]
+                bg-black/[0.12]
+                p-1
+                sm:p-2
+              `}
+            >
               <ScorersTable
                 scorers={data.scorers}
                 respectPaymentStatus
@@ -2117,11 +2106,7 @@ export default function PublicTournamentPage() {
           </div>
         </SectionCard>
 
-        {/*
-        |--------------------------------------------------------------------------
-        | TARJETAS
-        |--------------------------------------------------------------------------
-        */}
+        {/* Tarjetas */}
 
         <SectionCard
           section="cards"
@@ -2132,10 +2117,14 @@ export default function PublicTournamentPage() {
           <div
             id="cards-content"
             className={`
-              grid min-w-0 w-full
+              grid
+              min-w-0
+              w-full
+              max-w-full
               grid-cols-1
               gap-3
-              p-3
+              overflow-hidden
+              p-2.5
               sm:p-5
               ${
                 data.tournament.blueCardEnabled
@@ -2144,25 +2133,37 @@ export default function PublicTournamentPage() {
               }
             `}
           >
+            {/* Amarillas */}
+
             <div
               className="
-                min-w-0 overflow-hidden
+                min-w-0
+                max-w-full
+                overflow-hidden
                 rounded-xl
                 border border-amber-400/10
                 bg-gradient-to-br from-amber-400/[0.035] to-transparent
               "
             >
-              <div className="flex items-center justify-between border-b border-amber-400/10 px-3 py-2.5">
-                <h3 className="text-xs font-black uppercase tracking-wider text-amber-400">
+              <div className="flex min-w-0 items-center justify-between gap-2 border-b border-amber-400/10 px-2.5 py-2.5 sm:px-3">
+                <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-amber-400">
                   🟨 Amarillas
                 </h3>
 
-                <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[8px] font-bold text-amber-300">
+                <span className="shrink-0 rounded-full bg-amber-400/10 px-2 py-0.5 text-[8px] font-bold text-amber-300">
                   DISCIPLINA
                 </span>
               </div>
 
-              <div className="scroll-invisible max-h-[25rem] overflow-y-auto p-2">
+              <div
+                className={`
+                  ${responsiveScorersTableClass}
+                  scroll-invisible
+                  max-h-[25rem]
+                  p-1
+                  sm:p-2
+                `}
+              >
                 <ScorersTable
                   scorers={data.cards.yellowCards}
                   emptyMessage="Todavía no hay amarillas registradas."
@@ -2178,26 +2179,38 @@ export default function PublicTournamentPage() {
               </div>
             </div>
 
+            {/* Azules */}
+
             {data.tournament.blueCardEnabled && (
               <div
                 className="
-                  min-w-0 overflow-hidden
+                  min-w-0
+                  max-w-full
+                  overflow-hidden
                   rounded-xl
                   border border-blue-400/10
                   bg-gradient-to-br from-blue-400/[0.035] to-transparent
                 "
               >
-                <div className="flex items-center justify-between border-b border-blue-400/10 px-3 py-2.5">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-blue-400">
+                <div className="flex min-w-0 items-center justify-between gap-2 border-b border-blue-400/10 px-2.5 py-2.5 sm:px-3">
+                  <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-blue-400">
                     🟦 Azules
                   </h3>
 
-                  <span className="rounded-full bg-blue-400/10 px-2 py-0.5 text-[8px] font-bold text-blue-300">
+                  <span className="shrink-0 rounded-full bg-blue-400/10 px-2 py-0.5 text-[8px] font-bold text-blue-300">
                     DISCIPLINA
                   </span>
                 </div>
 
-                <div className="scroll-invisible max-h-[25rem] overflow-y-auto p-2">
+                <div
+                  className={`
+                    ${responsiveScorersTableClass}
+                    scroll-invisible
+                    max-h-[25rem]
+                    p-1
+                    sm:p-2
+                  `}
+                >
                   <ScorersTable
                     scorers={data.cards.blueCards}
                     emptyMessage="Todavía no hay azules registradas."
@@ -2214,25 +2227,37 @@ export default function PublicTournamentPage() {
               </div>
             )}
 
+            {/* Rojas */}
+
             <div
               className="
-                min-w-0 overflow-hidden
+                min-w-0
+                max-w-full
+                overflow-hidden
                 rounded-xl
                 border border-red-400/10
                 bg-gradient-to-br from-red-400/[0.035] to-transparent
               "
             >
-              <div className="flex items-center justify-between border-b border-red-400/10 px-3 py-2.5">
-                <h3 className="text-xs font-black uppercase tracking-wider text-red-400">
+              <div className="flex min-w-0 items-center justify-between gap-2 border-b border-red-400/10 px-2.5 py-2.5 sm:px-3">
+                <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-red-400">
                   🟥 Rojas
                 </h3>
 
-                <span className="rounded-full bg-red-400/10 px-2 py-0.5 text-[8px] font-bold text-red-300">
+                <span className="shrink-0 rounded-full bg-red-400/10 px-2 py-0.5 text-[8px] font-bold text-red-300">
                   DISCIPLINA
                 </span>
               </div>
 
-              <div className="scroll-invisible max-h-[25rem] overflow-y-auto p-2">
+              <div
+                className={`
+                  ${responsiveScorersTableClass}
+                  scroll-invisible
+                  max-h-[25rem]
+                  p-1
+                  sm:p-2
+                `}
+              >
                 <ScorersTable
                   scorers={data.cards.redCards}
                   emptyMessage="Todavía no hay rojas registradas."
@@ -2250,11 +2275,7 @@ export default function PublicTournamentPage() {
           </div>
         </SectionCard>
 
-        {/*
-        |--------------------------------------------------------------------------
-        | HISTORIAL
-        |--------------------------------------------------------------------------
-        */}
+        {/* Historial */}
 
         <SectionCard
           section="history"
@@ -2264,7 +2285,7 @@ export default function PublicTournamentPage() {
         >
           <div
             id="history-content"
-            className="p-3 sm:p-5"
+            className="min-w-0 p-3 sm:p-5"
           >
             {history.length === 0 ? (
               <p className="rounded-xl border border-dashed border-white/[0.07] py-10 text-center text-sm text-slate-500">
@@ -2274,14 +2295,13 @@ export default function PublicTournamentPage() {
               <div className="space-y-5">
                 {groupMatchesByDate(history).map(
                   ([date, matches]) => (
-                    <section key={date}>
+                    <section key={date} className="min-w-0">
                       <h3 className="mb-2 flex items-center gap-2 border-b border-white/[0.05] pb-2 text-xs font-bold uppercase tracking-[0.14em] text-blue-300 sm:mb-3 sm:text-sm">
                         <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-
                         {formatDate(date)}
                       </h3>
 
-                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {matches.map((match) => (
                           <HistoryMatchCard
                             key={match.id}
@@ -2300,20 +2320,25 @@ export default function PublicTournamentPage() {
 
       <MatchDetailModal
         match={selectedMatch}
-        recentFormByTeam={
-          data.recentFormByTeam
-        }
-        onClose={() =>
-          setSelectedMatch(null)
-        }
+        recentFormByTeam={data.recentFormByTeam}
+        onClose={() => setSelectedMatch(null)}
       />
 
-      <TeamDetailModal
-        selection={selectedTeam}
-        onClose={() =>
-          setSelectedTeam(null)
-        }
-      />
+      {/*
+       * CAMBIO IMPORTANTE:
+       *
+       * Cuando Tarjetas está abierta, NO renderizamos TeamDetailModal.
+       * Por lo tanto, aunque ScorersTable intente seleccionar un jugador,
+       * este modal no puede aparecer.
+       *
+       * Fuera de Tarjetas se mantiene exactamente el comportamiento anterior.
+       */}
+      {!cardsSectionOpen && (
+        <TeamDetailModal
+          selection={selectedTeam}
+          onClose={() => setSelectedTeam(null)}
+        />
+      )}
     </main>
   );
 }

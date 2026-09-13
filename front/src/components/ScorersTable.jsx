@@ -11,15 +11,15 @@ function mediaUrl(path) {
 
 /*
 |--------------------------------------------------------------------------
-| Tabla de goleadores reutilizable
+| Tabla de goleadores / tarjetas reutilizable
 |--------------------------------------------------------------------------
-| Mismo lenguaje visual que StandingsTable (corona para el líder, medallero
-| para el top 3), pero para el ranking de jugadores por goles.
+| IMPORTANTE:
+| - Cuando valueKey === 'goals', las filas pueden abrir PlayerCardModal.
+| - Cuando valueKey === 'yellowCards', 'redCards', etc., NO se abre modal.
 |
-| respectPaymentStatus: en vistas públicas, la foto y el nombre del jugador
-| se distorsionan según playerExpired (calculado en el backend): si el
-| equipo no pagó, el jugador sale sin foto salvo que él mismo haya pagado
-| aparte por su foto (con su propia fecha de vencimiento).
+| respectPaymentStatus:
+| en vistas públicas, la foto y el nombre del jugador se distorsionan
+| según playerExpired.
 */
 
 export default function ScorersTable({
@@ -34,6 +34,10 @@ export default function ScorersTable({
 }) {
   const [selectedRow, setSelectedRow] = useState(null);
 
+  // SOLO los goleadores pueden abrir la modal.
+  // Las tablas de tarjetas NO deben abrir PlayerCardModal.
+  const canOpenPlayerModal = valueKey === 'goals';
+
   if (!scorers || scorers.length === 0) {
     return <p className="px-3 py-4 text-xs text-slate-600">{emptyMessage}</p>;
   }
@@ -46,7 +50,9 @@ export default function ScorersTable({
             <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
               <th className="w-16 px-3 py-3 text-center">Pos</th>
               <th className="px-3 py-3 text-left">Jugador</th>
-              <th className="min-w-[70px] px-3 py-3 text-center">{valueLabel}</th>
+              <th className="min-w-[70px] px-3 py-3 text-center">
+                {valueLabel}
+              </th>
             </tr>
           </thead>
 
@@ -55,7 +61,10 @@ export default function ScorersTable({
               const isLeader = row.position === 1;
               const isSecond = row.position === 2;
               const isTopThree = row.position <= 3;
-              const expired = respectPaymentStatus && isPlayerExpired(row.player);
+
+              const expired =
+                respectPaymentStatus && isPlayerExpired(row.player);
+
               const photo = mediaUrl(row.player.photo);
 
               return (
@@ -84,7 +93,9 @@ export default function ScorersTable({
                         {row.position}
                       </span>
                     ) : (
-                      <span className="text-xs font-semibold text-slate-500">{row.position}</span>
+                      <span className="text-xs font-semibold text-slate-500">
+                        {row.position}
+                      </span>
                     )}
                   </td>
 
@@ -92,63 +103,94 @@ export default function ScorersTable({
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2.5">
                       <div className="relative shrink-0">
-                          {photo ? (
-                            <img
-                              className={`h-8 w-8 rounded-lg object-cover ${expired ? PLAYER_EXPIRED_CLASS : ''} ${
-                                isLeader
-                                  ? 'ring-2 ring-amber-400/50 shadow-[0_0_18px_rgba(251,191,36,0.2)]'
-                                  : isSecond
-                                    ? 'ring-2 ring-slate-300/30'
-                                    : 'ring-1 ring-white/5'
-                              }`}
-                              src={photo}
-                              alt={`Foto de ${row.player.name}`}
-                            />
-                          ) : (
-                            <div
-                              className={`flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-[10px] font-semibold ${expired ? PLAYER_EXPIRED_CLASS : ''} ${
-                                isLeader ? 'ring-2 ring-amber-400/40' : isSecond ? 'ring-2 ring-slate-300/30' : ''
-                              }`}
-                              aria-hidden="true"
-                            >
-                              {row.player.name?.slice(0, 2).toUpperCase()}
-                            </div>
-                          )}
+                        {photo ? (
+                          <img
+                            className={`h-8 w-8 rounded-lg object-cover ${
+                              expired ? PLAYER_EXPIRED_CLASS : ''
+                            } ${
+                              isLeader
+                                ? 'ring-2 ring-amber-400/50 shadow-[0_0_18px_rgba(251,191,36,0.2)]'
+                                : isSecond
+                                  ? 'ring-2 ring-slate-300/30'
+                                  : 'ring-1 ring-white/5'
+                            }`}
+                            src={photo}
+                            alt={`Foto de ${row.player.name}`}
+                          />
+                        ) : (
+                          <div
+                            className={`flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-[10px] font-semibold ${
+                              expired ? PLAYER_EXPIRED_CLASS : ''
+                            } ${
+                              isLeader
+                                ? 'ring-2 ring-amber-400/40'
+                                : isSecond
+                                  ? 'ring-2 ring-slate-300/30'
+                                  : ''
+                            }`}
+                            aria-hidden="true"
+                          >
+                            {row.player.name?.slice(0, 2).toUpperCase()}
+                          </div>
+                        )}
 
-                          {isLeader && (
-                            <span
-                              className="absolute -right-2 -top-3 text-base leading-none drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]"
-                              title={leaderTitle}
-                              aria-label={leaderTitle}
-                            >
-                              {leaderIcon}
-                            </span>
-                          )}
+                        {isLeader && (
+                          <span
+                            className="absolute -right-2 -top-3 text-base leading-none drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]"
+                            title={leaderTitle}
+                            aria-label={leaderTitle}
+                          >
+                            {leaderIcon}
+                          </span>
+                        )}
                       </div>
 
                       <div className="min-w-0">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedRow(row)}
-                          className={`max-w-full truncate text-left text-xs font-semibold underline decoration-transparent underline-offset-2 transition hover:decoration-current sm:text-sm ${
-                            isLeader ? 'text-amber-100' : isSecond ? 'text-slate-200' : 'text-slate-300'
-                          }`}
-                          title={row.player.name}
-                        >
-                          {row.player.name}
-                        </button>
+                        {canOpenPlayerModal ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedRow(row)}
+                            className={`max-w-full truncate text-left text-xs font-semibold underline decoration-transparent underline-offset-2 transition hover:decoration-current sm:text-sm ${
+                              isLeader
+                                ? 'text-amber-100'
+                                : isSecond
+                                  ? 'text-slate-200'
+                                  : 'text-slate-300'
+                            }`}
+                            title={row.player.name}
+                          >
+                            {row.player.name}
+                          </button>
+                        ) : (
+                          <span
+                            className={`block max-w-full truncate text-xs font-semibold sm:text-sm ${
+                              isLeader
+                                ? 'text-amber-100'
+                                : isSecond
+                                  ? 'text-slate-200'
+                                  : 'text-slate-300'
+                            }`}
+                            title={row.player.name}
+                          >
+                            {row.player.name}
+                          </span>
+                        )}
 
                         {row.team && (
-                          <p className="truncate text-[10px] text-slate-600">{row.team.name}</p>
+                          <p className="truncate text-[10px] text-slate-600">
+                            {row.team.name}
+                          </p>
                         )}
                       </div>
                     </div>
                   </td>
 
-                  {/* VALOR (goles o tarjetas, según valueKey) */}
+                  {/* VALOR */}
                   <td
                     className={`px-3 py-3 text-center text-sm ${
-                      isLeader ? 'font-black text-amber-300' : 'font-bold text-emerald-300'
+                      isLeader
+                        ? 'font-black text-amber-300'
+                        : 'font-bold text-emerald-300'
                     }`}
                   >
                     {row[valueKey]}
@@ -160,12 +202,15 @@ export default function ScorersTable({
         </table>
       </div>
 
-      <PlayerCardModal
-        row={selectedRow}
-        respectPaymentStatus={respectPaymentStatus}
-        blueCardEnabled={blueCardEnabled}
-        onClose={() => setSelectedRow(null)}
-      />
+      {/* La modal SOLO existe/se muestra para la tabla de goleadores */}
+      {canOpenPlayerModal && (
+        <PlayerCardModal
+          row={selectedRow}
+          respectPaymentStatus={respectPaymentStatus}
+          blueCardEnabled={blueCardEnabled}
+          onClose={() => setSelectedRow(null)}
+        />
+      )}
     </div>
   );
 }

@@ -287,14 +287,48 @@ function TeamLogo({
 |--------------------------------------------------------------------------
 */
 
-function LiveMatchCard({ match }) {
+function LiveMatchCard({
+  match,
+  accent = 'emerald',
+}) {
+  const isCyan = accent === 'cyan';
+
   if (!match) {
     return (
-      <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+      <div
+        className={`
+          rounded-xl border px-3 py-2.5
+          sm:rounded-2xl sm:px-4 sm:py-3
+          ${
+            isCyan
+              ? 'border-cyan-400/10 bg-cyan-400/[0.04]'
+              : 'border-white/[0.05] bg-white/[0.02]'
+          }
+        `}
+      >
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
+          <span
+            className={`
+              h-1.5 w-1.5 rounded-full
+              ${
+                isCyan
+                  ? 'bg-cyan-500/60'
+                  : 'bg-slate-600'
+              }
+            `}
+          />
 
-          <p className="text-[8px] font-black uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
+          <p
+            className={`
+              text-[8px] font-black uppercase tracking-[0.16em]
+              sm:text-[9px]
+              ${
+                isCyan
+                  ? 'text-cyan-500/70'
+                  : 'text-slate-600'
+              }
+            `}
+          >
             Partido
           </p>
         </div>
@@ -333,34 +367,75 @@ function LiveMatchCard({ match }) {
     null;
 
   return (
-    <div className="rounded-xl border border-red-400/10 bg-gradient-to-br from-red-500/[0.07] via-white/[0.02] to-white/[0.01] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
-      {/* Estado */}
-
+    <div
+      className={`
+        rounded-xl border px-3 py-2.5
+        sm:rounded-2xl sm:px-4 sm:py-3
+        ${
+          isCyan
+            ? 'border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-white/[0.02] to-white/[0.01]'
+            : 'border-red-400/10 bg-gradient-to-br from-red-500/[0.07] via-white/[0.02] to-white/[0.01]'
+        }
+      `}
+    >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-60" />
+            <span
+              className={`
+                absolute inline-flex h-full w-full animate-ping rounded-full opacity-60
+                ${
+                  isCyan
+                    ? 'bg-cyan-400'
+                    : 'bg-red-400'
+                }
+              `}
+            />
 
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-red-400" />
+            <span
+              className={`
+                relative inline-flex h-2 w-2 rounded-full
+                ${
+                  isCyan
+                    ? 'bg-cyan-400'
+                    : 'bg-red-400'
+                }
+              `}
+            />
           </span>
 
-          <p className="text-[8px] font-black uppercase tracking-[0.16em] text-red-300 sm:text-[9px]">
+          <p
+            className={`
+              text-[8px] font-black uppercase tracking-[0.16em]
+              sm:text-[9px]
+              ${
+                isCyan
+                  ? 'text-cyan-300'
+                  : 'text-red-300'
+              }
+            `}
+          >
             En vivo
           </p>
         </div>
 
         {minute !== null && (
-          <span className="text-[9px] font-bold text-red-300">
+          <span
+            className={`
+              text-[9px] font-bold
+              ${
+                isCyan
+                  ? 'text-cyan-300'
+                  : 'text-red-300'
+              }
+            `}
+          >
             {minute}'
           </span>
         )}
       </div>
 
-      {/* Partido */}
-
       <div className="mt-2.5 flex items-center gap-1.5">
-        {/* Local */}
-
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             {homeLogo ? (
@@ -381,8 +456,6 @@ function LiveMatchCard({ match }) {
           </div>
         </div>
 
-        {/* Marcador */}
-
         <div className="shrink-0 rounded-lg border border-white/[0.08] bg-black/30 px-2 py-1">
           <span className="text-sm font-black tracking-wider text-white">
             {homeScore}
@@ -396,8 +469,6 @@ function LiveMatchCard({ match }) {
             {awayScore}
           </span>
         </div>
-
-        {/* Visitante */}
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-end gap-1.5">
@@ -586,6 +657,7 @@ function TournamentCard({
   onSelectTeam,
   isExpanded,
   onToggle,
+  colorVariant = 'emerald',
 }) {
   const standings = tournament.standings ?? [];
 
@@ -629,44 +701,140 @@ function TournamentCard({
   const modeLabel =
     modeLabels[mode] ?? 'Competición';
 
+  const isCyan = colorVariant === 'cyan';
+
+  const colors = isCyan
+    ? {
+        border:
+          'border-cyan-400/25 sm:border-cyan-400/15',
+        borderHover:
+          'hover:border-cyan-400/50',
+        bg: 'bg-[#07141a]',
+        shadow:
+          'shadow-[0_20px_70px_rgba(6,182,212,0.10)]',
+        expanded:
+          'border-cyan-400/45 shadow-[0_25px_90px_rgba(6,182,212,0.16)]',
+        glow:
+          'bg-cyan-400/[0.10] group-hover:bg-cyan-400/[0.17]',
+        glowBottom:
+          'bg-blue-400/[0.06]',
+        line:
+          'via-cyan-400/80',
+        badge:
+          'border-cyan-400/25 bg-cyan-400/[0.10] text-cyan-300',
+        pulse:
+          'bg-cyan-400 shadow-[0_0_8px_#22d3ee]',
+        logoGlow:
+          'bg-cyan-400/15',
+        logoBorder:
+          'border-cyan-400/20',
+        topStatus:
+          'bg-cyan-400',
+        topStatusDot:
+          'bg-slate-950',
+        section:
+          'text-cyan-400',
+        button:
+          'border-cyan-400/30 bg-cyan-400/[0.10] text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18]',
+        closedButton:
+          'from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400',
+      }
+    : {
+        border:
+          'border-emerald-400/25 sm:border-white/[0.07]',
+        borderHover:
+          'hover:border-emerald-400/30',
+        bg: 'bg-[#0a0f18]',
+        shadow:
+          'shadow-[0_20px_70px_rgba(0,0,0,0.25)]',
+        expanded:
+          'border-emerald-400/40 shadow-[0_25px_90px_rgba(16,185,129,0.13)]',
+        glow:
+          'bg-emerald-400/[0.08] group-hover:bg-emerald-400/[0.13]',
+        glowBottom:
+          'bg-cyan-400/[0.04]',
+        line:
+          'via-emerald-400/70',
+        badge:
+          'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-300',
+        pulse:
+          'bg-emerald-400 shadow-[0_0_8px_#34d399]',
+        logoGlow:
+          'bg-emerald-400/10',
+        logoBorder:
+          'border-white/[0.09]',
+        topStatus:
+          'bg-emerald-400',
+        topStatusDot:
+          'bg-slate-950',
+        section:
+          'text-emerald-400',
+        button:
+          'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-400/15',
+        closedButton:
+          'from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400',
+      };
+
   return (
     <article
       className={`
-        group relative w-full min-w-0 overflow-hidden rounded-[1.75rem]
-        border bg-[#0a0f18]
-        shadow-[0_20px_70px_rgba(0,0,0,0.25)]
+        group relative w-full min-w-0 overflow-hidden
+        rounded-[1.75rem]
+        border
+        ${colors.border}
+        ${colors.bg}
+        ${colors.shadow}
         transition-all duration-500
         sm:rounded-[2rem]
+        sm:${colors.border}
         ${
           isExpanded
-            ? 'border-emerald-400/25 shadow-[0_25px_90px_rgba(16,185,129,0.10)]'
-            : 'border-white/[0.07] hover:-translate-y-1 hover:border-emerald-400/20 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]'
+            ? colors.expanded
+            : `${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]`
         }
       `}
     >
-      {/* Glows */}
+      {/* ============================================================
+          GLOWS DE LA TARJETA
+      ============================================================ */}
 
-      <div className="pointer-events-none absolute -right-24 -top-28 h-72 w-72 rounded-full bg-emerald-400/[0.08] blur-3xl transition duration-700 group-hover:bg-emerald-400/[0.12]" />
+      <div
+        className={`
+          pointer-events-none absolute -right-24 -top-28
+          h-72 w-72 rounded-full blur-3xl
+          transition duration-700
+          ${colors.glow}
+        `}
+      />
 
-      <div className="pointer-events-none absolute -bottom-32 -left-20 h-64 w-64 rounded-full bg-cyan-400/[0.04] blur-3xl" />
+      <div
+        className={`
+          pointer-events-none absolute -bottom-32 -left-20
+          h-64 w-64 rounded-full blur-3xl
+          ${colors.glowBottom}
+        `}
+      />
 
       {/* Línea superior */}
 
       <div
         className={`
-          absolute inset-x-0 top-0 h-px
+          absolute inset-x-0 top-0 h-[2px]
           bg-gradient-to-r from-transparent
-          via-emerald-400/60 to-transparent
+          ${colors.line}
+          to-transparent
           transition-opacity duration-500
           ${
             isExpanded
               ? 'opacity-100'
-              : 'opacity-50 group-hover:opacity-100'
+              : 'opacity-80 group-hover:opacity-100'
           }
         `}
       />
 
-      {/* Cabecera */}
+      {/* ============================================================
+          CABECERA
+      ============================================================ */}
 
       <button
         id={buttonId}
@@ -684,17 +852,32 @@ function TournamentCard({
               <div
                 className={`
                   absolute -inset-2 rounded-[1.25rem]
-                  bg-emerald-400/10 blur-xl
+                  blur-xl
                   transition duration-500
+                  ${colors.logoGlow}
                   ${
                     isExpanded
                       ? 'opacity-100'
-                      : 'opacity-0 group-hover:opacity-100'
+                      : 'opacity-60 group-hover:opacity-100'
                   }
                 `}
               />
 
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-[1.25rem] border border-white/[0.09] bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-2 shadow-2xl sm:h-20 sm:w-20 sm:rounded-[1.5rem] sm:p-2.5">
+              <div
+                className={`
+                  relative flex h-16 w-16
+                  items-center justify-center
+                  rounded-[1.25rem]
+                  border
+                  ${colors.logoBorder}
+                  bg-gradient-to-br
+                  from-slate-800 via-slate-900 to-slate-950
+                  p-2 shadow-2xl
+                  sm:h-20 sm:w-20
+                  sm:rounded-[1.5rem]
+                  sm:p-2.5
+                `}
+              >
                 {tournament.tournament.logo ? (
                   <img
                     className="h-full w-full rounded-xl object-cover"
@@ -708,8 +891,23 @@ function TournamentCard({
                 )}
               </div>
 
-              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#0a0f18] bg-emerald-400 sm:h-6 sm:w-6">
-                <span className="h-1.5 w-1.5 rounded-full bg-slate-950 sm:h-2 sm:w-2" />
+              <span
+                className={`
+                  absolute -bottom-1 -right-1
+                  flex h-5 w-5 items-center
+                  justify-center rounded-full
+                  border-2 border-[#07141a]
+                  sm:h-6 sm:w-6
+                  ${colors.topStatus}
+                `}
+              >
+                <span
+                  className={`
+                    h-1.5 w-1.5 rounded-full
+                    sm:h-2 sm:w-2
+                    ${colors.topStatusDot}
+                  `}
+                />
               </span>
             </div>
 
@@ -717,8 +915,23 @@ function TournamentCard({
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-300 sm:px-3 sm:text-[10px]">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+                <span
+                  className={`
+                    inline-flex items-center gap-1.5
+                    rounded-full border
+                    px-2.5 py-1
+                    text-[9px] font-bold uppercase
+                    tracking-[0.16em]
+                    sm:px-3 sm:text-[10px]
+                    ${colors.badge}
+                  `}
+                >
+                  <span
+                    className={`
+                      h-1.5 w-1.5 animate-pulse rounded-full
+                      ${colors.pulse}
+                    `}
+                  />
 
                   En vivo
                 </span>
@@ -750,7 +963,7 @@ function TournamentCard({
                 sm:h-10 sm:w-10
                 ${
                   isExpanded
-                    ? 'rotate-180 border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
+                    ? `rotate-180 ${colors.badge}`
                     : 'group-hover:border-white/[0.12] group-hover:text-white'
                 }
               `}
@@ -765,7 +978,7 @@ function TournamentCard({
           ============================================================ */}
 
           <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:grid-cols-4">
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Equipos
               </p>
@@ -775,7 +988,7 @@ function TournamentCard({
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Partidos
               </p>
@@ -785,7 +998,7 @@ function TournamentCard({
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.02] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Líder
               </p>
@@ -795,9 +1008,10 @@ function TournamentCard({
               </p>
             </div>
 
-            {/* PARTIDO EN VIVO */}
-
-            <LiveMatchCard match={liveMatch} />
+            <LiveMatchCard
+              match={liveMatch}
+              accent={isCyan ? 'cyan' : 'emerald'}
+            />
           </div>
         </div>
       </button>
@@ -828,7 +1042,9 @@ function TournamentCard({
 
             <div className="flex items-center justify-between bg-black/10 px-4 py-3 sm:px-6 sm:py-4">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-400">
+                <p
+                  className={`text-[9px] font-bold uppercase tracking-[0.18em] sm:text-[10px] ${colors.section}`}
+                >
                   Clasificación
                 </p>
 
@@ -878,7 +1094,17 @@ function TournamentCard({
                           🟦
                         </th>
 
-                        <th className="w-14 px-1.5 py-3 text-center text-emerald-400 sm:w-auto sm:px-3 sm:py-3.5">
+                        <th
+                          className={`
+                            w-14 px-1.5 py-3 text-center
+                            sm:w-auto sm:px-3 sm:py-3.5
+                            ${
+                              isCyan
+                                ? 'text-cyan-400'
+                                : 'text-emerald-400'
+                            }
+                          `}
+                        >
                           PTS
                         </th>
                       </tr>
@@ -1061,7 +1287,9 @@ function TournamentCard({
                                 ${
                                   isLeader
                                     ? 'font-black text-amber-300'
-                                    : 'font-black text-emerald-300'
+                                    : isCyan
+                                      ? 'font-black text-cyan-300'
+                                      : 'font-black text-emerald-300'
                                 }
                                 ${
                                   expired
@@ -1106,7 +1334,9 @@ function TournamentCard({
                           <div className="mb-2.5 flex items-center gap-3">
                             <span className="h-px flex-1 bg-white/[0.05]" />
 
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-400">
+                            <h3
+                              className={`text-[10px] font-black uppercase tracking-[0.18em] ${colors.section}`}
+                            >
                               Bombo {pot}
                             </h3>
 
@@ -1145,7 +1375,15 @@ function TournamentCard({
 
             <div className="border-t border-white/[0.05] bg-black/10 px-3 py-3 sm:px-5 sm:py-4">
               <Link
-                className="group/link flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.07] px-4 py-2.5 text-center text-xs font-black text-emerald-300 transition-all duration-300 hover:border-emerald-400/40 hover:bg-emerald-400/15 hover:text-emerald-200 sm:py-3 sm:text-sm"
+                className={`
+                  group/link flex min-h-11 w-full
+                  items-center justify-center gap-2
+                  rounded-xl border px-4 py-2.5
+                  text-center text-xs font-black
+                  transition-all duration-300
+                  sm:py-3 sm:text-sm
+                  ${colors.button}
+                `}
                 to={`/tournaments/${tournament.tournament.id}`}
               >
                 Abrir competición completa
@@ -1164,7 +1402,19 @@ function TournamentCard({
       {!isExpanded && (
         <div className="relative border-t border-white/[0.05] px-3 py-3 sm:px-5 sm:py-4">
           <Link
-            className="group/link flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-emerald-500 px-4 py-2.5 text-center text-xs font-black text-slate-950 shadow-lg shadow-emerald-500/10 transition-all duration-300 hover:from-emerald-300 hover:to-emerald-400 hover:shadow-emerald-500/20 sm:py-3 sm:text-sm"
+            className={`
+              group/link flex min-h-11 w-full
+              items-center justify-center gap-2
+              rounded-xl
+              bg-gradient-to-r
+              ${colors.closedButton}
+              px-4 py-2.5
+              text-center text-xs font-black
+              text-slate-950
+              shadow-lg
+              transition-all duration-300
+              sm:py-3 sm:text-sm
+            `}
             to={`/tournaments/${tournament.tournament.id}`}
           >
             Ver torneo y próximos partidos
@@ -1244,11 +1494,8 @@ export default function HomePage() {
 
   /*
   |--------------------------------------------------------------------------
-  | Actualización automática de partidos
+  | Actualización automática
   |--------------------------------------------------------------------------
-  |
-  | Mientras la página esté abierta, actualizamos los datos cada 30 segundos.
-  |
   */
 
   useEffect(() => {
@@ -1434,9 +1681,9 @@ export default function HomePage() {
               </p>
             </div>
           ) : (
-            <div className="flex w-full flex-col gap-4 sm:gap-5 lg:gap-6">
+            <div className="flex w-full flex-col gap-5 sm:gap-5 lg:gap-6">
               {filteredTournaments.map(
-                (tournament) => {
+                (tournament, index) => {
                   const tournamentId =
                     tournament.tournament.id;
 
@@ -1444,6 +1691,11 @@ export default function HomePage() {
                     <TournamentCard
                       key={tournamentId}
                       tournament={tournament}
+                      colorVariant={
+                        index % 2 === 0
+                          ? 'emerald'
+                          : 'cyan'
+                      }
                       isExpanded={
                         expandedTournamentId ===
                         tournamentId
