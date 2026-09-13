@@ -7,11 +7,11 @@ export default defineConfig({
     allowedHosts: ['v7n460l4-5173.use.devtunnels.ms'],
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'http://localhost:3000',
+        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         changeOrigin: true,
       },
     },

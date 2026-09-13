@@ -903,7 +903,7 @@ export default function PlayerCardModal({
               <div
                 className="
                   absolute
-                  left-[90px]
+                  left-[85px]
                   top-6
                   z-10
                 "
