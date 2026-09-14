@@ -1,4 +1,4 @@
-import { addEvent, changeStatus, createMatch, deleteEvent, generateFixtures, listMatches, registerResult, updateLiveScore, updateMatch } from '../services/match-service.js';
+import { addEvent, changeStatus, createMatch, deleteEvent, deleteFixtures, generateFixtures, listMatches, registerResult, updateLiveScore, updateMatch } from '../services/match-service.js';
 
 export async function listController(request, response, next) {
   try {
@@ -20,6 +20,15 @@ export async function generateFixturesController(request, response, next) {
   try {
     const result = await generateFixtures(request.tournamentId, request.validatedBody ?? {});
     return response.status(201).json({ success: true, data: result });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function deleteFixturesController(request, response, next) {
+  try {
+    const result = await deleteFixtures(request.tournamentId, request.fixturesGroupId ?? null);
+    return response.json({ success: true, data: result });
   } catch (error) {
     return next(error);
   }

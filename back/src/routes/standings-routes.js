@@ -5,6 +5,7 @@ import {
   getCardFinesController,
   getCardsController,
   getController,
+  getGoalkeepersController,
   getScorersController,
   setCardFinePaidController,
 } from '../controllers/standings-controller.js';
@@ -17,6 +18,7 @@ const router = Router();
 router.get('/:id/standings', authenticate, parseTournamentId, requireTournamentAccess, getController);
 router.get('/:id/standings/by-pot', authenticate, parseTournamentId, requireTournamentAccess, getByPotController);
 router.get('/:id/scorers', authenticate, parseTournamentId, requireTournamentAccess, getScorersController);
+router.get('/:id/goalkeepers', authenticate, parseTournamentId, requireTournamentAccess, getGoalkeepersController);
 router.get('/:id/cards', authenticate, parseTournamentId, requireTournamentAccess, getCardsController);
 router.get('/:id/card-fines', authenticate, parseTournamentId, requireTournamentAccess, getCardFinesController);
 router.patch('/:id/card-fines/:playerId', authenticate, parseTournamentId, requireTournamentAccess, setCardFinePaidController);

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
+import ConfirmActionModal from '../components/ConfirmActionModal.jsx';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
 import StandingsTable from '../components/StandingsTable.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -84,6 +85,9 @@ export default function GroupsPage() {
   const [groupCount, setGroupCount] = useState(2);
   const [pots, setPots] = useState({});
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isConfirmingDraw, setIsConfirmingDraw] = useState(false);
+  const [isConfirmingReset, setIsConfirmingReset] = useState(false);
+  const [isResettingGroups, setIsResettingGroups] = useState(false);
 
   useEffect(() => {
     api
@@ -148,6 +152,7 @@ export default function GroupsPage() {
       setPotStandings(potStandingsRes.data.data.pots);
 
       notify({ type: 'success', title: 'Sorteo realizado', message: 'Los grupos se generaron correctamente.' });
+      setIsConfirmingDraw(false);
     } catch (error) {
       notify(getApiErrorDetails(error));
     } finally {
@@ -180,6 +185,21 @@ export default function GroupsPage() {
       title: 'Bombos generados',
       message: 'Los equipos fueron distribuidos al azar. Ahora puedes sortear los grupos.',
     });
+  }
+
+  async function resetGroups() {
+    setIsResettingGroups(true);
+    try {
+      await api.delete(`/tournaments/${selectedTournamentId}/groups`);
+      setGroups([]);
+      setPotStandings([]);
+      setIsConfirmingReset(false);
+      notify({ type: 'success', title: 'Bombos eliminados', message: 'Puedes armar un nuevo sorteo para este torneo.' });
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsResettingGroups(false);
+    }
   }
 
   async function generateFixtures(groupId) {
@@ -278,7 +298,7 @@ export default function GroupsPage() {
                     className="min-h-10 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     disabled={isDrawing || teams.length < 2}
-                    onClick={runDraw}
+                    onClick={() => setIsConfirmingDraw(true)}
                   >
                     {isDrawing ? 'Sorteando…' : 'Sortear grupos'}
                   </button>
@@ -288,6 +308,26 @@ export default function GroupsPage() {
                 </p>
               </div>
             )}
+
+            <ConfirmActionModal
+              isOpen={isConfirmingDraw}
+              title="¿Sortear los grupos?"
+              message="Se reemplazarán los bombos y grupos existentes de este torneo. Si algún grupo ya tiene partidos pendientes, el sorteo no se podrá completar hasta que los resuelvas o canceles."
+              confirmLabel="Sí, sortear"
+              isLoading={isDrawing}
+              onCancel={() => setIsConfirmingDraw(false)}
+              onConfirm={runDraw}
+            />
+
+            <ConfirmActionModal
+              isOpen={isConfirmingReset}
+              title="¿Eliminar los bombos?"
+              message="Se eliminarán los grupos actuales de este torneo. Solo se puede hacer si ningún partido de esos grupos está pendiente."
+              confirmLabel="Sí, eliminar"
+              isLoading={isResettingGroups}
+              onCancel={() => setIsConfirmingReset(false)}
+              onConfirm={resetGroups}
+            />
 
             {potStandings.length > 0 && (
               <div className="mt-8">
@@ -309,7 +349,19 @@ export default function GroupsPage() {
               </div>
             )}
 
-            <div className="mt-8 grid gap-4 md:grid-cols-2">
+            {isAdmin && groups.length > 0 && (
+              <div className="mt-6 flex justify-end">
+                <button
+                  className="rounded-lg border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] font-semibold text-red-300 hover:bg-red-400/[0.1]"
+                  type="button"
+                  onClick={() => setIsConfirmingReset(true)}
+                >
+                  Eliminar bombos
+                </button>
+              </div>
+            )}
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
               {groups.map((group) => (
                 <div key={group.id} className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1018]/90">
                   <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">

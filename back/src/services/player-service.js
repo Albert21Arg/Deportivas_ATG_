@@ -5,9 +5,21 @@ import { publish } from './realtime-service.js';
 function id(value) { const parsed = Number(value); if (!Number.isInteger(parsed) || parsed <= 0) throw new HttpError(400, 'Identificador no válido'); return parsed; }
 function withAge(player) { const now = new Date(); const birth = new Date(player.birthDate); let age = now.getFullYear() - birth.getFullYear(); const beforeBirthday = now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate()); return { ...player, age: age - Number(beforeBirthday) }; }
 async function assertTeam(tournamentId, teamId) { if (!await repository.findTeamInTournament(id(teamId), id(tournamentId))) throw new HttpError(404, 'El equipo no pertenece a este torneo'); }
-export async function listPlayers(tournamentId, teamId) { await assertTeam(tournamentId, teamId); return (await repository.findForTeam(id(teamId))).map(({ player }) => withAge(player)); }
+export async function listPlayers(tournamentId, teamId) { await assertTeam(tournamentId, teamId); return (await repository.findForTeam(id(teamId))).map(({ player, isGoalkeeper }) => withAge({ ...player, isGoalkeeper })); }
 export async function createPlayer(tournamentId, teamId, data) { await assertTeam(tournamentId, teamId); const result = await repository.createAndAssign(data, id(teamId)); if (result.conflict) throw new HttpError(409, `El jugador ya pertenece al equipo ${result.conflict}`); publish(id(tournamentId), { type: 'player.created' }); return withAge(result.player); }
 export async function updatePlayer(tournamentId, teamId, playerId, data) { await assertTeam(tournamentId, teamId); const player = await repository.findById(id(playerId)); if (!player) throw new HttpError(404, 'Jugador no encontrado'); const updated = await repository.update(player.id, data); publish(id(tournamentId), { type: 'player.updated' }); return withAge(updated); }
+
+// Un jugador es "el arquero" de un equipo específico (vive en la relación
+// PlayerTeam, no en Player): un mismo jugador podría estar en más de un
+// equipo, y cada equipo tiene como máximo un arquero a la vez.
+export async function setGoalkeeper(tournamentId, teamId, playerId, isGoalkeeper) {
+  await assertTeam(tournamentId, teamId);
+  const assignment = await repository.findPlayerTeam(id(playerId), id(teamId));
+  if (!assignment) throw new HttpError(404, 'El jugador no pertenece a este equipo');
+  const { player, isGoalkeeper: updatedFlag } = await repository.setGoalkeeper(id(playerId), id(teamId), Boolean(isGoalkeeper));
+  publish(id(tournamentId), { type: 'player.goalkeeper_updated' });
+  return withAge({ ...player, isGoalkeeper: updatedFlag });
+}
 
 // Multa por tarjetas: aparte del pago individual de la foto, y separada por
 // tipo (amarilla/roja/azul) — pagar las amarillas no cubre las rojas. Cada

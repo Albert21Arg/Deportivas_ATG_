@@ -5,19 +5,20 @@ export default defineConfig({
   plugins: [react()],
 
   server: {
-    allowedHosts: ['v7n460l4-5173.use.devtunnels.ms'],
+    host: 'localhost',
+    port: 5173,
 
     proxy: {
       '/api': {
-        target: 'https://v7n460l4-3000.use.devtunnels.ms',
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
 
       '/uploads': {
-        target: 'https://v7n460l4-3000.use.devtunnels.ms',
+        target: 'http://localhost:3000',
         changeOrigin: true,
-        secure: true,
+        secure: false,
       },
     },
   },

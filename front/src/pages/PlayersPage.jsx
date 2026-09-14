@@ -47,6 +47,7 @@ export default function PlayersPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [playerToDisable, setPlayerToDisable] = useState(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [isTogglingGoalkeeper, setIsTogglingGoalkeeper] = useState(null);
 
   /*
   |--------------------------------------------------------------------------
@@ -202,6 +203,37 @@ export default function PlayersPage() {
       notify(getApiErrorDetails(error));
     } finally {
       setIsChangingStatus(false);
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Marcar/quitar arquero (uno solo por equipo)
+  |--------------------------------------------------------------------------
+  */
+
+  async function toggleGoalkeeper(player) {
+    setIsTogglingGoalkeeper(player.id);
+
+    try {
+      await api.patch(
+        `/tournaments/${tournamentId}/teams/${teamId}/players/${player.id}/goalkeeper`,
+        { isGoalkeeper: !player.isGoalkeeper }
+      );
+
+      notify({
+        type: 'success',
+        title: player.isGoalkeeper ? 'Arquero quitado' : 'Arquero asignado',
+        message: player.isGoalkeeper
+          ? `${player.name} ya no es el arquero del equipo.`
+          : `${player.name} ahora es el arquero del equipo.`,
+      });
+
+      loadPlayers();
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsTogglingGoalkeeper(null);
     }
   }
 
@@ -695,6 +727,15 @@ export default function PlayersPage() {
                                 Foto vencida
                               </span>
                             )}
+
+                            {player.isGoalkeeper && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-full border border-cyan-400/15 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan-300"
+                                title="Arquero del equipo"
+                              >
+                                🧤 Arquero
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -743,6 +784,23 @@ export default function PlayersPage() {
                         {isActive
                           ? 'Inhabilitar'
                           : 'Habilitar'}
+                      </button>
+
+                      <button
+                        className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                          player.isGoalkeeper
+                            ? 'border-cyan-400/30 bg-cyan-400/[0.08] text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.14]'
+                            : 'border-slate-700 bg-slate-950/40 text-slate-400 hover:border-cyan-400/30 hover:bg-cyan-400/[0.04] hover:text-cyan-300'
+                        }`}
+                        type="button"
+                        disabled={isTogglingGoalkeeper === player.id}
+                        onClick={() => toggleGoalkeeper(player)}
+                      >
+                        {isTogglingGoalkeeper === player.id
+                          ? 'Guardando…'
+                          : player.isGoalkeeper
+                            ? '🧤 Quitar arquero'
+                            : '🧤 Marcar como arquero'}
                       </button>
                     </div>
                   </article>

@@ -5,6 +5,7 @@ import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
+import GoalkeepersTable from '../components/GoalkeepersTable.jsx';
 import ScorersTable from '../components/ScorersTable.jsx';
 
 export default function GoleadoresPage() {
@@ -16,6 +17,7 @@ export default function GoleadoresPage() {
     searchParams.get('tournamentId') ?? ''
   );
   const [scorers, setScorers] = useState([]);
+  const [goalkeepers, setGoalkeepers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const isTournamentLocked = Boolean(searchParams.get('tournamentId'));
@@ -47,6 +49,7 @@ export default function GoleadoresPage() {
   useEffect(() => {
     if (!selectedTournamentId) {
       setScorers([]);
+      setGoalkeepers([]);
       return;
     }
 
@@ -54,11 +57,13 @@ export default function GoleadoresPage() {
       setIsLoading(true);
 
       try {
-        const { data } = await api.get(
-          `/tournaments/${selectedTournamentId}/scorers`
-        );
+        const [scorersRes, goalkeepersRes] = await Promise.all([
+          api.get(`/tournaments/${selectedTournamentId}/scorers`),
+          api.get(`/tournaments/${selectedTournamentId}/goalkeepers`),
+        ]);
 
-        setScorers(data.data.scorers);
+        setScorers(scorersRes.data.data.scorers);
+        setGoalkeepers(goalkeepersRes.data.data.goalkeepers);
       } catch (error) {
         notify(getApiErrorDetails(error));
       } finally {
@@ -144,6 +149,31 @@ export default function GoleadoresPage() {
               blueCardEnabled={Boolean(selectedTournament?.blueCardEnabled)}
             />
           )}
+        </div>
+
+        {/* ==================================================================
+            VALLA MENOS VENCIDA
+        ================================================================== */}
+
+        <div className="mt-8">
+          <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-white sm:text-xl">
+            Valla menos vencida
+          </h2>
+
+          <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
+            Arqueros designados por equipo, ordenados por menos goles recibidos por partido.
+          </p>
+
+          <div className="mt-4">
+            {isLoading ? (
+              <div className="flex min-h-[160px] flex-col items-center justify-center rounded-xl border border-slate-800 bg-slate-900 p-8 text-center sm:min-h-[200px] sm:rounded-2xl sm:p-12">
+                <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-700 border-t-cyan-400 sm:h-8 sm:w-8" />
+                <p className="mt-3 text-xs text-slate-500 sm:mt-4 sm:text-sm">Calculando valla menos vencida...</p>
+              </div>
+            ) : (
+              <GoalkeepersTable goalkeepers={goalkeepers} />
+            )}
+          </div>
         </div>
       </section>
     </main>

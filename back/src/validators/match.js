@@ -132,4 +132,14 @@ export function validateGenerateFixtures(request, _response, next) {
   }
 }
 
+export function parseFixturesScopeQuery(request, _response, next) {
+  try {
+    const raw = request.query.groupId;
+    request.fixturesGroupId = raw !== undefined && raw !== null && raw !== '' ? parseTeamId(raw, 'groupId') : null;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export function validateMatchEvent(request, _response, next) { try { const body = request.body ?? {}; const type = body.type; if (!['GOAL', 'OWN_GOAL', 'YELLOW_CARD', 'RED_CARD', 'BLUE_CARD'].includes(type)) throw new HttpError(422, 'Tipo de evento no válido'); const teamId = parseTeamId(body.teamId, 'teamId'); const playerId = body.playerId === undefined || body.playerId === '' ? null : parseTeamId(body.playerId, 'playerId'); if (!playerId) throw new HttpError(422, type === 'GOAL' ? 'Debes seleccionar un jugador o marcar autogol' : 'Debes seleccionar un jugador'); const minute = body.minute === undefined || body.minute === '' ? null : parseScore(body.minute, 'minute'); if (minute !== null && minute > 130) throw new HttpError(422, 'El minuto debe estar entre 0 y 130'); request.validatedBody = { type, teamId, playerId, minute }; return next(); } catch (error) { return next(error); } }

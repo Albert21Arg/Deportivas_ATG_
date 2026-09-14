@@ -114,7 +114,11 @@ export async function generateFixtures(tournamentId, options = {}) {
     ? await matchRepository.findGroupTeamIds(groupId, tournamentId)
     : await matchRepository.findTournamentTeamIds(tournamentId);
   if (teamIds.length < 2) throw new HttpError(422, 'Se necesitan al menos 2 equipos para generar el fixture');
-  if (await matchRepository.hasFixtureMatches(tournamentId, groupId)) {
+  // Si ya hay partidos de este alcance, solo se puede volver a generar
+  // cuando todos quedaron finalizados (p.ej. para armar la vuelta después
+  // de la ida). Si queda alguno pendiente, hay que borrarlo primero.
+  const existingStatuses = await matchRepository.findFixtureMatchStatuses(tournamentId, groupId);
+  if (existingStatuses.length && existingStatuses.some((match) => match.status !== 'FINISHED')) {
     throw new HttpError(409, 'Ya existen partidos generados para este alcance, elimínalos antes de volver a generar');
   }
   const rounds = buildRoundRobinRounds(teamIds);
@@ -129,6 +133,20 @@ export async function generateFixtures(tournamentId, options = {}) {
   const { count } = await matchRepository.createMany(matchesData);
   publish(tournamentId, { type: 'fixtures.generated' });
   return { created: count };
+}
+
+// Solo se puede borrar el fixture completo (para volver a generarlo con
+// otras fechas/equipos) si ningún partido de ese alcance arrancó todavía.
+export async function deleteFixtures(tournamentId, groupId = null) {
+  if (!await matchRepository.findTournament(tournamentId)) throw new HttpError(404, 'Torneo no encontrado');
+  const existingStatuses = await matchRepository.findFixtureMatchStatuses(tournamentId, groupId);
+  if (!existingStatuses.length) throw new HttpError(404, 'No hay partidos generados para este alcance');
+  if (existingStatuses.some((match) => ['STARTED', 'FINISHED'].includes(match.status))) {
+    throw new HttpError(409, 'No puedes eliminar el fixture: ya hay partidos iniciados o finalizados');
+  }
+  const { count } = await matchRepository.deleteFixtureMatches(tournamentId, groupId);
+  publish(tournamentId, { type: 'fixtures.deleted' });
+  return { deleted: count };
 }
 
 export async function createMatch(tournamentId, data) {

@@ -24,7 +24,20 @@ export async function createGroup(tournamentId, name) {
   return group;
 }
 
+// Borra todos los bombos/grupos del torneo sin volver a sortear (a
+// diferencia de drawGroups, que borra y crea de nuevo en el mismo paso).
+export async function resetGroups(tournamentId) {
+  if (await repository.hasPendingGroupMatches(tournamentId)) {
+    throw new HttpError(409, 'Finaliza (o cancela) los partidos de los grupos actuales antes de eliminarlos');
+  }
+  await repository.clearGroups(tournamentId);
+  publish(tournamentId, { type: 'group.reset' });
+}
+
 export async function deleteGroup(tournamentId, groupId) {
+  if (await repository.hasPendingMatchesForGroup(groupId)) {
+    throw new HttpError(409, 'Finaliza (o cancela) los partidos de este grupo antes de eliminarlo');
+  }
   const deleted = await repository.deleteGroup(groupId, tournamentId);
   if (!deleted) throw new HttpError(404, 'Grupo no encontrado');
   publish(tournamentId, { type: 'group.deleted' });
@@ -58,6 +71,13 @@ export async function drawGroups(tournamentId, { groupCount, pots }) {
     if (pots[potNumber].length !== groupCount) {
       throw new HttpError(422, `El bombo ${potNumber} debe tener exactamente ${groupCount} equipos para repartir uno por grupo`);
     }
+  }
+
+  // Sortear reemplaza los bombos/grupos existentes: si ya hay partidos
+  // pendientes generados a partir de ellos, hay que resolverlos (o
+  // cancelarlos) antes de rehacer el sorteo.
+  if (await repository.hasPendingGroupMatches(tournamentId)) {
+    throw new HttpError(409, 'Finaliza (o cancela) los partidos de los grupos actuales antes de repetir el sorteo');
   }
 
   await repository.clearGroups(tournamentId);

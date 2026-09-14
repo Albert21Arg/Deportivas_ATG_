@@ -45,12 +45,18 @@ export default function ScorersTable({
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/10">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[420px] text-left text-sm">
+        {/*
+          table-fixed + anchos fijos en Pos/valor: así el jugador es la
+          única columna que se ajusta (con truncate), la tabla siempre
+          cabe en el 100% del contenedor y nunca hace falta scroll
+          horizontal para ver la columna de la derecha (Goles/Tarjetas).
+        */}
+        <table className="w-full table-fixed text-left text-sm">
           <thead className="border-b border-slate-800 bg-slate-950">
             <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
-              <th className="w-16 px-3 py-3 text-center">Pos</th>
-              <th className="px-3 py-3 text-left">Jugador</th>
-              <th className="min-w-[70px] px-3 py-3 text-center">
+              <th className="w-10 px-1.5 py-3 text-center sm:w-16 sm:px-3">Pos</th>
+              <th className="px-2 py-3 text-left sm:px-3">Jugador</th>
+              <th className="w-12 px-1.5 py-3 text-center sm:w-16 sm:px-3">
                 {valueLabel}
               </th>
             </tr>
@@ -79,10 +85,10 @@ export default function ScorersTable({
                   }`}
                 >
                   {/* POSICIÓN */}
-                  <td className="px-3 py-3 text-center">
+                  <td className="px-1.5 py-3 text-center sm:px-3">
                     {isTopThree ? (
                       <span
-                        className={`mx-auto flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${
+                        className={`mx-auto flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold sm:h-7 sm:w-7 ${
                           row.position === 1
                             ? 'bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.35)]'
                             : row.position === 2
@@ -100,12 +106,12 @@ export default function ScorersTable({
                   </td>
 
                   {/* JUGADOR */}
-                  <td className="px-3 py-3">
-                    <div className="flex items-center gap-2.5">
+                  <td className="px-2 py-3 sm:px-3">
+                    <div className="flex items-center gap-2 sm:gap-2.5">
                       <div className="relative shrink-0">
                         {photo ? (
                           <img
-                            className={`h-8 w-8 rounded-lg object-cover ${
+                            className={`h-7 w-7 rounded-lg object-cover sm:h-8 sm:w-8 ${
                               expired ? PLAYER_EXPIRED_CLASS : ''
                             } ${
                               isLeader
@@ -119,7 +125,7 @@ export default function ScorersTable({
                           />
                         ) : (
                           <div
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg bg-slate-800 text-[10px] font-semibold ${
+                            className={`flex h-7 w-7 items-center justify-center rounded-lg bg-slate-800 text-[10px] font-semibold sm:h-8 sm:w-8 ${
                               expired ? PLAYER_EXPIRED_CLASS : ''
                             } ${
                               isLeader
@@ -187,7 +193,7 @@ export default function ScorersTable({
 
                   {/* VALOR */}
                   <td
-                    className={`px-3 py-3 text-center text-sm ${
+                    className={`px-1.5 py-3 text-center text-sm sm:px-3 ${
                       isLeader
                         ? 'font-black text-amber-300'
                         : 'font-bold text-emerald-300'

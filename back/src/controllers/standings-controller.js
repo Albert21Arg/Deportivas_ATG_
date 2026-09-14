@@ -1,4 +1,4 @@
-import { getCardFines, getStandings, getStandingsByPot, getTopCards, getTopScorers } from '../services/standings-service.js';
+import { getCardFines, getGoalkeepers, getStandings, getStandingsByPot, getTopCards, getTopScorers } from '../services/standings-service.js';
 import { setCardFinePaid } from '../services/player-service.js';
 
 export async function getController(request, response, next) {
@@ -24,6 +24,15 @@ export async function getScorersController(request, response, next) {
   try {
     const scorers = await getTopScorers(request.tournamentId);
     return response.json({ success: true, data: { scorers } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function getGoalkeepersController(request, response, next) {
+  try {
+    const goalkeepers = await getGoalkeepers(request.tournamentId);
+    return response.json({ success: true, data: { goalkeepers } });
   } catch (error) {
     return next(error);
   }

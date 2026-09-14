@@ -100,6 +100,7 @@ export default function BracketPage() {
   const [size, setSize] = useState(4);
   const [seeds, setSeeds] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [isCreateConfirmOpen, setIsCreateConfirmOpen] = useState(false);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
@@ -156,17 +157,24 @@ export default function BracketPage() {
     }));
   }, [ties]);
 
-  async function createBracket() {
+  function requestCreateBracket() {
     const teamIds = seeds.filter(Boolean).map(Number);
     if (teamIds.length !== Number(size) || new Set(teamIds).size !== teamIds.length) {
       notify({ type: 'error', title: 'Llave incompleta', message: 'Selecciona un equipo distinto para cada posición.' });
       return;
     }
 
+    setIsCreateConfirmOpen(true);
+  }
+
+  async function createBracket() {
+    const teamIds = seeds.filter(Boolean).map(Number);
+
     setIsCreating(true);
     try {
       const { data } = await api.post(`/tournaments/${selectedTournamentId}/bracket`, { teamIds });
       setTies(data.data.ties);
+      setIsCreateConfirmOpen(false);
       notify({ type: 'success', title: 'Llave creada', message: 'La llave se generó correctamente.' });
     } catch (error) {
       notify(getApiErrorDetails(error));
@@ -336,7 +344,7 @@ export default function BracketPage() {
                   className="mt-4 min-h-10 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                   type="button"
                   disabled={isCreating}
-                  onClick={createBracket}
+                  onClick={requestCreateBracket}
                 >
                   {isCreating ? 'Creando…' : 'Crear llave'}
                 </button>
@@ -376,6 +384,16 @@ export default function BracketPage() {
           </>
         )}
       </section>
+
+      <ConfirmActionModal
+        isOpen={isCreateConfirmOpen}
+        title="¿Crear la llave?"
+        message="Se generarán los cruces y los partidos de la primera ronda con los equipos y el orden que elegiste."
+        confirmLabel="Sí, crear"
+        isLoading={isCreating}
+        onCancel={() => setIsCreateConfirmOpen(false)}
+        onConfirm={createBracket}
+      />
 
       <ConfirmActionModal
         isOpen={isResetConfirmOpen}

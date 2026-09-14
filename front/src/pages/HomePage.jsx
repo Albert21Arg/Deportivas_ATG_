@@ -16,9 +16,9 @@ import PublicNavbar from '../components/PublicNavbar.jsx';
 import StandingsTable from '../components/StandingsTable.jsx';
 
 const formStyles = {
-  G: 'bg-emerald-500 text-slate-950',
-  E: 'bg-amber-400 text-slate-950',
-  P: 'bg-red-500 text-white',
+  G: 'bg-emerald-500 text-slate-950 dark:text-slate-950',
+  E: 'bg-amber-400 text-slate-950 dark:text-slate-950',
+  P: 'bg-red-500 text-white dark:text-white',
 };
 
 /*
@@ -74,11 +74,17 @@ function isLiveMatch(match) {
 }
 
 function getMatchesFromTournament(tournament) {
+  // `upcomingMatches` es el campo real que devuelve /public/tournaments/:id
+  // (incluye SCHEDULED, STARTED y POSTPONED, de todas las fases: liga,
+  // grupos y llaves). Los demás nombres son variantes defensivas por si el
+  // shape cambia, pero hoy ninguno existe en la respuesta real.
   const possibleSources = [
+    tournament?.upcomingMatches,
     tournament?.liveMatches,
     tournament?.matches,
     tournament?.games,
     tournament?.fixtures,
+    tournament?.tournament?.upcomingMatches,
     tournament?.tournament?.liveMatches,
     tournament?.tournament?.matches,
     tournament?.tournament?.games,
@@ -302,7 +308,7 @@ function LiveMatchCard({
           ${
             isCyan
               ? 'border-cyan-400/10 bg-cyan-400/[0.04]'
-              : 'border-white/[0.05] bg-white/[0.02]'
+              : 'border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.02]'
           }
         `}
       >
@@ -373,8 +379,8 @@ function LiveMatchCard({
         sm:rounded-2xl sm:px-4 sm:py-3
         ${
           isCyan
-            ? 'border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-white/[0.02] to-white/[0.01]'
-            : 'border-red-400/10 bg-gradient-to-br from-red-500/[0.07] via-white/[0.02] to-white/[0.01]'
+            ? 'border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-slate-900/[0.02] to-slate-900/[0.01] dark:via-white/[0.02] dark:to-white/[0.01]'
+            : 'border-red-400/10 bg-gradient-to-br from-red-500/[0.07] via-slate-900/[0.02] to-slate-900/[0.01] dark:via-white/[0.02] dark:to-white/[0.01]'
         }
       `}
     >
@@ -445,19 +451,19 @@ function LiveMatchCard({
                 alt=""
               />
             ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/[0.05] text-[8px] sm:h-7 sm:w-7">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[8px] dark:bg-white/[0.05] sm:h-7 sm:w-7">
                 ⚽
               </div>
             )}
 
-            <span className="truncate text-[9px] font-bold text-white sm:text-[10px]">
+            <span className="truncate text-[9px] font-bold text-slate-900 dark:text-white sm:text-[10px]">
               {homeName}
             </span>
           </div>
         </div>
 
-        <div className="shrink-0 rounded-lg border border-white/[0.08] bg-black/30 px-2 py-1">
-          <span className="text-sm font-black tracking-wider text-white">
+        <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 dark:border-white/[0.08] dark:bg-black/30">
+          <span className="text-sm font-black tracking-wider text-slate-900 dark:text-white">
             {homeScore}
           </span>
 
@@ -465,14 +471,14 @@ function LiveMatchCard({
             :
           </span>
 
-          <span className="text-sm font-black tracking-wider text-white">
+          <span className="text-sm font-black tracking-wider text-slate-900 dark:text-white">
             {awayScore}
           </span>
         </div>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-end gap-1.5">
-            <span className="truncate text-right text-[9px] font-bold text-white sm:text-[10px]">
+            <span className="truncate text-right text-[9px] font-bold text-slate-900 dark:text-white sm:text-[10px]">
               {awayName}
             </span>
 
@@ -483,7 +489,7 @@ function LiveMatchCard({
                 alt=""
               />
             ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/[0.05] text-[8px] sm:h-7 sm:w-7">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[8px] dark:bg-white/[0.05] sm:h-7 sm:w-7">
                 ⚽
               </div>
             )}
@@ -513,7 +519,7 @@ function TeamModal({ selection, onClose }) {
       onMouseDown={onClose}
     >
       <section
-        className="relative max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-white/[0.08] bg-[#090e17] shadow-2xl shadow-black/60 sm:max-h-[92vh]"
+        className="relative max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-black/10 dark:border-white/[0.08] dark:bg-[#090e17] dark:shadow-black/60 sm:max-h-[92vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-modal-title"
@@ -525,7 +531,7 @@ function TeamModal({ selection, onClose }) {
 
         <div className="relative flex justify-end px-3 pt-3 sm:px-4 sm:pt-4">
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.03] text-xl text-slate-400 transition hover:bg-white/[0.08] hover:text-white"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xl text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-slate-400 dark:hover:bg-white/[0.08] dark:hover:text-white"
             type="button"
             onClick={onClose}
             aria-label="Cerrar detalle"
@@ -538,7 +544,7 @@ function TeamModal({ selection, onClose }) {
           <div className="relative mx-auto mt-2 w-fit">
             <div className="absolute inset-0 rounded-full bg-emerald-400/10 blur-2xl" />
 
-            <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] border border-white/[0.08] bg-gradient-to-br from-slate-800 to-slate-950 shadow-2xl sm:h-32 sm:w-32">
+            <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 shadow-2xl dark:border-white/[0.08] dark:from-slate-800 dark:to-slate-950 sm:h-32 sm:w-32">
               <TeamLogo
                 team={row.team}
                 size="h-20 w-20 sm:h-24 sm:w-24"
@@ -563,42 +569,42 @@ function TeamModal({ selection, onClose }) {
             <h2
               className={`mt-3 text-2xl font-black tracking-tight sm:text-3xl ${
                 isLeader
-                  ? 'text-amber-100'
-                  : 'text-white'
+                  ? 'text-amber-600 dark:text-amber-100'
+                  : 'text-slate-900 dark:text-white'
               }`}
               id="team-modal-title"
             >
               {row.team.name}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {row.points} puntos en la competición
             </p>
           </div>
 
-          <div className="mt-7 grid grid-cols-3 overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.025]">
-            <div className="border-r border-white/[0.06] px-3 py-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+          <div className="mt-7 grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.06] dark:bg-white/[0.025]">
+            <div className="border-r border-slate-200 px-3 py-4 dark:border-white/[0.06]">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-500">
                 PJ
               </p>
 
-              <p className="mt-1 text-xl font-black text-white">
+              <p className="mt-1 text-xl font-black text-slate-900 dark:text-white">
                 {row.played}
               </p>
             </div>
 
-            <div className="border-r border-white/[0.06] px-3 py-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="border-r border-slate-200 px-3 py-4 dark:border-white/[0.06]">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-500">
                 DG
               </p>
 
               <p
                 className={`mt-1 text-xl font-black ${
                   row.goalDifference > 0
-                    ? 'text-emerald-400'
+                    ? 'text-emerald-500 dark:text-emerald-400'
                     : row.goalDifference < 0
-                      ? 'text-red-400'
-                      : 'text-white'
+                      ? 'text-red-500 dark:text-red-400'
+                      : 'text-slate-900 dark:text-white'
                 }`}
               >
                 {row.goalDifference > 0
@@ -608,18 +614,18 @@ function TeamModal({ selection, onClose }) {
             </div>
 
             <div className="px-3 py-4">
-              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-500">
                 PTS
               </p>
 
-              <p className="mt-1 text-xl font-black text-emerald-300">
+              <p className="mt-1 text-xl font-black text-emerald-600 dark:text-emerald-300">
                 {row.points}
               </p>
             </div>
           </div>
 
           <div className="mt-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
               Últimos resultados
             </p>
 
@@ -635,7 +641,7 @@ function TeamModal({ selection, onClose }) {
                 ))}
               </div>
             ) : (
-              <p className="mt-3 text-xs text-slate-500">
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
                 Sin partidos finalizados.
               </p>
             )}
@@ -685,11 +691,22 @@ function TournamentCard({
     tournament
   );
 
+  // La API pública no trae un conteo total de partidos: upcomingMatches
+  // solo cubre los pendientes (programados/en vivo/aplazados). Los ya
+  // finalizados se reconstruyen sumando "jugados" de cada equipo en la
+  // tabla de posiciones (cada partido cuenta para los dos equipos, por
+  // eso se divide entre 2).
+  const finishedMatchesCount = Math.round(
+    standings.reduce(
+      (sum, row) => sum + (row.played ?? 0),
+      0
+    ) / 2
+  );
+
   const totalMatches =
     tournament.tournament.matchCount ??
     tournament.matchCount ??
-    matches.length ??
-    0;
+    matches.length + finishedMatchesCount;
 
   const modeLabels = {
     ROUND_ROBIN: 'Liga',
@@ -709,7 +726,8 @@ function TournamentCard({
           'border-cyan-400/25 sm:border-cyan-400/15',
         borderHover:
           'hover:border-cyan-400/50',
-        bg: 'bg-[#07141a]',
+        bg: 'bg-white dark:bg-[#07141a]',
+        cardRing: 'border-white dark:border-[#07141a]',
         shadow:
           'shadow-[0_20px_70px_rgba(6,182,212,0.10)]',
         expanded:
@@ -721,7 +739,7 @@ function TournamentCard({
         line:
           'via-cyan-400/80',
         badge:
-          'border-cyan-400/25 bg-cyan-400/[0.10] text-cyan-300',
+          'border-cyan-400/25 bg-cyan-400/[0.10] text-cyan-600 dark:text-cyan-300',
         pulse:
           'bg-cyan-400 shadow-[0_0_8px_#22d3ee]',
         logoGlow:
@@ -731,22 +749,23 @@ function TournamentCard({
         topStatus:
           'bg-cyan-400',
         topStatusDot:
-          'bg-slate-950',
+          'bg-white dark:bg-slate-950',
         section:
-          'text-cyan-400',
+          'text-cyan-600 dark:text-cyan-400',
         button:
-          'border-cyan-400/30 bg-cyan-400/[0.10] text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18]',
+          'border-cyan-400/30 bg-cyan-400/[0.10] text-cyan-600 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18] dark:text-cyan-300',
         closedButton:
           'from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400',
       }
     : {
         border:
-          'border-emerald-400/25 sm:border-white/[0.07]',
+          'border-emerald-400/25 sm:border-slate-200 sm:dark:border-white/[0.07]',
         borderHover:
           'hover:border-emerald-400/30',
-        bg: 'bg-[#0a0f18]',
+        bg: 'bg-white dark:bg-[#0a0f18]',
+        cardRing: 'border-white dark:border-[#0a0f18]',
         shadow:
-          'shadow-[0_20px_70px_rgba(0,0,0,0.25)]',
+          'shadow-[0_20px_70px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_70px_rgba(0,0,0,0.25)]',
         expanded:
           'border-emerald-400/40 shadow-[0_25px_90px_rgba(16,185,129,0.13)]',
         glow:
@@ -756,21 +775,21 @@ function TournamentCard({
         line:
           'via-emerald-400/70',
         badge:
-          'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-300',
+          'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-600 dark:text-emerald-300',
         pulse:
           'bg-emerald-400 shadow-[0_0_8px_#34d399]',
         logoGlow:
           'bg-emerald-400/10',
         logoBorder:
-          'border-white/[0.09]',
+          'border-slate-200 dark:border-white/[0.09]',
         topStatus:
           'bg-emerald-400',
         topStatusDot:
-          'bg-slate-950',
+          'bg-white dark:bg-slate-950',
         section:
-          'text-emerald-400',
+          'text-emerald-600 dark:text-emerald-400',
         button:
-          'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-400/15',
+          'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-600 hover:border-emerald-400/40 hover:bg-emerald-400/15 dark:text-emerald-300',
         closedButton:
           'from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400',
       };
@@ -871,7 +890,8 @@ function TournamentCard({
                   border
                   ${colors.logoBorder}
                   bg-gradient-to-br
-                  from-slate-800 via-slate-900 to-slate-950
+                  from-slate-100 via-slate-200 to-slate-300
+                  dark:from-slate-800 dark:via-slate-900 dark:to-slate-950
                   p-2 shadow-2xl
                   sm:h-20 sm:w-20
                   sm:rounded-[1.5rem]
@@ -896,7 +916,8 @@ function TournamentCard({
                   absolute -bottom-1 -right-1
                   flex h-5 w-5 items-center
                   justify-center rounded-full
-                  border-2 border-[#07141a]
+                  border-2
+                  ${colors.cardRing}
                   sm:h-6 sm:w-6
                   ${colors.topStatus}
                 `}
@@ -936,12 +957,12 @@ function TournamentCard({
                   En vivo
                 </span>
 
-                <span className="rounded-full border border-white/[0.07] bg-white/[0.025] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500 sm:px-3 sm:text-[10px]">
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:px-3 sm:text-[10px]">
                   {modeLabel}
                 </span>
               </div>
 
-              <h2 className="mt-3 truncate text-xl font-black tracking-tight text-white sm:text-2xl lg:text-[1.7rem]">
+              <h2 className="mt-3 truncate text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl lg:text-[1.7rem]">
                 {tournament.tournament.name}
               </h2>
 
@@ -957,14 +978,16 @@ function TournamentCard({
               className={`
                 flex h-9 w-9 shrink-0 items-center
                 justify-center rounded-xl
-                border border-white/[0.07]
-                bg-white/[0.025] text-xs text-slate-500
+                border border-slate-200
+                bg-slate-50 text-xs text-slate-500
                 transition-all duration-300
+                dark:border-white/[0.07]
+                dark:bg-white/[0.025]
                 sm:h-10 sm:w-10
                 ${
                   isExpanded
                     ? `rotate-180 ${colors.badge}`
-                    : 'group-hover:border-white/[0.12] group-hover:text-white'
+                    : 'group-hover:border-slate-300 group-hover:text-slate-900 dark:group-hover:border-white/[0.12] dark:group-hover:text-white'
                 }
               `}
               aria-hidden="true"
@@ -978,32 +1001,32 @@ function TournamentCard({
           ============================================================ */}
 
           <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:grid-cols-4">
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Equipos
               </p>
 
-              <p className="mt-0.5 text-sm font-black text-white sm:text-base">
+              <p className="mt-0.5 text-sm font-black text-slate-900 dark:text-white sm:text-base">
                 {totalTeams}
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Partidos
               </p>
 
-              <p className="mt-0.5 text-sm font-black text-white sm:text-base">
+              <p className="mt-0.5 text-sm font-black text-slate-900 dark:text-white sm:text-base">
                 {totalMatches}
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/[0.05] bg-white/[0.025] px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Líder
               </p>
 
-              <p className="mt-0.5 truncate text-sm font-black text-amber-300 sm:text-base">
+              <p className="mt-0.5 truncate text-sm font-black text-amber-600 dark:text-amber-300 sm:text-base">
                 {leader?.team?.name ?? '—'}
               </p>
             </div>
@@ -1036,11 +1059,11 @@ function TournamentCard({
             id={contentId}
             role="region"
             aria-labelledby={buttonId}
-            className="w-full min-w-0 border-t border-white/[0.06]"
+            className="w-full min-w-0 border-t border-slate-200 dark:border-white/[0.06]"
           >
             {/* Header clasificación */}
 
-            <div className="flex items-center justify-between bg-black/10 px-4 py-3 sm:px-6 sm:py-4">
+            <div className="flex items-center justify-between bg-slate-50 px-4 py-3 dark:bg-black/10 sm:px-6 sm:py-4">
               <div>
                 <p
                   className={`text-[9px] font-bold uppercase tracking-[0.18em] sm:text-[10px] ${colors.section}`}
@@ -1053,7 +1076,7 @@ function TournamentCard({
                 </p>
               </div>
 
-              <span className="hidden rounded-full border border-white/[0.06] bg-white/[0.025] px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 sm:inline-flex">
+              <span className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/[0.06] dark:bg-white/[0.025] sm:inline-flex">
                 {standings.length} equipos
               </span>
             </div>
@@ -1062,9 +1085,9 @@ function TournamentCard({
 
             {mode === 'ROUND_ROBIN' ? (
               <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
-                <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-white/[0.05]">
+                <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.05]">
                   <table className="w-full table-fixed text-sm">
-                    <thead className="border-b border-white/[0.05] bg-white/[0.02]">
+                    <thead className="border-b border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.02]">
                       <tr className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-600 sm:text-[10px] sm:tracking-[0.16em]">
                         <th className="w-12 px-1.5 py-3 text-center sm:w-14 sm:px-2 sm:py-3.5">
                           Pos
@@ -1110,7 +1133,7 @@ function TournamentCard({
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-white/[0.04]">
+                    <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                       {standings.map((row) => {
                         const isLeader =
                           row.position === 1;
@@ -1126,7 +1149,7 @@ function TournamentCard({
                               ${
                                 isLeader
                                   ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.09] via-amber-400/[0.025] to-transparent'
-                                  : 'hover:bg-white/[0.025]'
+                                  : 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
                               }
                             `}
                           >
@@ -1139,10 +1162,10 @@ function TournamentCard({
                                     text-[10px] font-black
                                     ${
                                       row.position === 1
-                                        ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 shadow-[0_0_18px_rgba(251,191,36,0.22)]'
+                                        ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 dark:text-slate-950 shadow-[0_0_18px_rgba(251,191,36,0.22)]'
                                         : row.position === 2
-                                          ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900'
-                                          : 'bg-gradient-to-br from-orange-300 to-orange-500 text-slate-950'
+                                          ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900 dark:text-slate-900'
+                                          : 'bg-gradient-to-br from-orange-300 to-orange-500 text-slate-950 dark:text-slate-950'
                                     }
                                   `}
                                 >
@@ -1205,8 +1228,8 @@ function TournamentCard({
                                     transition-colors sm:text-sm
                                     ${
                                       isLeader
-                                        ? 'text-amber-100 group-hover/row:text-amber-300'
-                                        : 'text-slate-300 group-hover/row:text-white'
+                                        ? 'text-amber-600 group-hover/row:text-amber-500 dark:text-amber-100 dark:group-hover/row:text-amber-300'
+                                        : 'text-slate-700 group-hover/row:text-slate-900 dark:text-slate-300 dark:group-hover/row:text-white'
                                     }
                                   `}
                                 >
@@ -1317,7 +1340,7 @@ function TournamentCard({
               <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
                 {!tournament.pots ||
                 tournament.pots.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.02] p-6 text-center text-xs text-slate-500 sm:p-8 sm:text-sm">
+                  <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs text-slate-500 dark:border-white/[0.08] dark:bg-white/[0.02] sm:p-8 sm:text-sm">
                     Los grupos aún no han sido generados.
                   </p>
                 ) : (
@@ -1332,7 +1355,7 @@ function TournamentCard({
                           className="w-full min-w-0"
                         >
                           <div className="mb-2.5 flex items-center gap-3">
-                            <span className="h-px flex-1 bg-white/[0.05]" />
+                            <span className="h-px flex-1 bg-slate-200 dark:bg-white/[0.05]" />
 
                             <h3
                               className={`text-[10px] font-black uppercase tracking-[0.18em] ${colors.section}`}
@@ -1340,10 +1363,10 @@ function TournamentCard({
                               Bombo {pot}
                             </h3>
 
-                            <span className="h-px flex-1 bg-white/[0.05]" />
+                            <span className="h-px flex-1 bg-slate-200 dark:bg-white/[0.05]" />
                           </div>
 
-                          <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-white/[0.05]">
+                          <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.05]">
                             <StandingsTable
                               standings={potStandings}
                               respectPaymentStatus
@@ -1357,7 +1380,7 @@ function TournamentCard({
               </div>
             ) : (
               <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
-                <div className="rounded-2xl border border-white/[0.05] bg-white/[0.015]">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.015]">
                   <CompetitionOverview
                     mode={mode}
                     groups={tournament.groups}
@@ -1373,7 +1396,7 @@ function TournamentCard({
 
             {/* Footer */}
 
-            <div className="border-t border-white/[0.05] bg-black/10 px-3 py-3 sm:px-5 sm:py-4">
+            <div className="border-t border-slate-200 bg-slate-50 px-3 py-3 dark:border-white/[0.05] dark:bg-black/10 sm:px-5 sm:py-4">
               <Link
                 className={`
                   group/link flex min-h-11 w-full
@@ -1400,7 +1423,7 @@ function TournamentCard({
       {/* Footer cerrado */}
 
       {!isExpanded && (
-        <div className="relative border-t border-white/[0.05] px-3 py-3 sm:px-5 sm:py-4">
+        <div className="relative border-t border-slate-200 px-3 py-3 dark:border-white/[0.05] sm:px-5 sm:py-4">
           <Link
             className={`
               group/link flex min-h-11 w-full
@@ -1410,7 +1433,7 @@ function TournamentCard({
               ${colors.closedButton}
               px-4 py-2.5
               text-center text-xs font-black
-              text-slate-950
+              text-slate-950 dark:text-slate-950
               shadow-lg
               transition-all duration-300
               sm:py-3 sm:text-sm
@@ -1524,7 +1547,7 @@ export default function HomePage() {
       } catch {
         // No mostramos error en cada actualización automática.
       }
-    }, 30000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -1540,7 +1563,7 @@ export default function HomePage() {
     );
 
   return (
-    <main className="min-h-screen bg-[#070b12] text-slate-100">
+    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
       <PublicNavbar />
 
       <AnnouncementModal />
@@ -1549,7 +1572,7 @@ export default function HomePage() {
           HERO
       ================================================================ */}
 
-      <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#070b12] px-4 pb-12 pt-24 sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
+      <section className="relative w-full overflow-hidden border-b border-slate-200 bg-slate-50 px-4 pb-12 pt-24 dark:border-white/[0.06] dark:bg-[#070b12] sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.025]"
           style={{
@@ -1570,7 +1593,7 @@ export default function HomePage() {
             Resultados en un solo lugar
           </div>
 
-          <h1 className="mt-5 max-w-4xl text-[2.15rem] font-black leading-[1.03] tracking-[-0.04em] text-white sm:mt-6 sm:text-5xl lg:text-6xl xl:text-7xl">
+          <h1 className="mt-5 max-w-4xl text-[2.15rem] font-black leading-[1.03] tracking-[-0.04em] text-slate-900 dark:text-white sm:mt-6 sm:text-5xl lg:text-6xl xl:text-7xl">
             Torneos que se viven
 
             <span className="block bg-gradient-to-r from-emerald-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(52,211,153,0.15)]">
@@ -1608,7 +1631,7 @@ export default function HomePage() {
                 En vivo
               </p>
 
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.025em] text-white sm:text-3xl lg:text-4xl">
+              <h2 className="mt-2 text-2xl font-black tracking-[-0.025em] text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
                 Torneos activos
               </h2>
 
@@ -1634,12 +1657,12 @@ export default function HomePage() {
                       )
                     }
                     placeholder="Buscar torneo..."
-                    className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.025] py-2.5 pl-10 pr-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/40 focus:bg-white/[0.04] focus:ring-2 focus:ring-emerald-400/10"
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700 dark:focus:bg-white/[0.04]"
                   />
                 </div>
               )}
 
-              <span className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl border border-white/[0.07] bg-white/[0.025] px-3 text-[10px] font-bold text-slate-500 sm:px-4">
+              <span className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:px-4">
                 <span aria-hidden="true">
                   🏆
                 </span>
@@ -1650,18 +1673,18 @@ export default function HomePage() {
           </div>
 
           {isLoading ? (
-            <div className="relative overflow-hidden rounded-[1.75rem] border border-white/[0.06] bg-white/[0.02] p-12 text-center sm:rounded-[2rem] sm:p-20">
+            <div className="relative overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-12 text-center dark:border-white/[0.06] dark:bg-white/[0.02] sm:rounded-[2rem] sm:p-20">
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-400/[0.03] to-transparent" />
 
-              <div className="relative mx-auto h-10 w-10 animate-spin rounded-full border-2 border-slate-800 border-t-emerald-400" />
+              <div className="relative mx-auto h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-emerald-400 dark:border-slate-800" />
 
               <p className="relative mt-5 text-xs text-slate-600 sm:text-sm">
                 Cargando torneos...
               </p>
             </div>
           ) : tournaments.length === 0 ? (
-            <div className="rounded-[1.75rem] border border-dashed border-white/[0.08] bg-white/[0.015] p-10 text-center sm:rounded-[2rem] sm:p-16">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.025] text-xl">
+            <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 p-10 text-center dark:border-white/[0.08] dark:bg-white/[0.015] sm:rounded-[2rem] sm:p-16">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl dark:border-white/[0.06] dark:bg-white/[0.025]">
                 🏟️
               </div>
 
@@ -1671,8 +1694,8 @@ export default function HomePage() {
               </p>
             </div>
           ) : filteredTournaments.length === 0 ? (
-            <div className="rounded-[1.75rem] border border-dashed border-white/[0.08] bg-white/[0.015] p-10 text-center sm:rounded-[2rem] sm:p-16">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.025] text-xl">
+            <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 p-10 text-center dark:border-white/[0.08] dark:bg-white/[0.015] sm:rounded-[2rem] sm:p-16">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl dark:border-white/[0.06] dark:bg-white/[0.025]">
                 🔍
               </div>
 

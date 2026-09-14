@@ -65,8 +65,20 @@ export async function findGroupTeamIds(groupId, tournamentId) {
   return rows.map((row) => row.teamId);
 }
 
+function fixtureScopeWhere(tournamentId, groupId) {
+  return { tournamentId, groupId: groupId ?? null, ...(groupId ? {} : { tieId: null }) };
+}
+
 export function hasFixtureMatches(tournamentId, groupId) {
-  return prisma.match.count({ where: { tournamentId, groupId: groupId ?? null, ...(groupId ? {} : { tieId: null }) } }).then((count) => count > 0);
+  return prisma.match.count({ where: fixtureScopeWhere(tournamentId, groupId) }).then((count) => count > 0);
+}
+
+export function findFixtureMatchStatuses(tournamentId, groupId) {
+  return prisma.match.findMany({ where: fixtureScopeWhere(tournamentId, groupId), select: { status: true } });
+}
+
+export function deleteFixtureMatches(tournamentId, groupId) {
+  return prisma.match.deleteMany({ where: fixtureScopeWhere(tournamentId, groupId) });
 }
 
 export function update(id, data) {

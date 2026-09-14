@@ -25,19 +25,15 @@ export async function createTournament(data) {
 export async function updateTournament(id, data) {
   const tournament = await getTournament(id);
   if (data.mode !== undefined && data.mode !== tournament.mode) {
+    // El formato se puede cambiar libremente mientras no haya partidos, y
+    // luego solo cuando todos los que ya existen quedaron resueltos
+    // (finalizados o cancelados, sin nada pendiente). El cambio de modo no
+    // borra partidos ni estadísticas: el historial de la fase anterior
+    // queda intacto, solo cambia bajo qué formato se juega de aquí en
+    // adelante.
     const hasMatches = await tournamentRepository.hasMatches(id);
-    const canStartNextPhase =
-      tournament.mode === 'ROUND_ROBIN' &&
-      ['GROUP_STAGE', 'KNOCKOUT_SINGLE', 'KNOCKOUT_TWO_LEG'].includes(data.mode) &&
-      (!hasMatches || !(await tournamentRepository.hasPendingMatches(id)));
-
-    if (hasMatches && !canStartNextPhase) {
-      throw new HttpError(
-        409,
-        tournament.mode === 'ROUND_ROBIN'
-          ? 'Finaliza todos los partidos de todos contra todos antes de iniciar la siguiente fase'
-          : 'No puedes cambiar el modo de un torneo que ya tiene partidos registrados'
-      );
+    if (hasMatches && await tournamentRepository.hasPendingMatches(id)) {
+      throw new HttpError(409, 'Finaliza (o cancela) todos los partidos antes de cambiar el formato del torneo');
     }
   }
   return tournamentRepository.update(id, data);

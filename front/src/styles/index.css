@@ -21,42 +21,46 @@ body {
 }
 
 /*
-  Modo diurno: todo texto blanco/gris (pensado originalmente para fondo
-  oscuro) se repinta en el mismo azul cian de la firma "Albert Taborda"
-  sobre el logo, en vez de negro. Cubre las clases base de Tailwind sin
-  tocar variantes (hover:, sm:, dark:, etc.) ni colores de acento
-  (emerald, red, amber...), que se dejan intactos.
+  Modo diurno (parche de transición): todo texto blanco/gris de páginas
+  que TODAVÍA no tienen su propio par claro/oscuro (pensado originalmente
+  solo para fondo oscuro) se repinta en el mismo azul cian de la firma
+  "Albert Taborda" sobre el logo, en vez de negro. El :not([class*="dark:text-"])
+  es la salida de emergencia: en cuanto un elemento recibe su propio par
+  text-X dark:text-Y (el arreglo real, página por página), este parche deja
+  de tocarlo y manda el color que se le puso a propósito. Cuando todas las
+  páginas tengan su propio modo diurno, este bloque completo se puede borrar.
 */
-:root:not(.dark) [class~="text-white"],
-:root:not(.dark) [class~="text-slate-50"],
-:root:not(.dark) [class~="text-slate-100"],
-:root:not(.dark) [class~="text-slate-200"],
-:root:not(.dark) [class~="text-slate-300"],
-:root:not(.dark) [class~="text-slate-400"],
-:root:not(.dark) [class~="text-slate-500"],
-:root:not(.dark) [class~="text-slate-600"],
-:root:not(.dark) [class~="text-slate-700"],
-:root:not(.dark) [class~="text-slate-800"],
-:root:not(.dark) [class~="text-slate-900"],
-:root:not(.dark) [class~="text-slate-950"] {
+:root:not(.dark) [class~="text-white"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-50"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-100"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-200"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-300"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-400"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-500"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-600"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-700"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-800"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-900"]:not([class*="dark:text-"]),
+:root:not(.dark) [class~="text-slate-950"]:not([class*="dark:text-"]) {
   color: #00c2cb !important;
 }
 
 /*
-  Modo diurno: los botones con fondo oscuro/neutro (pensados para el
-  tema oscuro) pasan a fondo blanco. Los botones con color de acento
-  (emerald, red, amber...) no se tocan porque siguen siendo válidos
-  sobre fondo claro.
+  Modo diurno (mismo parche de transición): los botones con fondo
+  oscuro/neutro de páginas que todavía no tienen su propio par pasan a
+  fondo blanco. bg-emerald-500 se sacó de esta lista: es un color de
+  acento real (botones primarios tipo "Crear/Guardar"), no un remanente
+  del tema oscuro, y forzarlo a blanco los dejaba sin color. El
+  :not([class*="dark:bg-"]) es la misma salida de emergencia que arriba.
 */
-:root:not(.dark) button[class~="bg-slate-600"],
-:root:not(.dark) button[class~="bg-slate-700"],
-:root:not(.dark) button[class~="bg-slate-800"],
-:root:not(.dark) button[class~="bg-slate-900"],
-:root:not(.dark) button[class~="bg-slate-950"],
-:root:not(.dark) button[class~="bg-black/20"],
-:root:not(.dark) button[class~="bg-black/30"],
-:root:not(.dark) button[class~="bg-black/40"],
-:root:not(.dark) button[class~="bg-black/75"],
-:root:not(.dark) [class~="bg-emerald-500"] {
+:root:not(.dark) button[class~="bg-slate-600"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-slate-700"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-slate-800"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-slate-900"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-slate-950"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-black/20"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-black/30"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-black/40"]:not([class*="dark:bg-"]),
+:root:not(.dark) button[class~="bg-black/75"]:not([class*="dark:bg-"]) {
   background-color: #fff !important;
 }

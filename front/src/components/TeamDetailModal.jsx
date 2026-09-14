@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { EXPIRED_CLASS, isLogoHidden, isTeamExpired, PLAYER_EXPIRED_CLASS } from '../utils/team-expiry.js';
 import api from '../services/api.js';
+import PlayerCardModal from './PlayerCardModal.jsx';
 
 const formStyles = {
   G: 'bg-emerald-500 text-slate-950',
@@ -51,11 +53,36 @@ function TeamLogo({ team, size = 'h-9 w-9', className = '' }) {
 | pública que muestre una tabla de posiciones clicable.
 */
 
-export default function TeamDetailModal({ selection, onClose }) {
+export default function TeamDetailModal({ selection, onClose, blueCardEnabled = false }) {
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+
   if (!selection) return null;
 
   const { row, recentForm = [] } = selection;
   const isLeader = row.position === 1;
+
+  // Mismas reglas que la tarjeta abierta desde Goleadores: cada jugador del
+  // roster ya trae goles/tarjetas/partidos/posición (ver getPlayerStatMaps
+  // en el backend), solo hay que armar el shape que espera PlayerCardModal.
+  function openPlayerCard(player) {
+    setSelectedPlayer({
+      player: {
+        id: player.id,
+        name: player.name,
+        photo: player.photo,
+        jerseyNumber: player.jerseyNumber,
+        paidUntil: player.paidUntil,
+        playerExpired: player.playerExpired,
+      },
+      team: row.team,
+      goals: player.goals,
+      yellowCards: player.yellowCards,
+      redCards: player.redCards,
+      blueCards: player.blueCards,
+      matchesPlayed: player.matchesPlayed,
+      position: player.position,
+    });
+  }
 
   return (
     <div
@@ -180,7 +207,12 @@ export default function TeamDetailModal({ selection, onClose }) {
             {row.players?.length ? (
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {row.players.map((player) => (
-                  <div className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-2.5" key={player.id}>
+                  <button
+                    type="button"
+                    onClick={() => openPlayerCard(player)}
+                    className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-2.5 text-left transition hover:border-emerald-400/20 hover:bg-white/[0.05]"
+                    key={player.id}
+                  >
                     {player.photo ? (
                       <img
                         className={`h-10 w-10 shrink-0 rounded-lg object-cover ${player.playerExpired ? PLAYER_EXPIRED_CLASS : ''}`}
@@ -199,7 +231,7 @@ export default function TeamDetailModal({ selection, onClose }) {
                         {player.jerseyNumber ? `Dorsal ${player.jerseyNumber}` : 'Jugador'}
                       </p>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             ) : (
@@ -208,6 +240,13 @@ export default function TeamDetailModal({ selection, onClose }) {
           </div>
         </div>
       </section>
+
+      <PlayerCardModal
+        row={selectedPlayer}
+        respectPaymentStatus
+        blueCardEnabled={blueCardEnabled}
+        onClose={() => setSelectedPlayer(null)}
+      />
     </div>
   );
 }

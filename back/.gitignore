@@ -1,0 +1,11 @@
+#env
+.env
+
+#node_modules
+node_modules
+
+#DB
+dev.db
+
+#prisma
+schema.prisma

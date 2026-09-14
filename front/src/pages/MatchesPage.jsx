@@ -1478,21 +1478,30 @@ function MatchAccordion({
         </span>
       </button>
 
+      {/*
+        grid-template-rows (0fr/1fr) en vez de max-height fijo: con muchos
+        partidos el contenido real supera cualquier max-height fijo (p.ej.
+        max-h-[6000px]) y queda cortado sin poder hacer scroll, porque el
+        wrapper tiene overflow-hidden. El truco de grid con fr anima igual
+        de suave pero siempre ajusta al alto real del contenido.
+      */}
       <div
         className={`
-          overflow-hidden
-          transition-[max-height,opacity]
+          grid
+          transition-[grid-template-rows,opacity]
           duration-300
           ease-in-out
           ${
             isOpen
-              ? "max-h-[6000px] opacity-100"
-              : "max-h-0 opacity-0"
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
           }
         `}
       >
-        <div className="border-t border-white/[0.05] p-2.5 sm:p-4">
-          {children}
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-white/[0.05] p-2.5 sm:p-4">
+            {children}
+          </div>
         </div>
       </div>
     </section>
@@ -1907,6 +1916,15 @@ export default function MatchesPage() {
   const [isGeneratingFixtures, setIsGeneratingFixtures] =
     useState(false);
 
+  const [isConfirmingGenerateFixtures, setIsConfirmingGenerateFixtures] =
+    useState(false);
+
+  const [isConfirmingDeleteFixtures, setIsConfirmingDeleteFixtures] =
+    useState(false);
+
+  const [isDeletingFixtures, setIsDeletingFixtures] =
+    useState(false);
+
   const [isScheduleOpen, setIsScheduleOpen] =
     useState(false);
 
@@ -2194,10 +2212,47 @@ export default function MatchesPage() {
         message:
           "Se programaron todos los partidos del torneo.",
       });
+
+      setIsConfirmingGenerateFixtures(false);
     } catch (error) {
       notify(getApiErrorDetails(error));
     } finally {
       setIsGeneratingFixtures(false);
+    }
+  }
+
+  /* ==============================================================
+     DELETE FIXTURE
+  ============================================================== */
+
+  async function deleteFixtures() {
+    setIsDeletingFixtures(true);
+
+    try {
+      await api.delete(
+        `/tournaments/${selectedTournamentId}/matches/fixtures`,
+      );
+
+      const { data } = await api.get(
+        `/tournaments/${selectedTournamentId}/matches`,
+      );
+
+      setMatches(
+        sortMatches(data.data.matches),
+      );
+
+      notify({
+        type: "success",
+        title: "Fixture eliminado",
+        message:
+          "Se eliminaron los partidos generados automáticamente.",
+      });
+
+      setIsConfirmingDeleteFixtures(false);
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsDeletingFixtures(false);
     }
   }
 
@@ -2916,16 +2971,35 @@ export default function MatchesPage() {
                 </p>
               </div>
 
-              <button
-                className="shrink-0 rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
-                type="button"
-                disabled={isGeneratingFixtures}
-                onClick={generateFixtures}
-              >
-                {isGeneratingFixtures
-                  ? "Generando…"
-                  : "Generar fixture"}
-              </button>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  className="rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                  type="button"
+                  disabled={isGeneratingFixtures}
+                  onClick={() =>
+                    setIsConfirmingGenerateFixtures(true)
+                  }
+                >
+                  {isGeneratingFixtures
+                    ? "Generando…"
+                    : "Generar fixture"}
+                </button>
+
+                {matches.length > 0 && (
+                  <button
+                    className="rounded-xl border border-red-400/25 bg-red-400/[0.06] px-4 py-2.5 text-[10px] font-bold text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                    type="button"
+                    disabled={isDeletingFixtures}
+                    onClick={() =>
+                      setIsConfirmingDeleteFixtures(true)
+                    }
+                  >
+                    {isDeletingFixtures
+                      ? "Eliminando…"
+                      : "Eliminar fixture"}
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -3657,6 +3731,30 @@ export default function MatchesPage() {
           }
         />
       )}
+
+      <ConfirmActionModal
+        isOpen={isConfirmingGenerateFixtures}
+        title="¿Generar el fixture?"
+        message="Se programarán automáticamente todos los partidos de todos contra todos para este torneo."
+        confirmLabel="Sí, generar"
+        isLoading={isGeneratingFixtures}
+        onCancel={() =>
+          setIsConfirmingGenerateFixtures(false)
+        }
+        onConfirm={generateFixtures}
+      />
+
+      <ConfirmActionModal
+        isOpen={isConfirmingDeleteFixtures}
+        title="¿Eliminar el fixture?"
+        message="Se eliminarán todos los partidos generados automáticamente que todavía no hayan iniciado. Esta acción no se puede deshacer."
+        confirmLabel="Sí, eliminar"
+        isLoading={isDeletingFixtures}
+        onCancel={() =>
+          setIsConfirmingDeleteFixtures(false)
+        }
+        onConfirm={deleteFixtures}
+      />
     </main>
   );
 }

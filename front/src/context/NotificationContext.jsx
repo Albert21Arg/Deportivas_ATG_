@@ -15,15 +15,15 @@ function Notification({ notification, onDismiss }) {
     : 'border-red-500/40 bg-red-950/95 text-red-100';
 
   return (
-    <div className={`pointer-events-auto w-full max-w-sm rounded-xl border p-4 shadow-2xl backdrop-blur ${tone}`} role="alert">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 text-lg" aria-hidden="true">{isSuccess ? '✓' : '!'}</span>
+    <div className={`pointer-events-auto w-full max-w-[19rem] rounded-lg border px-3 py-2.5 shadow-lg backdrop-blur sm:max-w-sm ${tone}`} role="alert">
+      <div className="flex items-start gap-2">
+        <span className="mt-0.5 text-sm" aria-hidden="true">{isSuccess ? '✓' : '!'}</span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">{notification.title}</p>
-          <p className="mt-1 text-sm leading-5 opacity-90">{notification.message}</p>
+          <p className="text-xs font-semibold leading-4 sm:text-sm">{notification.title}</p>
+          <p className="mt-0.5 text-[11px] leading-4 opacity-90 sm:text-xs sm:leading-5">{notification.message}</p>
         </div>
         <button
-          className="rounded p-1 text-lg leading-none opacity-70 transition hover:opacity-100"
+          className="-mr-1 -mt-1 rounded p-1 text-sm leading-none opacity-70 transition hover:opacity-100"
           type="button"
           aria-label="Cerrar notificación"
           onClick={() => onDismiss(notification.id)}
@@ -50,7 +50,10 @@ export function NotificationProvider({ children }) {
   return (
     <NotificationContext.Provider value={{ notify, dismiss }}>
       {children}
-      <div className="pointer-events-none fixed inset-x-4 top-4 z-50 flex flex-col items-end gap-3 sm:inset-x-auto sm:right-6 sm:w-auto" aria-live="polite">
+      <div
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center gap-2 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-auto sm:right-4 sm:top-20 sm:items-end sm:px-0 sm:pb-0"
+        aria-live="polite"
+      >
         {notifications.map((notification) => (
           <Notification key={notification.id} notification={notification} onDismiss={dismiss} />
         ))}

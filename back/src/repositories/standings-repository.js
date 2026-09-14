@@ -75,11 +75,48 @@ export function findGoalTotals(tournamentId) {
   });
 }
 
+// No hay registro de alineación/convocatoria por partido: la única forma de
+// saber en qué partidos participó un jugador es contar los partidos
+// distintos donde tiene al menos un evento (gol, autogol, tarjeta, penal).
+// groupBy por [playerId, matchId] da un renglón por cada combinación única,
+// así que contar cuántos renglones caen en cada playerId ya es el conteo de
+// partidos distintos, sin necesidad de _count.
+export function findPlayerMatchAppearances(tournamentId) {
+  return prisma.matchEvent.groupBy({
+    by: ['playerId', 'matchId'],
+    where: { match: { tournamentId }, playerId: { not: null } },
+  });
+}
+
 export function findPlayerCardTotals(tournamentId) {
   return prisma.matchEvent.groupBy({
     by: ['playerId', 'type'],
     where: { match: { tournamentId }, type: { in: ['YELLOW_CARD', 'RED_CARD', 'BLUE_CARD'] }, playerId: { not: null } },
     _count: { _all: true },
+  });
+}
+
+// Eventos crudos (sin agrupar) para las multas: a diferencia de
+// findPlayerCardTotals, aquí se necesita el matchId para poder reducir, por
+// partido, cuál tarjeta quedó como sanción definitiva.
+export function findPlayerCardEvents(tournamentId) {
+  return prisma.matchEvent.findMany({
+    where: { match: { tournamentId }, type: { in: ['YELLOW_CARD', 'RED_CARD', 'BLUE_CARD'] }, playerId: { not: null } },
+    select: { playerId: true, matchId: true, type: true },
+  });
+}
+
+// Arqueros designados (uno por equipo) del torneo, para la valla menos
+// vencida: se cruza con los goles en contra/partidos ya calculados en la
+// tabla de posiciones (no hay alineación por partido, así que el arquero
+// asume los partidos y goles en contra de todo su equipo).
+export function findGoalkeeperAssignments(tournamentId) {
+  return prisma.playerTeam.findMany({
+    where: { isGoalkeeper: true, team: { tournaments: { some: { tournamentId } } } },
+    select: {
+      teamId: true,
+      player: { select: { id: true, name: true, photo: true, jerseyNumber: true, paidUntil: true } },
+    },
   });
 }
 

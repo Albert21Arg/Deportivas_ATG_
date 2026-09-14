@@ -47,7 +47,11 @@ function TeamCellBody({ row, expired, logoHidden, isLeader, isSecond }) {
       <div className="min-w-0">
         <p
           className={`truncate text-xs font-semibold sm:text-sm ${
-            isLeader ? 'text-amber-100' : isSecond ? 'text-slate-200' : 'text-slate-300'
+            isLeader
+              ? 'text-amber-600 dark:text-amber-100'
+              : isSecond
+                ? 'text-slate-700 dark:text-slate-200'
+                : 'text-slate-700 dark:text-slate-300'
           }`}
           title={row.team.name}
         >
@@ -78,10 +82,10 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/10">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-black/5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/10">
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-slate-800 bg-slate-950">
+          <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
             <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
               <th className="w-16 px-3 py-3 text-center">Pos</th>
               <th className="px-3 py-3 text-left">Equipo</th>
@@ -93,7 +97,7 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-800/70">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
             {standings.map((row) => {
               const isLeader = row.position === 1;
               const isSecond = row.position === 2;
@@ -109,7 +113,7 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
                       ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.12] via-amber-400/[0.045] to-transparent'
                       : isSecond
                         ? 'border-l-2 border-slate-300/40 bg-gradient-to-r from-slate-300/[0.07] via-slate-300/[0.025] to-transparent'
-                        : 'hover:bg-slate-800/40'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
                   }`}
                 >
                   {/* POSICIÓN */}
@@ -118,10 +122,10 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
                       <span
                         className={`mx-auto flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold ${
                           row.position === 1
-                            ? 'bg-amber-400 text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.35)]'
+                            ? 'bg-amber-400 text-slate-950 dark:text-slate-950 shadow-[0_0_16px_rgba(251,191,36,0.35)]'
                             : row.position === 2
-                              ? 'bg-slate-300 text-slate-900'
-                              : 'bg-orange-400 text-slate-950'
+                              ? 'bg-slate-300 text-slate-900 dark:text-slate-900'
+                              : 'bg-orange-400 text-slate-950 dark:text-slate-950'
                         }`}
                       >
                         {row.position}
@@ -155,14 +159,18 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
                     // Los goles en contra siempre se ven, incluso con el pago vencido.
                     const distortThisCell = expired && key !== 'goalsAgainst';
 
-                    let valueClass = 'text-slate-400';
+                    let valueClass = 'text-slate-500 dark:text-slate-400';
 
                     if (isPoints) {
-                      valueClass = isLeader ? 'font-black text-amber-300' : 'font-bold text-emerald-300';
+                      valueClass = isLeader
+                        ? 'font-black text-amber-600 dark:text-amber-300'
+                        : 'font-bold text-emerald-600 dark:text-emerald-300';
                     } else if (isGoalDifference && row[key] > 0) {
-                      valueClass = isLeader ? 'font-semibold text-amber-300' : 'font-semibold text-emerald-400';
+                      valueClass = isLeader
+                        ? 'font-semibold text-amber-600 dark:text-amber-300'
+                        : 'font-semibold text-emerald-600 dark:text-emerald-400';
                     } else if (isGoalDifference && row[key] < 0) {
-                      valueClass = 'font-semibold text-rose-400';
+                      valueClass = 'font-semibold text-rose-600 dark:text-rose-400';
                     }
 
                     if (distortThisCell) valueClass += ` ${EXPIRED_CLASS}`;
@@ -184,7 +192,7 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
       </div>
 
       {/* LEYENDA */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-800 px-3 py-2.5 text-[10px] text-slate-600">
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-slate-200 px-3 py-2.5 text-[10px] text-slate-600 dark:border-slate-800">
         <span>
           <strong className="text-slate-500">PJ</strong> Partidos
         </span>
@@ -204,7 +212,7 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
           <strong className="text-slate-500">DG</strong> Diferencia
         </span>
         <span>
-          <strong className="text-emerald-400">PTS</strong> Puntos
+          <strong className="text-emerald-600 dark:text-emerald-400">PTS</strong> Puntos
         </span>
       </div>
     </div>

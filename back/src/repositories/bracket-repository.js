@@ -30,6 +30,13 @@ export async function hasTies(tournamentId) {
   return count > 0;
 }
 
+export async function hasPendingTieMatches(tournamentId) {
+  const count = await prisma.match.count({
+    where: { tournamentId, tieId: { not: null }, status: { notIn: ['FINISHED', 'CANCELLED'] } },
+  });
+  return count > 0;
+}
+
 export function clearBracket(tournamentId) {
   return prisma.knockoutTie.deleteMany({ where: { tournamentId } });
 }

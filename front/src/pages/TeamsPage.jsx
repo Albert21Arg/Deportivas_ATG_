@@ -929,25 +929,25 @@ export default function TeamsPage() {
                     </Link>
 
                     {isSuperAdmin && (
-                      <>
-                        <button
-                          className="min-h-8 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-2 py-1.5 text-[9px] font-semibold text-emerald-400/80 transition hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-300 sm:text-[10px]"
-                          onClick={() => startEditing(team)}
-                          type="button"
-                          title="Editar equipo"
-                        >
-                          Editar
-                        </button>
+                      <button
+                        className="min-h-8 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-2 py-1.5 text-[9px] font-semibold text-emerald-400/80 transition hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-300 sm:text-[10px]"
+                        onClick={() => startEditing(team)}
+                        type="button"
+                        title="Editar equipo"
+                      >
+                        Editar
+                      </button>
+                    )}
 
-                        <button
-                          className="min-h-8 rounded-lg px-2 py-1.5 text-[9px] font-semibold text-slate-600 transition hover:bg-red-400/[0.05] hover:text-red-400 sm:text-[10px]"
-                          onClick={() => setTeamToRemove(team)}
-                          type="button"
-                          title="Retirar equipo"
-                        >
-                          Retirar
-                        </button>
-                      </>
+                    {canCreateTeams && (
+                      <button
+                        className="min-h-8 rounded-lg px-2 py-1.5 text-[9px] font-semibold text-slate-600 transition hover:bg-red-400/[0.05] hover:text-red-400 sm:text-[10px]"
+                        onClick={() => setTeamToRemove(team)}
+                        type="button"
+                        title="Retirar equipo"
+                      >
+                        Retirar
+                      </button>
                     )}
 
                   </div>

@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { createPlayer, listPlayers, updatePlayer } from '../services/player-service.js';
+import { createPlayer, listPlayers, setGoalkeeper, updatePlayer } from '../services/player-service.js';
 
 function stripSuperAdminOnlyFields(request) {
   if (request.user.role === 'SUPERADMIN') return;
@@ -11,3 +11,4 @@ function stripSuperAdminOnlyFields(request) {
 export async function listController(request, response, next) { try { return response.json({ success: true, data: { players: await listPlayers(request.tournamentId, request.params.teamId) } }); } catch (error) { return next(error); } }
 export async function createController(request, response, next) { try { stripSuperAdminOnlyFields(request); return response.status(201).json({ success: true, data: { player: await createPlayer(request.tournamentId, request.params.teamId, request.validatedBody) } }); } catch (error) { return next(error); } }
 export async function updateController(request, response, next) { try { stripSuperAdminOnlyFields(request); return response.json({ success: true, data: { player: await updatePlayer(request.tournamentId, request.params.teamId, request.params.playerId, request.validatedBody) } }); } catch (error) { return next(error); } }
+export async function setGoalkeeperController(request, response, next) { try { return response.json({ success: true, data: { player: await setGoalkeeper(request.tournamentId, request.params.teamId, request.params.playerId, request.validatedBody.isGoalkeeper) } }); } catch (error) { return next(error); } }

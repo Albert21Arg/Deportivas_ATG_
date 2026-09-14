@@ -1,4 +1,4 @@
-import { assignTeamToGroup, createGroup, deleteGroup, drawGroups, listGroups, removeTeamFromGroup } from '../services/group-service.js';
+import { assignTeamToGroup, createGroup, deleteGroup, drawGroups, listGroups, removeTeamFromGroup, resetGroups } from '../services/group-service.js';
 
 export async function listController(request, response, next) {
   try {
@@ -20,6 +20,15 @@ export async function createController(request, response, next) {
 export async function deleteController(request, response, next) {
   try {
     await deleteGroup(request.tournamentId, request.groupId);
+    return response.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function resetController(request, response, next) {
+  try {
+    await resetGroups(request.tournamentId);
     return response.status(204).send();
   } catch (error) {
     return next(error);

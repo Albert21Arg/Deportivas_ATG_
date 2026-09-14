@@ -46,7 +46,13 @@ export async function listBracket(tournamentId) {
   return repository.findByTournament(tournamentId);
 }
 
+// Solo se puede rehacer la llave (borrar los cruces actuales) si ningún
+// partido generado a partir de ella sigue pendiente; si ya hay resultados
+// en juego, hay que resolverlos (o cancelarlos) antes de reiniciarla.
 export async function resetBracket(tournamentId) {
+  if (await repository.hasPendingTieMatches(tournamentId)) {
+    throw new HttpError(409, 'Finaliza (o cancela) los partidos de la llave antes de eliminarla');
+  }
   await repository.clearBracket(tournamentId);
   publish(tournamentId, { type: 'bracket.reset' });
 }

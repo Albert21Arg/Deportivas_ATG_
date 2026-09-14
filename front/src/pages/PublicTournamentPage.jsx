@@ -15,6 +15,7 @@ import AnnouncementModal from '../components/AnnouncementModal.jsx';
 import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import FutbolIcon from '../components/FutbolIcon.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
+import GoalkeepersTable from '../components/GoalkeepersTable.jsx';
 import ScorersTable from '../components/ScorersTable.jsx';
 import StandingsTable from '../components/StandingsTable.jsx';
 import TeamDetailModal from '../components/TeamDetailModal.jsx';
@@ -62,7 +63,10 @@ function formatDate(value) {
 |--------------------------------------------------------------------------
 */
 
-function groupMatchesByDate(matches) {
+// direction: 'asc' para "Próximos partidos" (lo más próximo primero),
+// 'desc' para "Historial de partidos" (lo que acaba de finalizar primero,
+// de la fecha más reciente a la más antigua).
+function groupMatchesByDate(matches, direction = 'asc') {
   const groups = new Map();
 
   matches.forEach((match) => {
@@ -75,14 +79,16 @@ function groupMatchesByDate(matches) {
     groups.get(key).push(match);
   });
 
+  const sign = direction === 'desc' ? -1 : 1;
+
   return [...groups.entries()]
     .map(([date, dateMatches]) => [
       date,
       [...dateMatches].sort((left, right) =>
-        String(left.time).localeCompare(String(right.time))
+        sign * String(left.time).localeCompare(String(right.time))
       ),
     ])
-    .sort(([left], [right]) => left.localeCompare(right));
+    .sort(([left], [right]) => sign * left.localeCompare(right));
 }
 
 /*
@@ -850,6 +856,13 @@ const sectionConfig = {
     title: 'Goleadores',
   },
 
+  goalkeepers: {
+    icon: '🧤',
+    eyebrow: 'Valla menos vencida',
+    accent: 'cyan',
+    title: 'Valla menos vencida',
+  },
+
   cards: {
     icon: '🟨',
     eyebrow: 'Disciplina',
@@ -1179,8 +1192,14 @@ export default function PublicTournamentPage() {
       loadTournament
     );
 
+    // Sondeo de respaldo cada 10s: el stream en tiempo real cubre la
+    // mayoría de los casos, pero esto asegura que la página igual se
+    // ponga al día si la conexión se cae en silencio.
+    const interval = setInterval(loadTournament, 10000);
+
     return () => {
       stream.close();
+      clearInterval(interval);
     };
   }, [id, loadTournament]);
 
@@ -1237,6 +1256,14 @@ export default function PublicTournamentPage() {
       current === 'scorers'
         ? null
         : 'scorers'
+    );
+  }
+
+  function toggleGoalkeepers() {
+    setOpenSection((current) =>
+      current === 'goalkeepers'
+        ? null
+        : 'goalkeepers'
     );
   }
 
@@ -2106,6 +2133,42 @@ export default function PublicTournamentPage() {
           </div>
         </SectionCard>
 
+        {/* Valla menos vencida */}
+
+        <SectionCard
+          section="goalkeepers"
+          open={openSection === 'goalkeepers'}
+          onToggle={toggleGoalkeepers}
+          contentId="goalkeepers-content"
+        >
+          <div
+            id="goalkeepers-content"
+            className="w-full min-w-0 max-w-full overflow-hidden p-2.5 sm:p-5"
+          >
+            <p className="mb-3 px-0.5 text-[10px] text-slate-500 sm:text-xs">
+              Arquero con menos goles recibidos por partido.
+            </p>
+
+            <div
+              className={`
+                ${responsiveScorersTableClass}
+                scroll-invisible
+                max-h-[25rem]
+                rounded-xl
+                border border-white/[0.04]
+                bg-black/[0.12]
+                p-1
+                sm:p-2
+              `}
+            >
+              <GoalkeepersTable
+                goalkeepers={data.goalkeepers}
+                respectPaymentStatus
+              />
+            </div>
+          </div>
+        </SectionCard>
+
         {/* Tarjetas */}
 
         <SectionCard
@@ -2293,7 +2356,7 @@ export default function PublicTournamentPage() {
               </p>
             ) : (
               <div className="space-y-5">
-                {groupMatchesByDate(history).map(
+                {groupMatchesByDate(history, 'desc').map(
                   ([date, matches]) => (
                     <section key={date} className="min-w-0">
                       <h3 className="mb-2 flex items-center gap-2 border-b border-white/[0.05] pb-2 text-xs font-bold uppercase tracking-[0.14em] text-blue-300 sm:mb-3 sm:text-sm">
@@ -2336,6 +2399,7 @@ export default function PublicTournamentPage() {
       {!cardsSectionOpen && (
         <TeamDetailModal
           selection={selectedTeam}
+          blueCardEnabled={data.tournament.blueCardEnabled}
           onClose={() => setSelectedTeam(null)}
         />
       )}

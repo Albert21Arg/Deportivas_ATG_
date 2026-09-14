@@ -29,6 +29,18 @@ export async function deleteGroup(id, tournamentId) {
   return result.count > 0;
 }
 
+export async function hasPendingMatchesForGroup(groupId) {
+  const count = await prisma.match.count({ where: { groupId, status: { notIn: ['FINISHED', 'CANCELLED'] } } });
+  return count > 0;
+}
+
+export async function hasPendingGroupMatches(tournamentId) {
+  const count = await prisma.match.count({
+    where: { tournamentId, groupId: { not: null }, status: { notIn: ['FINISHED', 'CANCELLED'] } },
+  });
+  return count > 0;
+}
+
 export function assignTeam(groupId, teamId, pot) {
   return prisma.groupTeam.upsert({
     where: { groupId_teamId: { groupId, teamId } },
