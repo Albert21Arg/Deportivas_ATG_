@@ -25,20 +25,20 @@ function GroupsOverview({ groups = [] }) {
   return (
     <div className="space-y-3">
       {groups.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-white/[0.08] px-4 py-8 text-center text-xs text-slate-500">
+        <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-xs text-slate-500 dark:border-white/[0.08]">
           Los grupos aún no han sido generados.
         </p>
       ) : (
         groups.map((group) => (
-          <article className="rounded-xl border border-cyan-400/10 bg-slate-950/40 p-3" key={group.id}>
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-2">
-              <h3 className="text-sm font-bold text-white">{group.name}</h3>
-              <span className="text-[10px] text-cyan-300">{group.teams.length} equipos</span>
+          <article className="rounded-xl border border-cyan-400/10 bg-slate-50 p-3 dark:bg-slate-950/40" key={group.id}>
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2 dark:border-white/[0.06]">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{group.name}</h3>
+              <span className="text-[10px] text-cyan-600 dark:text-cyan-300">{group.teams.length} equipos</span>
             </div>
             <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
               {group.teams.map(({ team, pot }) => (
-                <div className="flex min-w-0 items-center justify-between gap-2 rounded-lg bg-black/20 px-2.5 py-2" key={team.id}>
-                  <span className="truncate text-xs font-semibold text-slate-300">
+                <div className="flex min-w-0 items-center justify-between gap-2 rounded-lg bg-white px-2.5 py-2 dark:bg-black/20" key={team.id}>
+                  <span className="truncate text-xs font-semibold text-slate-700 dark:text-slate-300">
                     {team.name}
                   </span>
                   <span className="shrink-0 text-[9px] text-slate-600">Bombo {pot}</span>
@@ -82,10 +82,10 @@ function BracketSlot({ team, score, penaltyScore, variant, isFinal }) {
     <div
       className={`flex h-full items-center gap-1 px-1 text-[10px] font-bold sm:gap-2 sm:px-2.5 sm:text-[11px] ${
         variant === 'winner'
-          ? 'bg-emerald-400/[0.08] text-emerald-200'
+          ? 'bg-emerald-400/[0.08] text-emerald-700 dark:text-emerald-200'
           : variant === 'loser'
             ? 'text-slate-500 opacity-40 grayscale'
-            : 'text-slate-300'
+            : 'text-slate-700 dark:text-slate-300'
       }`}
     >
       <TeamCrest team={team} size={isFinal ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-5 w-5 sm:h-6 sm:w-6'} />
@@ -96,7 +96,7 @@ function BracketSlot({ team, score, penaltyScore, variant, isFinal }) {
         </span>
       )}
       {score != null && (
-        <span className={`shrink-0 font-black ${variant === 'winner' ? 'text-emerald-300' : 'text-slate-500'}`}>
+        <span className={`shrink-0 font-black ${variant === 'winner' ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-500'}`}>
           {score}
           {penaltyScore != null && <span className="ml-0.5 text-amber-400">({penaltyScore})</span>}
         </span>
@@ -206,8 +206,8 @@ function BracketTieBlock({ tie, isFinal = false, onSelectMatch }) {
   return (
     <div className="flex h-full flex-col gap-1">
       <article
-        className={`flex flex-1 flex-col overflow-hidden rounded-lg border bg-[#0a1018] shadow-md shadow-black/20 ${
-          hasWinner ? 'border-emerald-400/15' : 'border-white/[0.07]'
+        className={`flex flex-1 flex-col overflow-hidden rounded-lg border bg-white shadow-md shadow-black/5 dark:bg-[#0a1018] dark:shadow-black/20 ${
+          hasWinner ? 'border-emerald-400/15' : 'border-slate-200 dark:border-white/[0.07]'
         } ${onSelectMatch && singleMatch ? 'cursor-pointer transition hover:border-emerald-400/40' : ''}`}
         role={onSelectMatch && singleMatch ? 'button' : undefined}
         tabIndex={onSelectMatch && singleMatch ? 0 : undefined}
@@ -228,7 +228,7 @@ function BracketTieBlock({ tie, isFinal = false, onSelectMatch }) {
             isFinal={isFinal}
           />
         </div>
-        <div className="flex-1 border-t border-white/[0.06]">
+        <div className="flex-1 border-t border-slate-200 dark:border-white/[0.06]">
           <BracketSlot
             team={tie.awayTeam}
             score={awayScore}
@@ -249,7 +249,7 @@ function BracketTieBlock({ tie, isFinal = false, onSelectMatch }) {
 
             return (
               <button
-                className="min-w-0 flex-1 truncate rounded bg-slate-900/80 px-1 text-center text-[8px] font-semibold text-slate-500 transition hover:bg-slate-800 hover:text-slate-200 sm:text-[9px]"
+                className="min-w-0 flex-1 truncate rounded bg-slate-100 px-1 text-center text-[8px] font-semibold text-slate-600 transition hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-900/80 dark:text-slate-500 dark:hover:bg-slate-800 dark:hover:text-slate-200 sm:text-[9px]"
                 key={match.id}
                 type="button"
                 onClick={() => onSelectMatch?.(match)}
@@ -391,14 +391,14 @@ function ChampionModal({ team, championLabel, onClose }) {
       onMouseDown={onClose}
     >
       <div
-        className="relative flex w-full max-w-xs flex-col items-center gap-4 rounded-3xl border border-amber-400/20 bg-gradient-to-b from-slate-900 to-slate-950 p-8 text-center shadow-2xl shadow-black/40"
+        className="relative flex w-full max-w-xs flex-col items-center gap-4 rounded-3xl border border-amber-400/20 bg-white p-8 text-center shadow-2xl shadow-black/10 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 dark:shadow-black/40"
         role="dialog"
         aria-modal="true"
         aria-labelledby="champion-modal-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-lg text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full text-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
           type="button"
           onClick={onClose}
           aria-label="Cerrar"
@@ -416,10 +416,10 @@ function ChampionModal({ team, championLabel, onClose }) {
           </span>
         </div>
 
-        <p className="text-xl font-black text-amber-300 sm:text-2xl" id="champion-modal-title">
+        <p className="text-xl font-black text-amber-600 dark:text-amber-300 sm:text-2xl" id="champion-modal-title">
           {team.name}
         </p>
-        <p className="text-3xl font-black uppercase tracking-[0.08em] text-emerald-200 drop-shadow-[0_0_18px_rgba(52,211,153,.55)] sm:text-4xl">
+        <p className="text-3xl font-black uppercase tracking-[0.08em] text-emerald-600 drop-shadow-[0_0_18px_rgba(52,211,153,.55)] dark:text-emerald-200 sm:text-4xl">
           Campeón{championLabel ? ` ${championLabel}` : ''}
         </p>
       </div>
@@ -461,7 +461,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
 
   if (!hasContent) {
     return (
-      <p className="rounded-xl border border-dashed border-white/[0.08] px-4 py-8 text-center text-xs text-slate-500">
+      <p className="rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-xs text-slate-500 dark:border-white/[0.08]">
         Las llaves aún no han sido generadas.
       </p>
     );
@@ -469,7 +469,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
 
   return (
     <Fragment>
-    <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#05090e] p-2 sm:p-8">
+    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 dark:border-white/[0.06] dark:bg-[#05090e] sm:p-8">
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.05]"
         style={{
@@ -493,7 +493,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
           )}
 
           <div className="flex shrink-0 flex-col items-center gap-2 px-1 sm:gap-3 sm:px-4">
-            <span className="text-sm font-black uppercase tracking-[0.14em] text-amber-300 sm:text-base">Final</span>
+            <span className="text-sm font-black uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 sm:text-base">Final</span>
 
             {showFinal ? (
               <div className="w-[140px] sm:w-[190px]" style={{ height: tieHeight }}>
@@ -501,7 +501,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
               </div>
             ) : (
               <div
-                className="flex w-[140px] items-center justify-center rounded-lg border border-dashed border-white/[0.08] text-[10px] text-slate-600 sm:w-[190px]"
+                className="flex w-[140px] items-center justify-center rounded-lg border border-dashed border-slate-200 text-[10px] text-slate-600 dark:border-white/[0.08] sm:w-[190px]"
                 style={{ height: tieHeight }}
               >
                 Por definir
@@ -531,10 +531,10 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
             )}
 
             <div className="text-center">
-              <p className="text-xl font-black uppercase tracking-[0.08em] text-emerald-200 drop-shadow-[0_0_14px_rgba(52,211,153,.5)] sm:text-2xl">
+              <p className="text-xl font-black uppercase tracking-[0.08em] text-emerald-600 drop-shadow-[0_0_14px_rgba(52,211,153,.5)] dark:text-emerald-200 sm:text-2xl">
                 Campeón{championLabel ? ` ${championLabel}` : ''}
               </p>
-              <p className="mt-1 text-sm font-black text-amber-300 sm:text-base">{championTeam?.name ?? 'Por definir'}</p>
+              <p className="mt-1 text-sm font-black text-amber-600 dark:text-amber-300 sm:text-base">{championTeam?.name ?? 'Por definir'}</p>
             </div>
 
             {showThirdPlace && (

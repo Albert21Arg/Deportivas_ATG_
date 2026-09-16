@@ -15,6 +15,7 @@ import standingsRoutes from './routes/standings-routes.js';
 import publicRoutes from './routes/public-routes.js';
 import announcementRoutes from './routes/announcement-routes.js';
 import floatingBubbleRoutes from './routes/floating-bubble-routes.js';
+import siteSettingRoutes from './routes/site-setting-routes.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { HttpError } from './utils/http-error.js';
 
@@ -47,6 +48,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/floating-bubbles', floatingBubbleRoutes);
+app.use('/api/site-settings', siteSettingRoutes);
 app.use('/uploads', express.static('uploads'));
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/users', userRoutes);

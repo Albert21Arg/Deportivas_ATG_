@@ -519,7 +519,7 @@ export default function AdminsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 pb-12 pt-24 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
+    <main className="lm-ready min-h-screen bg-slate-50 px-4 pb-12 pt-24 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6">
       <DashboardNavbar />
 
       <section className="mx-auto max-w-7xl">
@@ -530,14 +530,14 @@ export default function AdminsPage() {
 
         <div className="mb-8">
           <Link
-            className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+            className="text-sm font-medium text-emerald-600 dark:text-emerald-400 transition hover:text-emerald-700 hover:dark:text-emerald-300"
             to="/dashboard"
           >
             ← Volver al dashboard
           </Link>
 
           <div className="mt-6">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-400">
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-emerald-600 dark:text-emerald-400">
               Fase 5
             </p>
 
@@ -545,7 +545,7 @@ export default function AdminsPage() {
               Administradores
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400 sm:text-base">
               Gestiona administradores, usuarios y
               asignaciones de torneos desde un solo lugar.
             </p>
@@ -553,12 +553,12 @@ export default function AdminsPage() {
         </div>
 
         {!isSuperAdmin && (
-          <div className="rounded-2xl border border-amber-800/60 bg-amber-950/30 p-5 text-amber-200">
+          <div className="rounded-2xl border border-amber-800/60 bg-amber-950/30 p-5 text-amber-700 dark:text-amber-200">
             <p className="font-semibold">
               Acceso restringido
             </p>
 
-            <p className="mt-1 text-sm text-amber-300/80">
+            <p className="mt-1 text-sm text-amber-700 dark:text-amber-300/80">
               Solo un SUPERADMIN puede gestionar
               administradores.
             </p>
@@ -592,12 +592,12 @@ export default function AdminsPage() {
                   openSection ===
                   'new-admin'
                     ? 'border-emerald-500/60 bg-emerald-500/10 shadow-lg shadow-emerald-950/20'
-                    : 'border-slate-800 bg-slate-900 hover:border-emerald-500/50 hover:bg-slate-900/80'
+                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500/50 hover:bg-white hover:dark:bg-slate-900/80'
                 }`}
               >
                 <div className="flex items-center gap-4">
 
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl text-emerald-400">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-2xl text-emerald-600 dark:text-emerald-400">
                     +
                   </div>
 
@@ -606,13 +606,13 @@ export default function AdminsPage() {
                       Nuevo administrador
                     </p>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       Crear administrador
                     </p>
                   </div>
                 </div>
 
-                <span className="text-xl text-slate-500 transition group-hover:text-slate-300">
+                <span className="text-xl text-slate-500 transition group-hover:text-slate-700 group-hover:dark:text-slate-300">
                   {openSection ===
                   'new-admin'
                     ? '⌃'
@@ -630,12 +630,12 @@ export default function AdminsPage() {
                 className={`group flex items-center justify-between rounded-2xl border p-5 text-left transition ${
                   openSection === 'users'
                     ? 'border-sky-500/50 bg-sky-500/10 shadow-lg shadow-sky-950/20'
-                    : 'border-slate-800 bg-slate-900 hover:border-sky-500/50 hover:bg-slate-900/80'
+                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-sky-500/50 hover:bg-white hover:dark:bg-slate-900/80'
                 }`}
               >
                 <div className="flex items-center gap-4">
 
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-xl text-sky-400">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-500/10 text-xl text-sky-600 dark:text-sky-400">
                     👥
                   </div>
 
@@ -644,7 +644,7 @@ export default function AdminsPage() {
                       Lista de usuarios
                     </p>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       {admins.length}{' '}
                       administrador
                       {admins.length !== 1
@@ -654,7 +654,7 @@ export default function AdminsPage() {
                   </div>
                 </div>
 
-                <span className="text-xl text-slate-500 transition group-hover:text-slate-300">
+                <span className="text-xl text-slate-500 transition group-hover:text-slate-700 group-hover:dark:text-slate-300">
                   {openSection === 'users'
                     ? '⌃'
                     : '⌄'}
@@ -674,12 +674,12 @@ export default function AdminsPage() {
                   openSection ===
                   'assignments'
                     ? 'border-violet-500/50 bg-violet-500/10 shadow-lg shadow-violet-950/20'
-                    : 'border-slate-800 bg-slate-900 hover:border-violet-500/50 hover:bg-slate-900/80'
+                    : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-violet-500/50 hover:bg-white hover:dark:bg-slate-900/80'
                 }`}
               >
                 <div className="flex items-center gap-4">
 
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-xl text-violet-400">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-xl text-violet-600 dark:text-violet-400">
                     🎯
                   </div>
 
@@ -688,13 +688,13 @@ export default function AdminsPage() {
                       Asignaciones
                     </p>
 
-                    <p className="mt-1 text-sm text-slate-400">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       Administrar torneos
                     </p>
                   </div>
                 </div>
 
-                <span className="text-xl text-slate-500 transition group-hover:text-slate-300">
+                <span className="text-xl text-slate-500 transition group-hover:text-slate-700 group-hover:dark:text-slate-300">
                   {openSection ===
                   'assignments'
                     ? '⌃'
@@ -710,14 +710,14 @@ export default function AdminsPage() {
             {openSection ===
               'new-admin' && (
               <form
-                className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-xl"
+                className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl"
                 onSubmit={saveAdmin}
               >
-                <div className="border-b border-slate-800 px-6 py-5">
+                <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
                   <div className="flex items-center justify-between gap-4">
 
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                      <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                         {editingId
                           ? 'Edición'
                           : 'Nuevo usuario'}
@@ -735,7 +735,7 @@ export default function AdminsPage() {
                       onClick={
                         cancelEditing
                       }
-                      className="rounded-lg px-3 py-2 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                      className="rounded-lg px-3 py-2 text-sm text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                     >
                       Cerrar
                     </button>
@@ -750,7 +750,7 @@ export default function AdminsPage() {
                     Nombre
 
                     <input
-                      className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
                       name="name"
                       value={form.name}
                       onChange={
@@ -767,7 +767,7 @@ export default function AdminsPage() {
                     Email
 
                     <input
-                      className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
                       name="email"
                       type="email"
                       value={form.email}
@@ -787,7 +787,7 @@ export default function AdminsPage() {
                       : 'Contraseña'}
 
                     <input
-                      className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
                       name="password"
                       type="password"
                       minLength="8"
@@ -810,7 +810,7 @@ export default function AdminsPage() {
                     Estado
 
                     <select
-                      className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
                       name="status"
                       value={
                         form.status
@@ -830,20 +830,20 @@ export default function AdminsPage() {
                   </label>
                 </div>
 
-                <div className="flex flex-col-reverse gap-3 border-t border-slate-800 bg-slate-950/40 px-6 py-4 sm:flex-row sm:justify-end">
+                <div className="flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 px-6 py-4 sm:flex-row sm:justify-end">
 
                   <button
                     type="button"
                     onClick={
                       cancelEditing
                     }
-                    className="rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800"
+                    className="rounded-xl border border-slate-300 dark:border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 hover:dark:bg-slate-800"
                   >
                     Cancelar
                   </button>
 
                   <button
-                    className="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={
                       isSaving
                     }
@@ -865,28 +865,28 @@ export default function AdminsPage() {
 
             {openSection ===
               'users' && (
-              <section className="overflow-visible rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+              <section className="overflow-visible rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
 
-                <div className="border-b border-slate-800 px-6 py-5">
+                <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
                   <h2 className="text-xl font-bold">
                     Lista de usuarios
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Administra los datos y permisos
                     de cada administrador.
                   </p>
                 </div>
 
                 {isLoading ? (
-                  <div className="p-6 text-sm text-slate-400">
+                  <div className="p-6 text-sm text-slate-500 dark:text-slate-400">
                     Cargando usuarios...
                   </div>
                 ) : (
                   <div className="divide-y divide-slate-800">
 
                     {admins.length === 0 && (
-                      <div className="p-8 text-center text-sm text-slate-400">
+                      <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
                         No hay administradores registrados.
                       </div>
                     )}
@@ -899,7 +899,7 @@ export default function AdminsPage() {
 
                         <div className="flex min-w-0 items-center gap-4">
 
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-800 font-bold text-emerald-400">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 font-bold text-emerald-600 dark:text-emerald-400">
                             {admin.name
                               ?.charAt(0)
                               ?.toUpperCase()}
@@ -917,8 +917,8 @@ export default function AdminsPage() {
                                 className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
                                   admin.status ===
                                   'ACTIVE'
-                                    ? 'bg-emerald-500/10 text-emerald-400'
-                                    : 'bg-red-500/10 text-red-400'
+                                    ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                                    : 'bg-red-500/10 text-red-600 dark:text-red-400'
                                 }`}
                               >
                                 {admin.status ===
@@ -928,7 +928,7 @@ export default function AdminsPage() {
                               </span>
                             </div>
 
-                            <p className="mt-1 truncate text-sm text-slate-400">
+                            <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
                               {admin.email}
                             </p>
 
@@ -961,7 +961,7 @@ export default function AdminsPage() {
                                     : admin.id
                               )
                             }
-                            className="flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 hover:text-white"
+                            className="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                           >
                             Acciones
                             <span>
@@ -971,7 +971,7 @@ export default function AdminsPage() {
 
                           {openUserMenu ===
                             admin.id && (
-                            <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-700 bg-slate-950 p-1.5 shadow-2xl">
+                            <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-1.5 shadow-2xl">
 
                               <button
                                 type="button"
@@ -980,7 +980,7 @@ export default function AdminsPage() {
                                     admin
                                   )
                                 }
-                                className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-800"
+                                className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-100 hover:dark:bg-slate-800"
                               >
                                 ✏️ Editar usuario
                               </button>
@@ -992,7 +992,7 @@ export default function AdminsPage() {
                                     admin
                                   )
                                 }
-                                className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-800"
+                                className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-100 hover:dark:bg-slate-800"
                               >
                                 🔑 Cambiar contraseña
                               </button>
@@ -1004,7 +1004,7 @@ export default function AdminsPage() {
                                     admin
                                   )
                                 }
-                                className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-800"
+                                className="w-full rounded-lg px-3 py-2.5 text-left text-sm transition hover:bg-slate-100 hover:dark:bg-slate-800"
                               >
                                 {admin.status ===
                                 'ACTIVE'
@@ -1027,13 +1027,13 @@ export default function AdminsPage() {
 
             {openSection ===
               'assignments' && (
-              <section className="overflow-visible rounded-2xl border border-slate-800 bg-slate-900 shadow-xl">
+              <section className="overflow-visible rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
 
-                <div className="border-b border-slate-800 px-6 py-5">
+                <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
 
                   <div className="flex items-center gap-3">
 
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400">
                       🎯
                     </div>
 
@@ -1042,7 +1042,7 @@ export default function AdminsPage() {
                         Asignaciones
                       </h2>
 
-                      <p className="mt-1 text-sm text-slate-400">
+                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                         Busca un torneo y asigna
                         fácilmente sus administradores.
                       </p>
@@ -1110,7 +1110,7 @@ export default function AdminsPage() {
                             )
                           }
                           placeholder="Buscar torneo por nombre..."
-                          className="w-full rounded-xl border border-slate-700 bg-slate-950 py-3 pl-11 pr-10 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-400/10"
+                          className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 py-3 pl-11 pr-10 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-400/10"
                         />
 
                         {tournamentSearch && (
@@ -1119,7 +1119,7 @@ export default function AdminsPage() {
                             onClick={
                               clearTournament
                             }
-                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-slate-500 transition hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                           >
                             ✕
                           </button>
@@ -1131,12 +1131,12 @@ export default function AdminsPage() {
 
                     {showTournamentResults &&
                       !selectedTournament && (
-                        <div className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-2 shadow-2xl">
+                        <div className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 shadow-2xl">
 
                           {filteredTournaments.length ===
                           0 ? (
                             <div className="p-5 text-center">
-                              <p className="text-sm text-slate-400">
+                              <p className="text-sm text-slate-500 dark:text-slate-400">
                                 No se encontraron torneos.
                               </p>
 
@@ -1159,9 +1159,9 @@ export default function AdminsPage() {
                                       tournament
                                     )
                                   }
-                                  className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-slate-800"
+                                  className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-slate-100 hover:dark:bg-slate-800"
                                 >
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
+                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
                                     🏆
                                   </div>
 
@@ -1193,13 +1193,13 @@ export default function AdminsPage() {
 
                         <div className="flex min-w-0 items-center gap-3">
 
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-400">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400">
                             🏆
                           </div>
 
                           <div className="min-w-0">
 
-                            <p className="text-xs font-medium text-violet-400">
+                            <p className="text-xs font-medium text-violet-600 dark:text-violet-400">
                               Torneo seleccionado
                             </p>
 
@@ -1216,7 +1216,7 @@ export default function AdminsPage() {
                           onClick={
                             clearTournament
                           }
-                          className="shrink-0 rounded-lg px-3 py-2 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                          className="shrink-0 rounded-lg px-3 py-2 text-xs text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                         >
                           Cambiar
                         </button>
@@ -1276,7 +1276,7 @@ export default function AdminsPage() {
                               ? 'Buscar por nombre o correo...'
                               : 'Primero selecciona un torneo'
                           }
-                          className="w-full rounded-xl border border-slate-700 bg-slate-950 py-3 pl-11 pr-10 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 py-3 pl-11 pr-10 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-50"
                         />
 
                         {adminSearch && (
@@ -1285,7 +1285,7 @@ export default function AdminsPage() {
                             onClick={
                               clearAdmin
                             }
-                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-slate-500 transition hover:bg-slate-800 hover:text-white"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg px-2 py-1 text-slate-500 transition hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                           >
                             ✕
                           </button>
@@ -1298,12 +1298,12 @@ export default function AdminsPage() {
                     {showAdminResults &&
                       selectedTournamentId &&
                       !selectedAdmin && (
-                        <div className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-2 shadow-2xl">
+                        <div className="absolute left-0 right-0 z-40 mt-2 max-h-64 overflow-y-auto rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 p-2 shadow-2xl">
 
                           {filteredAdmins.length ===
                           0 ? (
                             <div className="p-5 text-center">
-                              <p className="text-sm text-slate-400">
+                              <p className="text-sm text-slate-500 dark:text-slate-400">
                                 No se encontraron administradores.
                               </p>
 
@@ -1325,9 +1325,9 @@ export default function AdminsPage() {
                                       admin
                                     )
                                   }
-                                  className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-slate-800"
+                                  className="flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-slate-100 hover:dark:bg-slate-800"
                                 >
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 font-bold text-emerald-400">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400">
                                     {admin.name
                                       ?.charAt(
                                         0
@@ -1362,7 +1362,7 @@ export default function AdminsPage() {
 
                         <div className="flex min-w-0 items-center gap-3">
 
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 font-bold text-emerald-400">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 font-bold text-emerald-600 dark:text-emerald-400">
                             {selectedAdmin.name
                               ?.charAt(0)
                               ?.toUpperCase()}
@@ -1370,7 +1370,7 @@ export default function AdminsPage() {
 
                           <div className="min-w-0">
 
-                            <p className="text-xs font-medium text-emerald-400">
+                            <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                               Administrador seleccionado
                             </p>
 
@@ -1393,7 +1393,7 @@ export default function AdminsPage() {
                           onClick={
                             clearAdmin
                           }
-                          className="shrink-0 rounded-lg px-3 py-2 text-xs text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                          className="shrink-0 rounded-lg px-3 py-2 text-xs text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                         >
                           Cambiar
                         </button>
@@ -1414,7 +1414,7 @@ export default function AdminsPage() {
                         !selectedTournamentId ||
                         !selectedAdminId
                       }
-                      className="mt-5 w-full rounded-xl bg-emerald-500 px-6 py-3 font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="mt-5 w-full rounded-xl bg-emerald-500 px-6 py-3 font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       + Asignar administrador
                     </button>
@@ -1442,7 +1442,7 @@ export default function AdminsPage() {
                         )}
                       </div>
 
-                      <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-300">
+                      <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
                         {
                           assignedAdmins.length
                         }
@@ -1451,9 +1451,9 @@ export default function AdminsPage() {
 
                     {assignedAdmins.length ===
                     0 ? (
-                      <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/40 p-6 text-center">
+                      <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 p-6 text-center">
 
-                        <p className="text-sm text-slate-400">
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
                           {selectedTournamentId
                             ? 'No hay administradores asignados a este torneo.'
                             : 'Selecciona un torneo para ver sus administradores.'}
@@ -1473,7 +1473,7 @@ export default function AdminsPage() {
                             user: assigned,
                           }) => (
                             <div
-                              className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/50 p-4"
+                              className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/50 p-4"
                               key={
                                 assigned.id
                               }
@@ -1481,7 +1481,7 @@ export default function AdminsPage() {
 
                               <div className="flex min-w-0 items-center gap-3">
 
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-400">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-600 dark:text-emerald-400">
                                   {assigned.name
                                     ?.charAt(
                                       0
@@ -1512,7 +1512,7 @@ export default function AdminsPage() {
                                     assigned
                                   )
                                 }
-                                className="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
+                                className="shrink-0 rounded-lg px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 transition hover:bg-red-500/10 hover:text-red-700 hover:dark:text-red-300"
                               >
                                 Retirar
                               </button>
@@ -1535,7 +1535,7 @@ export default function AdminsPage() {
 
       {passwordAdmin && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-slate-950/80 p-4 backdrop-blur-sm"
           onClick={closePasswordModal}
         >
           <form
@@ -1543,12 +1543,12 @@ export default function AdminsPage() {
             onClick={(event) =>
               event.stopPropagation()
             }
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl"
           >
 
-            <div className="border-b border-slate-800 p-6">
+            <div className="border-b border-slate-200 dark:border-slate-800 p-6">
 
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
                 Seguridad
               </p>
 
@@ -1556,9 +1556,9 @@ export default function AdminsPage() {
                 Cambiar contraseña
               </h2>
 
-              <p className="mt-2 text-sm text-slate-400">
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
                 Cambiarás la contraseña de{' '}
-                <span className="font-semibold text-slate-200">
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
                   {
                     passwordAdmin.name
                   }
@@ -1584,12 +1584,12 @@ export default function AdminsPage() {
                     )
                   }
                   placeholder="Mínimo 8 caracteres"
-                  className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                  className="mt-2 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
                 />
               </label>
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-800 bg-slate-950/40 p-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 p-5 sm:flex-row sm:justify-end">
 
               <button
                 type="button"
@@ -1599,7 +1599,7 @@ export default function AdminsPage() {
                 onClick={
                   closePasswordModal
                 }
-                className="rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-xl border border-slate-300 dark:border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 hover:dark:bg-slate-800 disabled:opacity-50"
               >
                 Cancelar
               </button>
@@ -1610,7 +1610,7 @@ export default function AdminsPage() {
                   isChangingPassword ||
                   newPassword.length < 8
                 }
-                className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isChangingPassword
                   ? 'Actualizando...'
@@ -1627,23 +1627,23 @@ export default function AdminsPage() {
 
       {adminToRemove && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-white dark:bg-slate-950/80 p-4 backdrop-blur-sm"
           onClick={
             cancelRemoveAdmin
           }
         >
           <div
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl"
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl"
             onClick={(event) =>
               event.stopPropagation()
             }
           >
 
-            <div className="border-b border-slate-800 p-6">
+            <div className="border-b border-slate-200 dark:border-slate-800 p-6">
 
               <div className="flex items-start gap-4">
 
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-xl font-bold text-red-400">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-500/10 text-xl font-bold text-red-600 dark:text-red-400">
                   !
                 </div>
 
@@ -1652,10 +1652,10 @@ export default function AdminsPage() {
                     Retirar administrador
                   </h2>
 
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                  <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
                     ¿Estás seguro de que deseas
                     retirar a{' '}
-                    <span className="font-semibold text-slate-200">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200">
                       {
                         adminToRemove.name
                       }
@@ -1670,7 +1670,7 @@ export default function AdminsPage() {
 
               <div className="rounded-xl border border-amber-800/50 bg-amber-950/20 p-4">
 
-                <p className="text-sm leading-6 text-amber-300">
+                <p className="text-sm leading-6 text-amber-700 dark:text-amber-300">
                   El administrador dejará de tener
                   acceso a la gestión de este torneo.
                 </p>
@@ -1682,7 +1682,7 @@ export default function AdminsPage() {
               </div>
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-800 bg-slate-950/40 p-5 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/40 p-5 sm:flex-row sm:justify-end">
 
               <button
                 type="button"
@@ -1690,7 +1690,7 @@ export default function AdminsPage() {
                 onClick={
                   cancelRemoveAdmin
                 }
-                className="rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-300 transition hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-xl border border-slate-300 dark:border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 hover:dark:bg-slate-800 disabled:opacity-50"
               >
                 Cancelar
               </button>
@@ -1701,7 +1701,7 @@ export default function AdminsPage() {
                 onClick={
                   confirmRemoveAdmin
                 }
-                className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="rounded-xl bg-red-500 px-5 py-2.5 text-sm font-bold text-slate-900 dark:text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isRemoving
                   ? 'Retirando...'

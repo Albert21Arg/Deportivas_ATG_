@@ -17,11 +17,13 @@ import HomePage from '../pages/HomePage.jsx';
 import PublicTournamentPage from '../pages/PublicTournamentPage.jsx';
 import AnnouncementsPage from '../pages/AnnouncementsPage.jsx';
 import FloatingBubblesPage from '../pages/FloatingBubblesPage.jsx';
+import SiteSettingsPage from '../pages/SiteSettingsPage.jsx';
 import PlayersPage from '../pages/PlayersPage.jsx';
 import GroupsPage from '../pages/GroupsPage.jsx';
 import BracketPage from '../pages/BracketPage.jsx';
 import TournamentWorkspacePage from '../pages/TournamentWorkspacePage.jsx';
 import FloatingBubbles from '../components/FloatingBubbles.jsx';
+import FaviconLoader from '../components/FaviconLoader.jsx';
 
 export default function AppRoutes() {
   return (
@@ -29,6 +31,7 @@ export default function AppRoutes() {
       <ThemeProvider>
         <NotificationProvider>
           <AuthProvider>
+            <FaviconLoader />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -48,6 +51,7 @@ export default function AppRoutes() {
                 <Route path="/dashboard/bracket" element={<BracketPage />} />
                 <Route path="/dashboard/announcements" element={<AnnouncementsPage />} />
                 <Route path="/dashboard/floating-bubbles" element={<FloatingBubblesPage />} />
+                <Route path="/dashboard/site-settings" element={<SiteSettingsPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

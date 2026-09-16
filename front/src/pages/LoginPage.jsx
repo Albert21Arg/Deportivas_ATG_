@@ -53,16 +53,16 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6 pb-12 pt-28 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <PublicNavbar showLogin={false} />
-      <section className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-2xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Deportiva</p>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight">Iniciar sesión</h1>
-        <p className="mt-2 text-sm text-slate-400">Accede a la gestión de tus torneos.</p>
+      <section className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-black/5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-2xl dark:shadow-black/40">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">Deportiva</p>
+        <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Iniciar sesión</h1>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Accede a la gestión de tus torneos.</p>
 
         <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <label className="block text-sm font-medium text-slate-200">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
             Email
             <input
-              className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none transition focus:border-emerald-400"
+              className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-emerald-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
               name="email"
               type="email"
               autoComplete="email"
@@ -72,10 +72,10 @@ export default function LoginPage() {
             />
           </label>
 
-          <label className="block text-sm font-medium text-slate-200">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-200">
             Contraseña
             <input
-              className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-slate-100 outline-none transition focus:border-emerald-400"
+              className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-emerald-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
               name="password"
               type="password"
               autoComplete="current-password"
@@ -86,10 +86,10 @@ export default function LoginPage() {
             />
           </label>
 
-          {error && <p className="rounded-lg border border-red-900 bg-red-950/50 p-3 text-sm text-red-300">{error}</p>}
+          {error && <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300">{error}</p>}
 
           <button
-            className="w-full rounded-lg bg-emerald-500 px-4 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-lg bg-emerald-500 px-4 py-3 font-semibold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-950"
             type="submit"
             disabled={isSubmitting}
           >

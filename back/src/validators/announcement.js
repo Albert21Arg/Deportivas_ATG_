@@ -8,6 +8,15 @@ function seconds(value, field, { min, max }) {
   return parsed;
 }
 
+function parseTournamentId(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new HttpError(422, 'Torneo no válido');
+  }
+  return parsed;
+}
+
 export function validateAnnouncement(request, _response, next) {
   try {
     const body = request.body ?? {};
@@ -21,6 +30,7 @@ export function validateAnnouncement(request, _response, next) {
       delaySeconds: seconds(body.delaySeconds ?? 0, 'delaySeconds', { min: 0, max: 86400 }),
       durationSeconds: seconds(body.durationSeconds ?? 8, 'durationSeconds', { min: 1, max: 86400 }),
       status: body.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
+      tournamentId: parseTournamentId(body.tournamentId),
     };
     return next();
   } catch (error) {
@@ -38,6 +48,7 @@ export function validateAnnouncementUpdate(request, _response, next) {
     if (body.linkUrl !== undefined) data.linkUrl = body.linkUrl?.trim() || null;
     if (body.delaySeconds !== undefined) data.delaySeconds = seconds(body.delaySeconds, 'delaySeconds', { min: 0, max: 86400 });
     if (body.durationSeconds !== undefined) data.durationSeconds = seconds(body.durationSeconds, 'durationSeconds', { min: 1, max: 86400 });
+    if (body.tournamentId !== undefined) data.tournamentId = parseTournamentId(body.tournamentId);
     if (request.file) data.imageUrl = `/uploads/announcements/${request.file.filename}`;
     if (!Object.keys(data).length) throw new HttpError(422, 'No hay cambios para guardar');
     request.validatedBody = data;

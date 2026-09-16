@@ -185,18 +185,20 @@ function MatchRow({ match, onClick }) {
     <button
       className="
         group flex w-full min-w-0 items-center justify-between gap-2
-        border-b border-white/[0.05]
+        border-b border-slate-100
         py-3 text-left
         transition-colors duration-200
-        hover:bg-white/[0.025]
+        hover:bg-slate-50
         last:border-0
+        dark:border-white/[0.05]
+        dark:hover:bg-white/[0.025]
         sm:gap-4 sm:py-4
       "
       type="button"
       onClick={onClick}
     >
       <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-medium text-slate-500 sm:text-sm sm:text-slate-400">
+        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 sm:text-sm">
           {formatTime(match.time)} · Colombia
         </p>
 
@@ -206,7 +208,7 @@ function MatchRow({ match, onClick }) {
             size="h-7 w-7 sm:h-9 sm:w-9"
           />
 
-          <span className="ml-1.5 min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-300 sm:ml-2 sm:max-w-none sm:text-base sm:text-slate-200">
+          <span className="ml-1.5 min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-700 dark:text-slate-300 sm:ml-2 sm:max-w-none sm:text-base">
             {match.homeTeam.name}
           </span>
 
@@ -216,7 +218,7 @@ function MatchRow({ match, onClick }) {
               sm:mx-2 sm:text-sm
               ${
                 match.status === 'STARTED'
-                  ? 'text-emerald-400'
+                  ? 'text-emerald-600 dark:text-emerald-400'
                   : 'text-slate-600'
               }
             `}
@@ -226,7 +228,7 @@ function MatchRow({ match, onClick }) {
               : 'vs'}
           </span>
 
-          <span className="min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-300 sm:max-w-none sm:text-base sm:text-slate-200">
+          <span className="min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-700 dark:text-slate-300 sm:max-w-none sm:text-base">
             {match.awayTeam.name}
           </span>
 
@@ -245,8 +247,8 @@ function MatchRow({ match, onClick }) {
           sm:ml-4 sm:px-3 sm:text-xs
           ${
             match.status === 'STARTED'
-              ? 'border border-emerald-400/20 bg-emerald-400/10 font-bold text-emerald-300'
-              : 'bg-slate-800 text-slate-400'
+              ? 'border border-emerald-400/20 bg-emerald-400/10 font-bold text-emerald-700 dark:text-emerald-300'
+              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
           }
         `}
       >
@@ -274,9 +276,12 @@ function LiveMatchCard({ match, onClick }) {
         rounded-2xl
         border border-emerald-400/30
         bg-gradient-to-br
-        from-emerald-500/[0.12]
-        via-slate-900
-        to-slate-950
+        from-emerald-500/[0.10]
+        via-white
+        to-slate-50
+        dark:from-emerald-500/[0.12]
+        dark:via-slate-900
+        dark:to-slate-950
         p-4
         text-left
         shadow-[0_12px_45px_rgba(16,185,129,0.10)]
@@ -294,36 +299,36 @@ function LiveMatchCard({ match, onClick }) {
           <div className="flex items-center gap-2">
             <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-red-500 shadow-[0_0_14px_rgba(239,68,68,0.8)]" />
 
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-red-400 sm:text-xs">
+            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-red-600 dark:text-red-400 sm:text-xs">
               Partido en vivo
             </span>
           </div>
 
-          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-300 sm:px-3 sm:text-xs">
+          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-emerald-700 dark:text-emerald-300 sm:px-3 sm:text-xs">
             ● EN VIVO
           </span>
         </div>
 
         <div className="flex items-center justify-center gap-2 sm:gap-8">
           <div className="flex w-[105px] min-w-0 flex-col items-center text-center sm:w-[180px]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.035] sm:h-24 sm:w-24">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.07] dark:bg-white/[0.035] sm:h-24 sm:w-24">
               <TeamLogo
                 team={match.homeTeam}
                 size="h-14 w-14 sm:h-20 sm:w-20"
               />
             </div>
 
-            <p className="mt-2 w-full truncate text-xs font-black text-white sm:mt-3 sm:text-base">
+            <p className="mt-2 w-full truncate text-xs font-black text-slate-900 dark:text-white sm:mt-3 sm:text-base">
               {match.homeTeam.name}
             </p>
 
-            <span className="mt-2 text-3xl font-black leading-none text-emerald-400 sm:text-5xl">
+            <span className="mt-2 text-3xl font-black leading-none text-emerald-600 dark:text-emerald-400 sm:text-5xl">
               {match.homeScore ?? 0}
             </span>
           </div>
 
           <div className="flex shrink-0 flex-col items-center">
-            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-red-400 sm:text-xs">
+            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-red-600 dark:text-red-400 sm:text-xs">
               EN VIVO
             </span>
 
@@ -337,18 +342,18 @@ function LiveMatchCard({ match, onClick }) {
           </div>
 
           <div className="flex w-[105px] min-w-0 flex-col items-center text-center sm:w-[180px]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.07] bg-white/[0.035] sm:h-24 sm:w-24">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.07] dark:bg-white/[0.035] sm:h-24 sm:w-24">
               <TeamLogo
                 team={match.awayTeam}
                 size="h-14 w-14 sm:h-20 sm:w-20"
               />
             </div>
 
-            <p className="mt-2 w-full truncate text-xs font-black text-white sm:mt-3 sm:text-base">
+            <p className="mt-2 w-full truncate text-xs font-black text-slate-900 dark:text-white sm:mt-3 sm:text-base">
               {match.awayTeam.name}
             </p>
 
-            <span className="mt-2 text-3xl font-black leading-none text-emerald-400 sm:text-5xl">
+            <span className="mt-2 text-3xl font-black leading-none text-emerald-600 dark:text-emerald-400 sm:text-5xl">
               {match.awayScore ?? 0}
             </span>
           </div>
@@ -374,13 +379,18 @@ function HistoryMatchCard({ match }) {
   return (
     <article
       className="
-        rounded-2xl border border-white/[0.06]
-        bg-gradient-to-br from-slate-900 via-slate-950 to-black
-        p-3 shadow-lg shadow-black/10
+        rounded-2xl border border-slate-200
+        bg-white
+        p-3 shadow-lg shadow-black/5
         transition-all duration-200
         hover:-translate-y-0.5
-        hover:border-white/[0.1]
-        hover:shadow-xl hover:shadow-black/20
+        hover:border-slate-300
+        hover:shadow-xl
+        dark:border-white/[0.06]
+        dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-black
+        dark:shadow-black/10
+        dark:hover:border-white/[0.1]
+        dark:hover:shadow-black/20
         sm:p-5
       "
     >
@@ -396,45 +406,45 @@ function HistoryMatchCard({ match }) {
 
       <div className="flex items-center justify-center">
         <div className="flex w-[90px] min-w-0 flex-col items-center text-center sm:w-[150px]">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.05] bg-white/[0.025] sm:h-20 sm:w-20">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.025] sm:h-20 sm:w-20">
             <TeamLogo
               team={match.homeTeam}
               size="h-14 w-14 sm:h-20 sm:w-20"
             />
           </div>
 
-          <p className="mt-2 w-full truncate text-[11px] font-bold text-slate-200 sm:text-sm">
+          <p className="mt-2 w-full truncate text-[11px] font-bold text-slate-700 dark:text-slate-200 sm:text-sm">
             {match.homeTeam.name}
           </p>
 
-          <span className="mt-1.5 text-2xl font-black text-slate-100 sm:mt-2 sm:text-3xl">
+          <span className="mt-1.5 text-2xl font-black text-slate-900 dark:text-slate-100 sm:mt-2 sm:text-3xl">
             {match.homeScore}
           </span>
         </div>
 
         <div className="flex w-10 shrink-0 flex-col items-center sm:w-16">
-          <span className="rounded-full border border-white/[0.06] bg-white/[0.025] px-2 py-1 text-[8px] font-black tracking-wider text-slate-500 sm:text-xs">
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[8px] font-black tracking-wider text-slate-500 dark:border-white/[0.06] dark:bg-white/[0.025] sm:text-xs">
             FINAL
           </span>
 
-          <span className="mt-1 text-sm font-bold text-slate-700">
+          <span className="mt-1 text-sm font-bold text-slate-700 dark:text-slate-400">
             -
           </span>
         </div>
 
         <div className="flex w-[90px] min-w-0 flex-col items-center text-center sm:w-[150px]">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.05] bg-white/[0.025] sm:h-20 sm:w-20">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.025] sm:h-20 sm:w-20">
             <TeamLogo
               team={match.awayTeam}
               size="h-14 w-14 sm:h-20 sm:w-20"
             />
           </div>
 
-          <p className="mt-2 w-full truncate text-[11px] font-bold text-slate-200 sm:text-sm">
+          <p className="mt-2 w-full truncate text-[11px] font-bold text-slate-700 dark:text-slate-200 sm:text-sm">
             {match.awayTeam.name}
           </p>
 
-          <span className="mt-1.5 text-2xl font-black text-slate-100 sm:mt-2 sm:text-3xl">
+          <span className="mt-1.5 text-2xl font-black text-slate-900 dark:text-slate-100 sm:mt-2 sm:text-3xl">
             {match.awayScore}
           </span>
         </div>
@@ -511,9 +521,12 @@ function MatchDetailModal({
           max-h-[94vh] w-full max-w-lg
           overflow-y-auto
           rounded-2xl
-          border border-slate-700
-          bg-slate-900
-          shadow-2xl
+          border border-slate-200
+          bg-white
+          shadow-2xl shadow-black/10
+          dark:border-slate-700
+          dark:bg-slate-900
+          dark:shadow-black/40
           sm:max-h-[92vh]
         "
         role="dialog"
@@ -524,13 +537,14 @@ function MatchDetailModal({
         <div
           className="
             flex items-start justify-between gap-3
-            border-b border-slate-800
+            border-b border-slate-200
             px-3 py-3
+            dark:border-slate-800
             sm:px-6 sm:py-5
           "
         >
           <div className="min-w-0">
-            <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-emerald-400 sm:text-xs">
+            <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-emerald-600 dark:text-emerald-400 sm:text-xs">
               Detalle del partido
             </p>
 
@@ -549,8 +563,10 @@ function MatchDetailModal({
               flex h-8 w-8 shrink-0
               items-center justify-center
               rounded-full
-              text-lg text-slate-400
-              hover:bg-slate-800 hover:text-white
+              text-lg text-slate-500
+              hover:bg-slate-100 hover:text-slate-900
+              dark:text-slate-400
+              dark:hover:bg-slate-800 dark:hover:text-white
               sm:h-9 sm:w-9 sm:text-xl
             "
             type="button"
@@ -575,7 +591,7 @@ function MatchDetailModal({
               className="mx-auto"
             />
 
-            <p className="mt-2 break-words text-xs font-bold leading-tight text-slate-100 sm:mt-3 sm:text-base">
+            <p className="mt-2 break-words text-xs font-bold leading-tight text-slate-900 dark:text-slate-100 sm:mt-3 sm:text-base">
               {match.homeTeam.name}
             </p>
 
@@ -585,8 +601,8 @@ function MatchDetailModal({
                 sm:mt-3 sm:text-5xl
                 ${
                   match.status === 'STARTED'
-                    ? 'text-emerald-400'
-                    : 'text-slate-100'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-900 dark:text-slate-100'
                 }
               `}
             >
@@ -639,7 +655,7 @@ function MatchDetailModal({
               className="mx-auto"
             />
 
-            <p className="mt-2 break-words text-xs font-bold leading-tight text-slate-100 sm:mt-3 sm:text-base">
+            <p className="mt-2 break-words text-xs font-bold leading-tight text-slate-900 dark:text-slate-100 sm:mt-3 sm:text-base">
               {match.awayTeam.name}
             </p>
 
@@ -649,8 +665,8 @@ function MatchDetailModal({
                 sm:mt-3 sm:text-5xl
                 ${
                   match.status === 'STARTED'
-                    ? 'text-emerald-400'
-                    : 'text-slate-100'
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-900 dark:text-slate-100'
                 }
               `}
             >
@@ -664,14 +680,14 @@ function MatchDetailModal({
         </div>
 
         {match.status === 'STARTED' && (
-          <div className="border-t border-slate-800 px-3 py-3 sm:px-6 sm:py-4">
+          <div className="border-t border-slate-200 px-3 py-3 dark:border-slate-800 sm:px-6 sm:py-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-400 sm:gap-2 sm:text-xs">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 sm:gap-2 sm:text-xs">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
                 EN VIVO
               </span>
 
-              <span className="text-base font-black text-white sm:text-lg">
+              <span className="text-base font-black text-slate-900 dark:text-white sm:text-lg">
                 {match.homeScore ?? 0} - {match.awayScore ?? 0}
               </span>
             </div>
@@ -697,7 +713,7 @@ function MatchDetailModal({
                   <div
                     className={`
                       flex w-full items-center gap-2
-                      text-xs text-slate-300
+                      text-xs text-slate-700 dark:text-slate-300
                       sm:text-sm
                       ${
                         isHomeTeam
@@ -721,9 +737,11 @@ function MatchDetailModal({
 
                         <span
                           className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${
-                            event.player
+                            (event.player
                               ? isPlayerExpired(event.player)
-                              : isTeamExpired(event.team)
+                              : isTeamExpired(event.team))
+                              ? EXPIRED_CLASS
+                              : ''
                           }`}
                         >
                           {event.player?.name ?? event.team.name}
@@ -743,9 +761,11 @@ function MatchDetailModal({
 
                         <span
                           className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${
-                            event.player
+                            (event.player
                               ? isPlayerExpired(event.player)
-                              : isTeamExpired(event.team)
+                              : isTeamExpired(event.team))
+                              ? EXPIRED_CLASS
+                              : ''
                           }`}
                         >
                           {event.player?.name ?? event.team.name}
@@ -773,9 +793,11 @@ function MatchDetailModal({
 
                         <span
                           className={`truncate font-semibold ${
-                            event.player
+                            (event.player
                               ? isPlayerExpired(event.player)
-                              : isTeamExpired(event.team)
+                              : isTeamExpired(event.team))
+                              ? EXPIRED_CLASS
+                              : ''
                           }`}
                         >
                           {event.player?.name ?? event.team.name}
@@ -797,17 +819,18 @@ function MatchDetailModal({
 
         <div
           className="
-            border-t border-slate-800
+            border-t border-slate-200
             px-3 py-3
             text-center text-[9px]
             leading-relaxed text-slate-500
+            dark:border-slate-800
             sm:px-6 sm:py-4 sm:text-xs
           "
         >
           Últimos 3 partidos:{' '}
-          <span className="text-emerald-300">G</span> ganado ·{' '}
-          <span className="text-amber-300">E</span> empatado ·{' '}
-          <span className="text-red-300">P</span> perdido
+          <span className="text-emerald-600 dark:text-emerald-300">G</span> ganado ·{' '}
+          <span className="text-amber-600 dark:text-amber-300">E</span> empatado ·{' '}
+          <span className="text-red-600 dark:text-red-300">P</span> perdido
         </div>
       </section>
     </div>
@@ -892,49 +915,49 @@ function SectionCard({
     emerald: {
       border: 'border-emerald-400/20',
       glow: 'bg-emerald-400/[0.06]',
-      icon: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-300',
+      icon: 'border-emerald-400/20 bg-emerald-400/10 text-emerald-600 dark:text-emerald-300',
       dot: 'bg-emerald-400',
-      text: 'text-emerald-300',
+      text: 'text-emerald-600 dark:text-emerald-300',
     },
 
     cyan: {
       border: 'border-cyan-400/20',
       glow: 'bg-cyan-400/[0.045]',
-      icon: 'border-cyan-400/20 bg-cyan-400/10 text-cyan-300',
+      icon: 'border-cyan-400/20 bg-cyan-400/10 text-slate-900 dark:text-cyan-300',
       dot: 'bg-cyan-400',
-      text: 'text-cyan-300',
+      text: 'text-slate-900 dark:text-cyan-300',
     },
 
     amber: {
       border: 'border-amber-400/20',
       glow: 'bg-amber-400/[0.045]',
-      icon: 'border-amber-400/20 bg-amber-400/10 text-amber-300',
+      icon: 'border-amber-400/20 bg-amber-400/10 text-amber-600 dark:text-amber-300',
       dot: 'bg-amber-400',
-      text: 'text-amber-300',
+      text: 'text-amber-600 dark:text-amber-300',
     },
 
     rose: {
       border: 'border-rose-400/20',
       glow: 'bg-rose-400/[0.045]',
-      icon: 'border-rose-400/20 bg-rose-400/10 text-rose-300',
+      icon: 'border-rose-400/20 bg-rose-400/10 text-rose-600 dark:text-rose-300',
       dot: 'bg-rose-400',
-      text: 'text-rose-300',
+      text: 'text-rose-600 dark:text-rose-300',
     },
 
     blue: {
       border: 'border-blue-400/20',
       glow: 'bg-blue-400/[0.045]',
-      icon: 'border-blue-400/20 bg-blue-400/10 text-blue-300',
+      icon: 'border-blue-400/20 bg-blue-400/10 text-blue-600 dark:text-blue-300',
       dot: 'bg-blue-400',
-      text: 'text-blue-300',
+      text: 'text-blue-600 dark:text-blue-300',
     },
 
     violet: {
       border: 'border-violet-400/20',
       glow: 'bg-violet-400/[0.045]',
-      icon: 'border-violet-400/20 bg-violet-400/10 text-violet-300',
+      icon: 'border-violet-400/20 bg-violet-400/10 text-violet-600 dark:text-violet-300',
       dot: 'bg-violet-400',
-      text: 'text-violet-300',
+      text: 'text-violet-600 dark:text-violet-300',
     },
   };
 
@@ -946,11 +969,11 @@ function SectionCard({
         group relative min-w-0 w-full overflow-hidden
         rounded-2xl
         border
-        bg-gradient-to-br from-slate-900 via-slate-950 to-[#080b11]
-        shadow-[0_12px_40px_rgba(0,0,0,0.18)]
+        bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-[#080b11]
+        shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
         transition-all duration-300
-        ${open ? colors.border : 'border-white/[0.055]'}
-        ${open ? 'shadow-[0_12px_45px_rgba(0,0,0,0.28)]' : ''}
+        ${open ? colors.border : 'border-slate-200 dark:border-white/[0.055]'}
+        ${open ? 'shadow-[0_12px_45px_rgba(15,23,42,0.10)] dark:shadow-[0_12px_45px_rgba(0,0,0,0.28)]' : ''}
         ${className}
       `}
     >
@@ -1017,13 +1040,13 @@ function SectionCard({
               </span>
 
               {open && (
-                <span className="hidden rounded-full border border-white/[0.06] bg-white/[0.03] px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-500 sm:inline-flex">
+                <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/[0.06] dark:bg-white/[0.03] sm:inline-flex">
                   Abierto
                 </span>
               )}
             </div>
 
-            <h2 className="mt-1 text-base font-black tracking-tight text-white sm:mt-1.5 sm:text-xl lg:text-2xl">
+            <h2 className="mt-1 text-base font-black tracking-tight text-slate-900 dark:text-white sm:mt-1.5 sm:text-xl lg:text-2xl">
               {config.title}
             </h2>
           </div>
@@ -1034,14 +1057,16 @@ function SectionCard({
             flex h-9 w-9 shrink-0
             items-center justify-center
             rounded-full
-            border border-white/[0.07]
-            bg-white/[0.025]
+            border border-slate-200
+            bg-slate-50
             text-slate-500
             transition-all duration-300
+            dark:border-white/[0.07]
+            dark:bg-white/[0.025]
             sm:h-10 sm:w-10
             ${
               open
-                ? `rotate-180 ${colors.text} border-white/[0.12]`
+                ? `rotate-180 ${colors.text} border-slate-300 dark:border-white/[0.12]`
                 : ''
             }
           `}
@@ -1058,8 +1083,10 @@ function SectionCard({
             relative z-10
             min-w-0 max-w-full
             overflow-hidden
-            border-t border-white/[0.055]
-            bg-black/[0.08]
+            border-t border-slate-200
+            bg-slate-50
+            dark:border-white/[0.055]
+            dark:bg-black/[0.08]
           "
         >
           {children}
@@ -1078,7 +1105,7 @@ function SectionCard({
 const responsiveScorersTableClass = `
   min-w-0
   max-w-full
-  overflow-hidden
+  overflow-x-hidden
 
   [&_table]:!w-full
   [&_table]:!min-w-0
@@ -1334,6 +1361,7 @@ export default function PublicTournamentPage() {
   return (
     <main
       className="
+        lm-ready
         min-h-screen
         w-full
         max-w-full
@@ -1346,7 +1374,7 @@ export default function PublicTournamentPage() {
         sm:px-6 sm:pb-12 sm:pt-24
       "
     >
-      <AnnouncementModal />
+      <AnnouncementModal tournamentId={id} />
       <PublicNavbar />
 
       <header className="mx-auto max-w-7xl min-w-0">
@@ -1359,10 +1387,10 @@ export default function PublicTournamentPage() {
             px-3 py-1.5
             text-[11px]
             font-semibold
-            text-emerald-400
+            text-emerald-600 dark:text-emerald-400
             transition-colors
             hover:bg-emerald-400/[0.08]
-            hover:text-emerald-300
+            hover:text-emerald-700 dark:hover:text-emerald-300
             sm:text-sm
           "
           to="/"
@@ -1388,7 +1416,7 @@ export default function PublicTournamentPage() {
           <div className="mb-3 flex items-center gap-2">
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)]" />
 
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 sm:text-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 sm:text-sm">
               Torneo activo
             </p>
           </div>
@@ -1399,7 +1427,8 @@ export default function PublicTournamentPage() {
               text-2xl
               font-black
               tracking-tight
-              text-white
+              text-slate-900
+              dark:text-white
               sm:text-5xl
             "
           >
@@ -1412,7 +1441,8 @@ export default function PublicTournamentPage() {
               max-w-2xl
               text-xs
               leading-relaxed
-              text-slate-400
+              text-slate-500
+              dark:text-slate-400
               sm:mt-4 sm:text-base
             "
           >
@@ -1452,7 +1482,7 @@ export default function PublicTournamentPage() {
             <div id="standings-content" className="w-full min-w-0">
               <div className="scroll-invisible hidden max-h-[31rem] w-full overflow-y-auto sm:block">
                 <table className="w-full text-sm">
-                  <thead className="sticky top-0 z-20 border-b border-white/[0.05] bg-slate-950/95 backdrop-blur">
+                  <thead className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 backdrop-blur dark:border-white/[0.05] dark:bg-slate-950/95">
                     <tr className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
                       <th className="w-20 px-4 py-3.5 text-center">
                         Pos
@@ -1496,7 +1526,7 @@ export default function PublicTournamentPage() {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-white/[0.04]">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
                     {data.standings.map((row) => {
                       const isLeader = row.position === 1;
                       const isSecond = row.position === 2;
@@ -1513,8 +1543,8 @@ export default function PublicTournamentPage() {
                               isLeader
                                 ? 'border-l-2 border-amber-400 bg-amber-400/[0.06]'
                                 : isSecond
-                                  ? 'border-l-2 border-slate-400/40 bg-white/[0.015]'
-                                  : 'hover:bg-white/[0.025]'
+                                  ? 'border-l-2 border-slate-400/40 bg-slate-900/[0.02] dark:bg-white/[0.015]'
+                                  : 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
                             }
                           `}
                         >
@@ -1615,10 +1645,10 @@ export default function PublicTournamentPage() {
                                   min-w-0 truncate font-semibold
                                   ${
                                     isLeader
-                                      ? 'text-amber-100'
+                                      ? 'text-amber-600 dark:text-amber-100'
                                       : isSecond
-                                        ? 'text-slate-200'
-                                        : 'text-slate-300'
+                                        ? 'text-slate-700 dark:text-slate-200'
+                                        : 'text-slate-700 dark:text-slate-300'
                                   }
                                 `}
                               >
@@ -1628,7 +1658,7 @@ export default function PublicTournamentPage() {
                           </td>
 
                           <td
-                            className={`px-2 py-3.5 text-center text-slate-500 ${
+                            className={`px-2 py-3.5 text-center text-slate-500 dark:text-slate-500 ${
                               expired ? EXPIRED_CLASS : ''
                             }`}
                           >
@@ -1636,7 +1666,7 @@ export default function PublicTournamentPage() {
                           </td>
 
                           <td
-                            className={`px-2 py-3.5 text-center text-amber-300 ${
+                            className={`px-2 py-3.5 text-center text-amber-600 dark:text-amber-300 ${
                               expired ? EXPIRED_CLASS : ''
                             }`}
                           >
@@ -1644,7 +1674,7 @@ export default function PublicTournamentPage() {
                           </td>
 
                           <td
-                            className={`px-2 py-3.5 text-center text-red-300 ${
+                            className={`px-2 py-3.5 text-center text-red-600 dark:text-red-300 ${
                               expired ? EXPIRED_CLASS : ''
                             }`}
                           >
@@ -1652,7 +1682,7 @@ export default function PublicTournamentPage() {
                           </td>
 
                           <td
-                            className={`px-2 py-3.5 text-center text-blue-300 ${
+                            className={`px-2 py-3.5 text-center text-blue-600 dark:text-blue-300 ${
                               expired ? EXPIRED_CLASS : ''
                             }`}
                           >
@@ -1660,14 +1690,14 @@ export default function PublicTournamentPage() {
                           </td>
 
                           <td
-                            className={`px-2 py-3.5 text-center text-slate-500 ${
+                            className={`px-2 py-3.5 text-center text-slate-500 dark:text-slate-500 ${
                               expired ? EXPIRED_CLASS : ''
                             }`}
                           >
                             {row.goalsFor}
                           </td>
 
-                          <td className="px-2 py-3.5 text-center text-slate-500">
+                          <td className="px-2 py-3.5 text-center text-slate-500 dark:text-slate-500">
                             {row.goalsAgainst}
                           </td>
 
@@ -1677,11 +1707,11 @@ export default function PublicTournamentPage() {
                               ${
                                 row.goalDifference > 0
                                   ? isLeader
-                                    ? 'text-amber-300'
-                                    : 'text-emerald-400'
+                                    ? 'text-amber-600 dark:text-amber-300'
+                                    : 'text-emerald-600 dark:text-emerald-400'
                                   : row.goalDifference < 0
-                                    ? 'text-rose-400'
-                                    : 'text-slate-500'
+                                    ? 'text-rose-600 dark:text-rose-400'
+                                    : 'text-slate-500 dark:text-slate-500'
                               }
                               ${
                                 expired ? EXPIRED_CLASS : ''
@@ -1701,10 +1731,10 @@ export default function PublicTournamentPage() {
                               font-black
                               ${
                                 isLeader
-                                  ? 'text-amber-300'
+                                  ? 'text-amber-600 dark:text-amber-300'
                                   : isSecond
-                                    ? 'text-slate-100'
-                                    : 'text-emerald-300'
+                                    ? 'text-slate-800 dark:text-slate-100'
+                                    : 'text-emerald-600 dark:text-emerald-300'
                               }
                               ${
                                 expired ? EXPIRED_CLASS : ''
@@ -1722,7 +1752,7 @@ export default function PublicTournamentPage() {
 
               <div className="scroll-invisible max-h-[25rem] w-full overflow-y-auto sm:hidden">
                 <table className="w-full table-fixed text-xs">
-                  <thead className="sticky top-0 z-20 border-b border-white/[0.05] bg-slate-900/95 backdrop-blur">
+                  <thead className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 backdrop-blur dark:border-white/[0.05] dark:bg-slate-900/95">
                     <tr className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-600">
                       <th className="w-[38px] px-0.5 py-2.5 text-center">
                         Pos
@@ -1746,7 +1776,7 @@ export default function PublicTournamentPage() {
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-white/[0.035]">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.035]">
                     {data.standings.map((row) => {
                       const isLeader = row.position === 1;
                       const isSecond = row.position === 2;
@@ -1764,7 +1794,7 @@ export default function PublicTournamentPage() {
                               isLeader
                                 ? 'border-l-2 border-amber-400 bg-amber-400/[0.045]'
                                 : isSecond
-                                  ? 'border-l-2 border-slate-400/40 bg-white/[0.015]'
+                                  ? 'border-l-2 border-slate-400/40 bg-slate-900/[0.02] dark:bg-white/[0.015]'
                                   : ''
                             }
                           `}
@@ -1858,10 +1888,10 @@ export default function PublicTournamentPage() {
                                   font-semibold
                                   ${
                                     isLeader
-                                      ? 'text-amber-100'
+                                      ? 'text-amber-600 dark:text-amber-100'
                                       : isSecond
-                                        ? 'text-slate-200'
-                                        : 'text-slate-300'
+                                        ? 'text-slate-700 dark:text-slate-200'
+                                        : 'text-slate-700 dark:text-slate-300'
                                   }
                                 `}
                               >
@@ -1871,7 +1901,7 @@ export default function PublicTournamentPage() {
                           </td>
 
                           <td
-                            className={`px-0.5 py-3 text-center text-[10px] font-medium text-slate-500 ${
+                            className={`px-0.5 py-3 text-center text-[10px] font-medium text-slate-500 dark:text-slate-500 ${
                               expired ? EXPIRED_CLASS : ''
                             }`}
                           >
@@ -1887,11 +1917,11 @@ export default function PublicTournamentPage() {
                               ${
                                 row.goalDifference > 0
                                   ? isLeader
-                                    ? 'text-amber-300'
-                                    : 'text-emerald-400'
+                                    ? 'text-amber-600 dark:text-amber-300'
+                                    : 'text-emerald-600 dark:text-emerald-400'
                                   : row.goalDifference < 0
-                                    ? 'text-rose-400'
-                                    : 'text-slate-500'
+                                    ? 'text-rose-600 dark:text-rose-400'
+                                    : 'text-slate-500 dark:text-slate-500'
                               }
                               ${
                                 expired ? EXPIRED_CLASS : ''
@@ -1911,10 +1941,10 @@ export default function PublicTournamentPage() {
                               font-black
                               ${
                                 isLeader
-                                  ? 'text-amber-300'
+                                  ? 'text-amber-600 dark:text-amber-300'
                                   : isSecond
-                                    ? 'text-slate-100'
-                                    : 'text-emerald-300'
+                                    ? 'text-slate-800 dark:text-slate-100'
+                                    : 'text-emerald-600 dark:text-emerald-300'
                               }
                               ${
                                 expired ? EXPIRED_CLASS : ''
@@ -1934,11 +1964,13 @@ export default function PublicTournamentPage() {
                 className="
                   flex flex-wrap
                   gap-x-3 gap-y-1
-                  border-t border-white/[0.05]
-                  bg-slate-950/30
+                  border-t border-slate-200
+                  bg-slate-50
                   px-3 py-2.5
                   text-[9px]
                   text-slate-600
+                  dark:border-white/[0.05]
+                  dark:bg-slate-950/30
                   sm:px-5 sm:py-3 sm:text-[10px]
                 "
               >
@@ -1983,38 +2015,40 @@ export default function PublicTournamentPage() {
               </p>
 
               {!data.pots || data.pots.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-white/[0.08] px-4 py-8 text-center text-xs text-slate-500">
+                <p className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-xs text-slate-500 dark:border-white/[0.08]">
                   Los grupos aún no han sido generados.
                 </p>
               ) : (
-                <div className="grid w-full min-w-0 grid-cols-1 gap-6">
-                  {data.pots.map(({ pot, standings }) => (
-                    <div
-                      key={pot}
-                      className="min-w-0 w-full"
-                    >
-                      <h3 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                        Bombo {pot}
-                      </h3>
+                <div className="scroll-invisible max-h-[31rem] w-full min-w-0 overflow-y-auto pr-1">
+                  <div className="grid w-full min-w-0 grid-cols-1 gap-6">
+                    {data.pots.map(({ pot, standings }) => (
+                      <div
+                        key={pot}
+                        className="min-w-0 w-full"
+                      >
+                        <h3 className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                          Bombo {pot}
+                        </h3>
 
-                      <div className="w-full min-w-0 overflow-hidden rounded-xl border border-white/[0.05]">
-                        <StandingsTable
-                          standings={standings}
-                          respectPaymentStatus
-                          onSelectTeam={(row) =>
-                            setSelectedTeam({
-                              row,
-                              recentForm:
-                                data.recentFormByTeam?.[
-                                  row.team.id
-                                ] ?? [],
-                            })
-                          }
-                        />
+                        <div className="w-full min-w-0 overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.05]">
+                          <StandingsTable
+                            standings={standings}
+                            respectPaymentStatus
+                            onSelectTeam={(row) =>
+                              setSelectedTeam({
+                                row,
+                                recentForm:
+                                  data.recentFormByTeam?.[
+                                    row.team.id
+                                  ] ?? [],
+                              })
+                            }
+                          />
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -2030,15 +2064,17 @@ export default function PublicTournamentPage() {
               id="bracket-content"
               className="w-full min-w-0 p-3 sm:p-5 lg:p-6"
             >
-              <CompetitionOverview
-                mode={competitionMode}
-                groups={data.groups}
-                ties={data.ties}
-                championLabel={
-                  data.tournament.championLabel
-                }
-                onSelectMatch={setSelectedMatch}
-              />
+              <div className="scroll-invisible max-h-[38rem] w-full min-w-0 overflow-y-auto pr-1">
+                <CompetitionOverview
+                  mode={competitionMode}
+                  groups={data.groups}
+                  ties={data.ties}
+                  championLabel={
+                    data.tournament.championLabel
+                  }
+                  onSelectMatch={setSelectedMatch}
+                />
+              </div>
             </div>
           </SectionCard>
         )}
@@ -2059,7 +2095,7 @@ export default function PublicTournamentPage() {
               Haz clic en un partido para ver sus detalles.
             </p>
 
-            <div className="scroll-invisible max-h-[25rem] overflow-y-auto overflow-x-hidden rounded-xl border border-white/[0.04] bg-black/[0.12] px-3 sm:px-4">
+            <div className="scroll-invisible max-h-[25rem] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 dark:border-white/[0.04] dark:bg-black/[0.12] sm:px-4">
               {data.upcomingMatches.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-500">
                   No hay próximos partidos.
@@ -2070,7 +2106,7 @@ export default function PublicTournamentPage() {
                     data.upcomingMatches
                   ).map(([date, matches]) => (
                     <section key={date} className="min-w-0">
-                      <h3 className="mb-1.5 flex items-center gap-2 border-b border-white/[0.05] pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-300 sm:mb-2 sm:pb-2 sm:text-xs">
+                      <h3 className="mb-1.5 flex items-center gap-2 border-b border-slate-200 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600 dark:border-white/[0.05] dark:text-emerald-300 sm:mb-2 sm:pb-2 sm:text-xs">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                         {formatDate(date)}
                       </h3>
@@ -2114,10 +2150,11 @@ export default function PublicTournamentPage() {
               className={`
                 ${responsiveScorersTableClass}
                 scroll-invisible
-                max-h-[25rem]
+                max-h-[452px]
+                overflow-y-auto
                 rounded-xl
-                border border-white/[0.04]
-                bg-black/[0.12]
+                border border-slate-200 dark:border-white/[0.04]
+                bg-slate-50 dark:bg-black/[0.12]
                 p-1
                 sm:p-2
               `}
@@ -2153,10 +2190,11 @@ export default function PublicTournamentPage() {
               className={`
                 ${responsiveScorersTableClass}
                 scroll-invisible
-                max-h-[25rem]
+                max-h-[452px]
+                overflow-y-auto
                 rounded-xl
-                border border-white/[0.04]
-                bg-black/[0.12]
+                border border-slate-200 dark:border-white/[0.04]
+                bg-slate-50 dark:bg-black/[0.12]
                 p-1
                 sm:p-2
               `}
@@ -2209,11 +2247,11 @@ export default function PublicTournamentPage() {
               "
             >
               <div className="flex min-w-0 items-center justify-between gap-2 border-b border-amber-400/10 px-2.5 py-2.5 sm:px-3">
-                <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-amber-400">
+                <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-amber-600 dark:text-amber-400">
                   🟨 Amarillas
                 </h3>
 
-                <span className="shrink-0 rounded-full bg-amber-400/10 px-2 py-0.5 text-[8px] font-bold text-amber-300">
+                <span className="shrink-0 rounded-full bg-amber-400/10 px-2 py-0.5 text-[8px] font-bold text-amber-700 dark:text-amber-300">
                   DISCIPLINA
                 </span>
               </div>
@@ -2222,7 +2260,8 @@ export default function PublicTournamentPage() {
                 className={`
                   ${responsiveScorersTableClass}
                   scroll-invisible
-                  max-h-[25rem]
+                  max-h-[452px]
+                  overflow-y-auto
                   p-1
                   sm:p-2
                 `}
@@ -2256,11 +2295,11 @@ export default function PublicTournamentPage() {
                 "
               >
                 <div className="flex min-w-0 items-center justify-between gap-2 border-b border-blue-400/10 px-2.5 py-2.5 sm:px-3">
-                  <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-blue-400">
+                  <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
                     🟦 Azules
                   </h3>
 
-                  <span className="shrink-0 rounded-full bg-blue-400/10 px-2 py-0.5 text-[8px] font-bold text-blue-300">
+                  <span className="shrink-0 rounded-full bg-blue-400/10 px-2 py-0.5 text-[8px] font-bold text-blue-700 dark:text-blue-300">
                     DISCIPLINA
                   </span>
                 </div>
@@ -2269,7 +2308,8 @@ export default function PublicTournamentPage() {
                   className={`
                     ${responsiveScorersTableClass}
                     scroll-invisible
-                    max-h-[25rem]
+                    max-h-[452px]
+                    overflow-y-auto
                     p-1
                     sm:p-2
                   `}
@@ -2303,11 +2343,11 @@ export default function PublicTournamentPage() {
               "
             >
               <div className="flex min-w-0 items-center justify-between gap-2 border-b border-red-400/10 px-2.5 py-2.5 sm:px-3">
-                <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-red-400">
+                <h3 className="min-w-0 truncate text-xs font-black uppercase tracking-wider text-red-600 dark:text-red-400">
                   🟥 Rojas
                 </h3>
 
-                <span className="shrink-0 rounded-full bg-red-400/10 px-2 py-0.5 text-[8px] font-bold text-red-300">
+                <span className="shrink-0 rounded-full bg-red-400/10 px-2 py-0.5 text-[8px] font-bold text-red-700 dark:text-red-300">
                   DISCIPLINA
                 </span>
               </div>
@@ -2316,7 +2356,8 @@ export default function PublicTournamentPage() {
                 className={`
                   ${responsiveScorersTableClass}
                   scroll-invisible
-                  max-h-[25rem]
+                  max-h-[452px]
+                  overflow-y-auto
                   p-1
                   sm:p-2
                 `}
@@ -2350,33 +2391,35 @@ export default function PublicTournamentPage() {
             id="history-content"
             className="min-w-0 p-3 sm:p-5"
           >
-            {history.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-white/[0.07] py-10 text-center text-sm text-slate-500">
-                Aún no hay partidos jugados.
-              </p>
-            ) : (
-              <div className="space-y-5">
-                {groupMatchesByDate(history, 'desc').map(
-                  ([date, matches]) => (
-                    <section key={date} className="min-w-0">
-                      <h3 className="mb-2 flex items-center gap-2 border-b border-white/[0.05] pb-2 text-xs font-bold uppercase tracking-[0.14em] text-blue-300 sm:mb-3 sm:text-sm">
-                        <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-                        {formatDate(date)}
-                      </h3>
+            <div className="scroll-invisible max-h-[1536px] w-full min-w-0 overflow-y-auto overflow-x-hidden pr-1 sm:max-h-[762px] lg:max-h-[504px]">
+              {history.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500 dark:border-white/[0.07]">
+                  Aún no hay partidos jugados.
+                </p>
+              ) : (
+                <div className="space-y-5">
+                  {groupMatchesByDate(history, 'desc').map(
+                    ([date, matches]) => (
+                      <section key={date} className="min-w-0">
+                        <h3 className="mb-2 flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold uppercase tracking-[0.14em] text-blue-600 dark:border-white/[0.05] dark:text-blue-300 sm:mb-3 sm:text-sm">
+                          <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                          {formatDate(date)}
+                        </h3>
 
-                      <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {matches.map((match) => (
-                          <HistoryMatchCard
-                            key={match.id}
-                            match={match}
-                          />
-                        ))}
-                      </div>
-                    </section>
-                  )
-                )}
-              </div>
-            )}
+                        <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                          {matches.map((match) => (
+                            <HistoryMatchCard
+                              key={match.id}
+                              match={match}
+                            />
+                          ))}
+                        </div>
+                      </section>
+                    )
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </SectionCard>
       </section>

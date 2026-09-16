@@ -244,7 +244,7 @@ export default function PlayersPage() {
   const disabledPlayers = players.length - activePlayers;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 pb-16 pt-24 text-slate-900 dark:bg-[#070b12] dark:text-slate-100 sm:px-6">
+    <main className="lm-ready min-h-screen bg-slate-50 px-4 pb-16 pt-24 text-slate-900 dark:bg-[#070b12] dark:text-slate-100 sm:px-6">
       <DashboardNavbar />
 
       <section className="mx-auto max-w-6xl">
@@ -254,7 +254,7 @@ export default function PlayersPage() {
         {/* ---------------------------------------------------------------- */}
 
         <Link
-          className="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-400"
+          className="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600 hover:dark:text-emerald-400"
           to={`/dashboard/teams?tournamentId=${tournamentId}`}
         >
           <span className="transition-transform duration-200 group-hover:-translate-x-1">
@@ -268,7 +268,7 @@ export default function PlayersPage() {
         {/* Header */}
         {/* ---------------------------------------------------------------- */}
 
-        <header className="relative mt-5 overflow-hidden rounded-3xl border border-white/[0.06] bg-gradient-to-b from-slate-900 to-slate-950 shadow-2xl shadow-black/20">
+        <header className="relative mt-5 overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/20">
 
           {/* Luz */}
           <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full bg-emerald-400/[0.07] blur-3xl" />
@@ -281,23 +281,23 @@ export default function PlayersPage() {
               <div className="flex min-w-0 items-center gap-4">
 
                 {/* Logo / inicial */}
-                <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/10 bg-emerald-500/10 text-xl font-black text-emerald-300 sm:flex">
+                <div className="hidden h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-emerald-400/10 bg-emerald-500/10 text-xl font-black text-emerald-700 dark:text-emerald-300 sm:flex">
                   {team?.name?.charAt(0)?.toUpperCase() || 'E'}
                 </div>
 
                 <div className="min-w-0">
 
-                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
                     Gestión de plantilla
                   </div>
 
-                  <h1 className="mt-3 truncate text-2xl font-black tracking-tight text-white sm:text-3xl">
+                  <h1 className="mt-3 truncate text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
                     Jugadores
                   </h1>
 
                   {team && (
-                    <p className="mt-1 text-sm font-semibold text-slate-300">
+                    <p className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-300">
                       {team.name}
                     </p>
                   )}
@@ -312,7 +312,7 @@ export default function PlayersPage() {
               <div className="flex items-center gap-2">
 
                 <div className="rounded-2xl border border-emerald-400/10 bg-emerald-500/10 px-4 py-3 text-center">
-                  <p className="text-lg font-black text-emerald-300">
+                  <p className="text-lg font-black text-emerald-700 dark:text-emerald-300">
                     {activePlayers}
                   </p>
 
@@ -321,8 +321,8 @@ export default function PlayersPage() {
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/[0.06] bg-slate-800/50 px-4 py-3 text-center">
-                  <p className="text-lg font-black text-slate-200">
+                <div className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-slate-800/50 px-4 py-3 text-center">
+                  <p className="text-lg font-black text-slate-700 dark:text-slate-200">
                     {players.length}
                   </p>
 
@@ -333,7 +333,7 @@ export default function PlayersPage() {
 
                 {disabledPlayers > 0 && (
                   <div className="rounded-2xl border border-amber-400/10 bg-amber-500/10 px-4 py-3 text-center">
-                    <p className="text-lg font-black text-amber-300">
+                    <p className="text-lg font-black text-amber-700 dark:text-amber-300">
                       {disabledPlayers}
                     </p>
 
@@ -346,9 +346,9 @@ export default function PlayersPage() {
             </div>
 
             {/* Acción */}
-            <div className="mt-5 border-t border-white/[0.06] pt-5">
+            <div className="mt-5 border-t border-slate-200 dark:border-white/[0.06] pt-5">
               <button
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-black text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 sm:w-auto"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-black text-slate-950 dark:text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 sm:w-auto"
                 type="button"
                 onClick={openCreateForm}
               >
@@ -365,7 +365,7 @@ export default function PlayersPage() {
 
         <div
           id="player-form"
-          className="mt-5 overflow-hidden rounded-3xl border border-white/[0.06] bg-gradient-to-b from-slate-900 to-slate-950 shadow-2xl shadow-black/20"
+          className="mt-5 overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/20"
         >
           {/* Header */}
           <button
@@ -377,15 +377,15 @@ export default function PlayersPage() {
                 openCreateForm();
               }
             }}
-            className="group flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-slate-800/30 sm:px-6"
+            className="group flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-slate-100 hover:dark:bg-slate-800/30 sm:px-6"
           >
             <div className="flex items-center gap-3">
 
               <div
                 className={`flex h-9 w-9 items-center justify-center rounded-xl border transition ${
                   showForm
-                    ? 'border-emerald-400/15 bg-emerald-500/10 text-emerald-300'
-                    : 'border-white/[0.06] bg-slate-800 text-slate-400 group-hover:border-emerald-400/15 group-hover:text-emerald-300'
+                    ? 'border-emerald-400/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:border-emerald-400/15 group-hover:text-emerald-700 group-hover:dark:text-emerald-300'
                 }`}
               >
                 <span
@@ -398,7 +398,7 @@ export default function PlayersPage() {
               </div>
 
               <div>
-                <h2 className="text-sm font-bold text-white">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
                   {editingId ? 'Editar jugador' : 'Nuevo jugador'}
                 </h2>
 
@@ -428,15 +428,15 @@ export default function PlayersPage() {
             <div className="overflow-hidden">
               <form
                 onSubmit={savePlayer}
-                className="border-t border-white/[0.06]"
+                className="border-t border-slate-200 dark:border-white/[0.06]"
               >
 
                 <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
 
                   {/* Nombre */}
-                  <label className="text-sm font-semibold text-slate-300">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Nombre
-                    <span className="ml-1 text-emerald-400">*</span>
+                    <span className="ml-1 text-emerald-600 dark:text-emerald-400">*</span>
 
                     <input
                       required
@@ -444,14 +444,14 @@ export default function PlayersPage() {
                       value={form.name}
                       onChange={updateField}
                       placeholder="Nombre completo"
-                      className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition placeholder:text-slate-600 hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition placeholder:text-slate-600 hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                     />
                   </label>
 
                   {/* Fecha */}
-                  <label className="text-sm font-semibold text-slate-300">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Fecha de nacimiento
-                    <span className="ml-1 text-emerald-400">*</span>
+                    <span className="ml-1 text-emerald-600 dark:text-emerald-400">*</span>
 
                     <input
                       required
@@ -460,12 +460,12 @@ export default function PlayersPage() {
                       max={new Date().toISOString().slice(0, 10)}
                       value={form.birthDate}
                       onChange={updateField}
-                      className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                     />
                   </label>
 
                   {/* Documento */}
-                  <label className="text-sm font-semibold text-slate-300">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     N.º de documento
 
                     <input
@@ -473,12 +473,12 @@ export default function PlayersPage() {
                       value={form.documentNumber}
                       onChange={updateField}
                       placeholder="Opcional"
-                      className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition placeholder:text-slate-600 hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition placeholder:text-slate-600 hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                     />
                   </label>
 
                   {/* Dorsal */}
-                  <label className="text-sm font-semibold text-slate-300">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Dorsal
 
                     <input
@@ -486,16 +486,16 @@ export default function PlayersPage() {
                       value={form.jerseyNumber}
                       onChange={updateField}
                       placeholder="Ej. 10"
-                      className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition placeholder:text-slate-600 hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition placeholder:text-slate-600 hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                     />
                   </label>
 
                   {/* Foto */}
                   {isSuperAdmin && (
-                    <label className="text-sm font-semibold text-slate-300">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Foto
 
-                      <div className="relative mt-2 flex h-11 cursor-pointer items-center overflow-hidden rounded-xl border border-slate-700 bg-slate-950 transition hover:border-slate-600">
+                      <div className="relative mt-2 flex h-11 cursor-pointer items-center overflow-hidden rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 transition hover:border-slate-300 hover:dark:border-slate-600">
                         <input
                           name="photo"
                           type="file"
@@ -505,7 +505,7 @@ export default function PlayersPage() {
                         />
 
                         <div className="flex items-center gap-2.5 px-3.5">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-xs text-emerald-300">
+                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-xs text-emerald-700 dark:text-emerald-300">
                             ↑
                           </span>
 
@@ -521,7 +521,7 @@ export default function PlayersPage() {
 
                   {/* Pago (foto visible en público hasta esta fecha) */}
                   {isSuperAdmin && (
-                    <label className="text-sm font-semibold text-slate-300">
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                       Foto pagada hasta
 
                       <input
@@ -529,20 +529,20 @@ export default function PlayersPage() {
                         type="date"
                         value={form.paidUntil}
                         onChange={updateField}
-                        className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                        className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                       />
                     </label>
                   )}
 
                   {/* Estado */}
-                  <label className="text-sm font-semibold text-slate-300">
+                  <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Estado
 
                     <select
                       name="status"
                       value={form.status}
                       onChange={updateField}
-                      className="mt-2 h-11 w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 text-sm font-normal text-white outline-none transition hover:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                     >
                       <option value="ACTIVE">Activo</option>
                       <option value="DISABLED">Inhabilitado</option>
@@ -551,10 +551,10 @@ export default function PlayersPage() {
                 </div>
 
                 {/* Footer */}
-                <div className="flex flex-col-reverse gap-2 border-t border-white/[0.06] bg-slate-950/40 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+                <div className="flex flex-col-reverse gap-2 border-t border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950/40 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
 
                   <button
-                    className="rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-400 transition hover:border-slate-600 hover:bg-slate-800 hover:text-white"
+                    className="rounded-xl border border-slate-300 dark:border-slate-700 px-5 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition hover:border-slate-300 hover:dark:border-slate-600 hover:bg-slate-100 hover:dark:bg-slate-800 hover:text-slate-900 hover:dark:text-white"
                     type="button"
                     onClick={closeForm}
                   >
@@ -562,7 +562,7 @@ export default function PlayersPage() {
                   </button>
 
                   <button
-                    className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-black text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-black text-slate-950 dark:text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isSaving}
                   >
                     {isSaving
@@ -591,7 +591,7 @@ export default function PlayersPage() {
                 Equipo
               </p>
 
-              <h2 className="mt-1 text-2xl font-black tracking-tight text-white">
+              <h2 className="mt-1 text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                 Plantilla
               </h2>
 
@@ -600,7 +600,7 @@ export default function PlayersPage() {
               </p>
             </div>
 
-            <span className="rounded-full border border-white/[0.06] bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-500">
+            <span className="rounded-full border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-500">
               {players.length}{' '}
               {players.length === 1 ? 'jugador' : 'jugadores'}
             </span>
@@ -611,15 +611,15 @@ export default function PlayersPage() {
           {/* ---------------------------------------------------------------- */}
 
           {players.length === 0 ? (
-            <div className="relative overflow-hidden rounded-3xl border border-dashed border-slate-700 bg-slate-900/50 px-6 py-14 text-center">
+            <div className="relative overflow-hidden rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50 px-6 py-14 text-center">
 
               <div className="pointer-events-none absolute -left-16 -top-20 h-48 w-48 rounded-full bg-emerald-400/[0.04] blur-3xl" />
 
-              <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-slate-950 text-xl text-slate-600">
+              <div className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950 text-xl text-slate-600">
                 +
               </div>
 
-              <h3 className="relative mt-4 text-sm font-bold text-slate-300">
+              <h3 className="relative mt-4 text-sm font-bold text-slate-700 dark:text-slate-300">
                 No hay jugadores todavía
               </h3>
 
@@ -630,7 +630,7 @@ export default function PlayersPage() {
               <button
                 type="button"
                 onClick={openCreateForm}
-                className="relative mt-5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-2.5 text-xs font-black text-emerald-300 transition hover:border-emerald-400/40 hover:bg-emerald-400/10"
+                className="relative mt-5 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06] px-4 py-2.5 text-xs font-black text-emerald-700 dark:text-emerald-300 transition hover:border-emerald-400/40 hover:bg-emerald-400/10"
               >
                 + Crear jugador
               </button>
@@ -649,7 +649,7 @@ export default function PlayersPage() {
                 return (
                   <article
                     key={player.id}
-                    className="group overflow-hidden rounded-3xl border border-white/[0.06] bg-gradient-to-b from-slate-900 to-slate-950 shadow-2xl shadow-black/20 transition duration-300 hover:border-emerald-400/15 hover:shadow-emerald-950/20"
+                    className="group overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/20 transition duration-300 hover:border-emerald-400/15 hover:shadow-emerald-950/20"
                   >
                     {/* Card superior */}
                     <div className="relative overflow-hidden p-5">
@@ -663,12 +663,12 @@ export default function PlayersPage() {
                         <div className="shrink-0">
                           {player.photo ? (
                             <img
-                              className="h-16 w-16 rounded-2xl border border-slate-700 bg-slate-950 object-cover"
+                              className="h-16 w-16 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 object-cover"
                               src={mediaUrl(player.photo)}
                               alt={player.name}
                             />
                           ) : (
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/10 bg-emerald-500/10 text-xl font-black text-emerald-300">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-emerald-400/10 bg-emerald-500/10 text-xl font-black text-emerald-700 dark:text-emerald-300">
                               {player.name.charAt(0).toUpperCase()}
                             </div>
                           )}
@@ -680,7 +680,7 @@ export default function PlayersPage() {
                           <div className="flex items-start justify-between gap-2">
 
                             <div className="min-w-0">
-                              <h3 className="truncate text-base font-black text-white">
+                              <h3 className="truncate text-base font-black text-slate-900 dark:text-white">
                                 {player.name}
                               </h3>
 
@@ -691,7 +691,7 @@ export default function PlayersPage() {
 
                             {/* Dorsal */}
                             {player.jerseyNumber && (
-                              <span className="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-slate-950 px-2 text-xs font-black text-emerald-300">
+                              <span className="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950 px-2 text-xs font-black text-emerald-700 dark:text-emerald-300">
                                 #{player.jerseyNumber}
                               </span>
                             )}
@@ -702,8 +702,8 @@ export default function PlayersPage() {
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ${
                                 isActive
-                                  ? 'border-emerald-400/10 bg-emerald-500/10 text-emerald-300'
-                                  : 'border-amber-400/10 bg-amber-500/10 text-amber-300'
+                                  ? 'border-emerald-400/10 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                                  : 'border-amber-400/10 bg-amber-500/10 text-amber-700 dark:text-amber-300'
                               }`}
                             >
                               <span
@@ -721,7 +721,7 @@ export default function PlayersPage() {
 
                             {player.paidUntil && new Date(player.paidUntil).getTime() < Date.now() && (
                               <span
-                                className="inline-flex items-center gap-1 rounded-full border border-red-400/20 bg-red-400/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-300"
+                                className="inline-flex items-center gap-1 rounded-full border border-red-400/20 bg-red-400/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-700 dark:text-red-300"
                                 title={`Foto vencida desde ${toDateInputValue(player.paidUntil)}`}
                               >
                                 Foto vencida
@@ -730,7 +730,7 @@ export default function PlayersPage() {
 
                             {player.isGoalkeeper && (
                               <span
-                                className="inline-flex items-center gap-1 rounded-full border border-cyan-400/15 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-cyan-300"
+                                className="inline-flex items-center gap-1 rounded-full border border-cyan-400/15 bg-cyan-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300"
                                 title="Arquero del equipo"
                               >
                                 🧤 Arquero
@@ -742,14 +742,14 @@ export default function PlayersPage() {
 
                       {/* Documento */}
                       {player.documentNumber && (
-                        <div className="relative mt-4 rounded-2xl border border-white/[0.05] bg-slate-950/60 px-3.5 py-3">
+                        <div className="relative mt-4 rounded-2xl border border-slate-200 dark:border-white/[0.05] bg-white dark:bg-slate-950/60 px-3.5 py-3">
 
                           <div className="flex items-center justify-between gap-3">
                             <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-slate-600">
                               Documento
                             </p>
 
-                            <p className="truncate text-xs font-semibold text-slate-400">
+                            <p className="truncate text-xs font-semibold text-slate-500 dark:text-slate-400">
                               {player.documentNumber}
                             </p>
                           </div>
@@ -758,10 +758,10 @@ export default function PlayersPage() {
                     </div>
 
                     {/* Acciones */}
-                    <div className="grid grid-cols-2 gap-2 border-t border-white/[0.06] bg-slate-950/30 p-4">
+                    <div className="grid grid-cols-2 gap-2 border-t border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950/30 p-4">
 
                       <button
-                        className="rounded-xl border border-slate-700 bg-slate-950/40 py-2.5 text-xs font-bold text-slate-400 transition hover:border-emerald-400/30 hover:bg-emerald-400/[0.04] hover:text-emerald-300"
+                        className="rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 py-2.5 text-xs font-bold text-slate-500 dark:text-slate-400 transition hover:border-emerald-400/30 hover:bg-emerald-400/[0.04] hover:text-emerald-700 hover:dark:text-emerald-300"
                         type="button"
                         onClick={() => startEditing(player)}
                       >
@@ -771,8 +771,8 @@ export default function PlayersPage() {
                       <button
                         className={`rounded-xl border py-2.5 text-xs font-bold transition ${
                           isActive
-                            ? 'border-slate-700 bg-slate-950/40 text-slate-400 hover:border-amber-400/30 hover:bg-amber-400/[0.04] hover:text-amber-300'
-                            : 'border-emerald-400/20 bg-emerald-400/[0.04] text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-400/[0.08]'
+                            ? 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-amber-400/30 hover:bg-amber-400/[0.04] hover:text-amber-700 hover:dark:text-amber-300'
+                            : 'border-emerald-400/20 bg-emerald-400/[0.04] text-emerald-700 dark:text-emerald-300 hover:border-emerald-400/40 hover:bg-emerald-400/[0.08]'
                         }`}
                         type="button"
                         onClick={() =>
@@ -789,8 +789,8 @@ export default function PlayersPage() {
                       <button
                         className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
                           player.isGoalkeeper
-                            ? 'border-cyan-400/30 bg-cyan-400/[0.08] text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.14]'
-                            : 'border-slate-700 bg-slate-950/40 text-slate-400 hover:border-cyan-400/30 hover:bg-cyan-400/[0.04] hover:text-cyan-300'
+                            ? 'border-cyan-400/30 bg-cyan-400/[0.08] text-slate-900 dark:text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.14]'
+                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-cyan-400/30 hover:bg-cyan-400/[0.04] hover:text-slate-900 hover:dark:text-cyan-300'
                         }`}
                         type="button"
                         disabled={isTogglingGoalkeeper === player.id}

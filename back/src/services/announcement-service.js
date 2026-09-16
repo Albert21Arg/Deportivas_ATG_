@@ -7,21 +7,29 @@ function parseId(id) {
   return value;
 }
 
+async function assertTournamentExists(tournamentId) {
+  if (tournamentId === undefined || tournamentId === null) return;
+  const tournament = await repository.findTournamentById(tournamentId);
+  if (!tournament) throw new HttpError(422, 'El torneo seleccionado no existe');
+}
+
 export function listAnnouncements() {
   return repository.findAll();
 }
 
-export function getActiveAnnouncement() {
-  return repository.findActive();
+export function getActiveAnnouncement(tournamentId) {
+  return repository.findActive(tournamentId);
 }
 
 export async function createAnnouncement(data) {
+  await assertTournamentExists(data.tournamentId);
   return repository.create(data);
 }
 
 export async function updateAnnouncement(id, data) {
   const announcement = await repository.findById(parseId(id));
   if (!announcement) throw new HttpError(404, 'Anuncio no encontrado');
+  await assertTournamentExists(data.tournamentId);
   return repository.update(announcement.id, data);
 }
 

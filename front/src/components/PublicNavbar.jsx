@@ -38,7 +38,8 @@ export default function PublicNavbar({ showLogin = true }) {
                 italic
                 font-medium
                 tracking-tight
-                text-cyan-400
+                text-slate-900
+                dark:text-cyan-400
                 transition-all
                 duration-300
                 sm:-top-[12px]
@@ -47,7 +48,8 @@ export default function PublicNavbar({ showLogin = true }) {
                 md:-top-[15px]
                 md:left-[12px]
                 md:text-[12px]
-                group-hover:text-cyan-300
+                group-hover:text-slate-700
+                dark:group-hover:text-cyan-300
               "
               style={{
                 fontFamily: '"Brush Script MT", "Segoe Script", cursive',
@@ -65,7 +67,8 @@ export default function PublicNavbar({ showLogin = true }) {
                   w-[105%]
                   -rotate-[3deg]
                   rounded-full
-                  bg-cyan-400
+                  bg-slate-900
+                  dark:bg-cyan-400
                 "
               />
             </span>

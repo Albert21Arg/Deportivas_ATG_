@@ -267,6 +267,13 @@ function calculateOverall({
 | Es una raíz cuadrada invertida: al inicio (cerca de 0) cae rápido, así
 | que un arquero genuinamente bueno llega rápido a los 80, pero después se
 | aplana y hace falta un promedio casi perfecto para seguir subiendo.
+|
+| El piso NO es 60: si fuera 60, cualquier promedio malo (por ejemplo 3 o 5
+| goles en un solo partido) quedaría recortado al mismo valor y dos arqueros
+| claramente distintos se verían con el mismo OVR. El piso real (20) solo
+| se alcanza con promedios catastróficos, así que los malos siguen
+| diferenciándose entre sí. Los 0 partidos jugados son un caso aparte: ahí
+| no hay datos, así que se usa 60 como valor neutral.
 |--------------------------------------------------------------------------
 */
 
@@ -301,7 +308,7 @@ function calculateGoalkeeperOverall({
   return Math.min(
     Math.max(
       Math.round(overall),
-      60
+      20
     ),
     99
   );

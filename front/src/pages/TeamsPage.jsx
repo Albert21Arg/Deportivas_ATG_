@@ -287,7 +287,7 @@ export default function TeamsPage() {
   }, [availableTeams, teamSearch]);
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+    <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
 
       {/* =========================================================
           BACKGROUND
@@ -317,7 +317,7 @@ export default function TeamsPage() {
         {/* =======================================================
             HEADER
         ======================================================= */}
-        <header className="relative mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-white/[0.045] via-white/[0.02] to-transparent shadow-xl shadow-black/10 sm:mt-5 sm:rounded-3xl sm:shadow-2xl sm:shadow-black/20">
+        <header className="relative mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-br from-white/[0.045] via-white/[0.02] to-transparent shadow-xl shadow-black/10 sm:mt-5 sm:rounded-3xl sm:shadow-2xl sm:shadow-black/20">
 
           <div className="pointer-events-none absolute -right-24 -top-28 hidden h-64 w-64 rounded-full bg-emerald-400/[0.08] blur-3xl sm:block" />
 
@@ -328,7 +328,7 @@ export default function TeamsPage() {
               {/* TITLE */}
               <div className="min-w-0">
 
-                <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:mt-4 sm:text-3xl lg:text-4xl">
+                <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:mt-4 sm:text-3xl lg:text-4xl">
                   Equipos
                 </h1>
 
@@ -354,11 +354,11 @@ export default function TeamsPage() {
             </div>
 
             <div className="min-w-0">
-              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:text-[9px] sm:tracking-[0.18em]">
+              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:text-[9px] sm:tracking-[0.18em]">
                 Torneo actual
               </p>
 
-              <p className="mt-0.5 truncate text-xs font-bold text-white sm:text-sm">
+              <p className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                 {selectedTournament
                   ? selectedTournament.name
                   : 'Selecciona un torneo'}
@@ -369,7 +369,7 @@ export default function TeamsPage() {
 
           {!isTournamentLocked && (
             <select
-              className="min-h-10 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3 py-2 text-xs font-medium text-slate-300 outline-none transition focus:border-emerald-400/50 md:w-auto md:min-w-[220px]"
+              className="min-h-10 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 outline-none transition focus:border-emerald-400/50 md:w-auto md:min-w-[220px]"
               value={selectedTournamentId}
               onChange={(event) =>
                 setSelectedTournamentId(event.target.value)
@@ -394,15 +394,15 @@ export default function TeamsPage() {
             ACTION ACCORDIONS
         ======================================================= */}
         {canCreateTeams && (
-          <section className="mt-3 grid gap-3 sm:mt-5 md:grid-cols-2 lg:gap-4">
+          <section className={`mt-3 grid gap-3 sm:mt-5 lg:gap-4 ${isSuperAdmin ? 'md:grid-cols-2' : ''}`}>
 
             {/* ===================================================
                 CREATE / EDIT TEAM
             =================================================== */}
-            <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0a1018]/90 shadow-lg shadow-black/5 sm:rounded-2xl sm:shadow-xl sm:shadow-black/10">
+            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 shadow-lg shadow-black/5 sm:rounded-2xl sm:shadow-xl sm:shadow-black/10">
 
               <button
-                className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-white/[0.025] sm:min-h-[68px] sm:gap-4 sm:px-5 sm:py-4"
+                className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:min-h-[68px] sm:gap-4 sm:px-5 sm:py-4"
                 onClick={() =>
                   setIsCreateOpen((current) => !current)
                 }
@@ -418,11 +418,11 @@ export default function TeamsPage() {
 
                   <div className="min-w-0">
 
-                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:text-[9px] sm:tracking-[0.18em]">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:text-[9px] sm:tracking-[0.18em]">
                       {editingId ? 'Edición' : 'Administración'}
                     </p>
 
-                    <h2 className="mt-0.5 truncate text-xs font-bold text-white sm:text-sm">
+                    <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                       {editingId
                         ? 'Editar equipo'
                         : 'Crear equipo'}
@@ -432,7 +432,7 @@ export default function TeamsPage() {
                 </div>
 
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] text-xs text-slate-500 transition-transform duration-200 ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-white/[0.06] text-xs text-slate-500 transition-transform duration-200 ${
                     isCreateOpen ? 'rotate-180' : ''
                   }`}
                 >
@@ -451,17 +451,17 @@ export default function TeamsPage() {
                 <div className="overflow-hidden">
 
                   <form
-                    className="border-t border-white/[0.05] p-4 sm:p-5"
+                    className="border-t border-slate-200 dark:border-white/[0.05] p-4 sm:p-5"
                     onSubmit={saveTeam}
                   >
 
                     <div className="grid gap-3 sm:grid-cols-2">
 
-                      <label className={`text-xs font-semibold text-slate-400 ${isSuperAdmin ? '' : 'sm:col-span-2'}`}>
+                      <label className={`text-xs font-semibold text-slate-500 dark:text-slate-400 ${isSuperAdmin ? '' : 'sm:col-span-2'}`}>
                         Nombre
 
                         <input
-                          className="mt-1.5 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
+                          className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
                           name="name"
                           maxLength="120"
                           value={form.name}
@@ -473,11 +473,11 @@ export default function TeamsPage() {
                       </label>
 
                       {isSuperAdmin && (
-                        <label className="text-xs font-semibold text-slate-400">
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                           Logo
 
                           <input
-                            className="mt-1.5 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
+                            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
                             name="logo"
                             maxLength="500"
                             value={form.logo}
@@ -488,11 +488,11 @@ export default function TeamsPage() {
                       )}
 
                       {isSuperAdmin && (
-                        <label className="text-xs font-semibold text-slate-400">
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                           Pago vigente hasta
 
                           <input
-                            className="mt-1.5 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
+                            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
                             name="paidUntil"
                             type="date"
                             value={form.paidUntil}
@@ -502,11 +502,11 @@ export default function TeamsPage() {
                       )}
 
                       {isSuperAdmin && (
-                        <label className="text-xs font-semibold text-slate-400">
+                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                           Escudo vigente hasta
 
                           <input
-                            className="mt-1.5 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
+                            className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-2.5 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
                             name="logoExpiresAt"
                             type="date"
                             value={form.logoExpiresAt}
@@ -532,7 +532,7 @@ export default function TeamsPage() {
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
 
                       <button
-                        className="min-h-11 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10"
+                        className="min-h-11 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-bold text-slate-950 dark:text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-10"
                         disabled={isSaving}
                         type="submit"
                       >
@@ -545,7 +545,7 @@ export default function TeamsPage() {
 
                       {editingId && (
                         <button
-                          className="min-h-11 rounded-xl border border-white/[0.07] px-4 py-2.5 text-xs font-semibold text-slate-500 transition hover:bg-white/[0.04] hover:text-white sm:min-h-10"
+                          className="min-h-11 rounded-xl border border-slate-200 dark:border-white/[0.07] px-4 py-2.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:dark:bg-white/[0.04] hover:text-slate-900 hover:dark:text-white sm:min-h-10"
                           onClick={cancelEditing}
                           type="button"
                         >
@@ -563,10 +563,11 @@ export default function TeamsPage() {
             {/* ===================================================
                 ASSIGN TEAM
             =================================================== */}
-            <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-[#0a1018]/90 shadow-lg shadow-black/5 sm:rounded-2xl sm:shadow-xl sm:shadow-black/10">
+            {isSuperAdmin && (
+            <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 shadow-lg shadow-black/5 sm:rounded-2xl sm:shadow-xl sm:shadow-black/10">
 
               <button
-                className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-white/[0.025] sm:min-h-[68px] sm:gap-4 sm:px-5 sm:py-4"
+                className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:min-h-[68px] sm:gap-4 sm:px-5 sm:py-4"
                 onClick={() =>
                   setIsAssignOpen((current) => !current)
                 }
@@ -582,11 +583,11 @@ export default function TeamsPage() {
 
                   <div className="min-w-0">
 
-                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-cyan-400 sm:text-[9px] sm:tracking-[0.18em]">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-900 dark:text-cyan-400 sm:text-[9px] sm:tracking-[0.18em]">
                       Participación
                     </p>
 
-                    <h2 className="mt-0.5 truncate text-xs font-bold text-white sm:text-sm">
+                    <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                       Asociar equipo
                     </h2>
 
@@ -594,7 +595,7 @@ export default function TeamsPage() {
                 </div>
 
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] text-xs text-slate-500 transition-transform duration-200 ${
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-white/[0.06] text-xs text-slate-500 transition-transform duration-200 ${
                     isAssignOpen ? 'rotate-180' : ''
                   }`}
                 >
@@ -612,7 +613,7 @@ export default function TeamsPage() {
               >
                 <div className="overflow-hidden">
 
-                  <div className="border-t border-white/[0.05] p-4 sm:p-5">
+                  <div className="border-t border-slate-200 dark:border-white/[0.05] p-4 sm:p-5">
 
                     {!selectedTournamentId ? (
                       <p className="text-xs leading-5 text-slate-500">
@@ -620,13 +621,13 @@ export default function TeamsPage() {
                         equipos.
                       </p>
                     ) : availableTeams.length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-white/[0.07] px-4 py-5 text-center">
+                      <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/[0.07] px-4 py-5 text-center">
 
-                        <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-white/[0.03] text-sm">
+                        <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/[0.03] text-sm">
                           ✓
                         </div>
 
-                        <p className="mt-2 text-xs font-semibold text-white">
+                        <p className="mt-2 text-xs font-semibold text-slate-900 dark:text-white">
                           No hay equipos disponibles
                         </p>
 
@@ -642,7 +643,7 @@ export default function TeamsPage() {
                         onSubmit={assignTeam}
                       >
 
-                        <label className="block text-xs font-semibold text-slate-400">
+                        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400">
                           Buscar equipo
 
                           <div className="relative mt-1.5">
@@ -652,7 +653,7 @@ export default function TeamsPage() {
                             </span>
 
                             <input
-                              className="min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 py-2.5 pl-9 pr-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/10"
+                              className="min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 py-2.5 pl-9 pr-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/10"
                               value={teamSearch}
                               onChange={(event) => {
                                 setTeamSearch(event.target.value);
@@ -666,7 +667,7 @@ export default function TeamsPage() {
 
                         {/* Search results */}
                         {teamSearch.trim() && (
-                          <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-white/[0.07] bg-[#080d14] p-1.5">
+                          <div className="mt-2 max-h-48 overflow-y-auto rounded-xl border border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#080d14] p-1.5">
 
                             {filteredAvailableTeams.length === 0 ? (
                               <div className="px-3 py-4 text-center text-xs text-slate-600">
@@ -682,7 +683,7 @@ export default function TeamsPage() {
                                     className={`flex min-h-12 w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ${
                                       isSelected
                                         ? 'bg-emerald-400/[0.08] ring-1 ring-emerald-400/20'
-                                        : 'hover:bg-white/[0.04]'
+                                        : 'hover:bg-slate-100 hover:dark:bg-white/[0.04]'
                                     }`}
                                     key={team.id}
                                     onClick={() =>
@@ -705,12 +706,12 @@ export default function TeamsPage() {
                                       </div>
                                     )}
 
-                                    <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-300">
+                                    <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-700 dark:text-slate-300">
                                       {team.name}
                                     </span>
 
                                     {isSelected && (
-                                      <span className="text-xs font-bold text-emerald-400">
+                                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
                                         ✓
                                       </span>
                                     )}
@@ -734,11 +735,11 @@ export default function TeamsPage() {
                               </div>
 
                               <div className="min-w-0">
-                                <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                                <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                                   Equipo seleccionado
                                 </p>
 
-                                <p className="truncate text-xs font-semibold text-white">
+                                <p className="truncate text-xs font-semibold text-slate-900 dark:text-white">
                                   {
                                     availableTeams.find(
                                       (team) =>
@@ -752,7 +753,7 @@ export default function TeamsPage() {
                             </div>
 
                             <button
-                              className="shrink-0 text-[10px] font-semibold text-slate-600 hover:text-slate-300"
+                              className="shrink-0 text-[10px] font-semibold text-slate-600 hover:text-slate-700 hover:dark:text-slate-300"
                               onClick={() => {
                                 setSelectedTeamId('');
                                 setTeamSearch('');
@@ -766,7 +767,7 @@ export default function TeamsPage() {
                         )}
 
                         <button
-                          className="mt-3 min-h-11 w-full rounded-xl bg-cyan-400 px-4 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-400/10 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-30"
+                          className="mt-3 min-h-11 w-full rounded-xl bg-cyan-400 px-4 py-2.5 text-xs font-bold text-slate-950 dark:text-slate-950 shadow-lg shadow-cyan-400/10 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-30"
                           disabled={!selectedTeamId}
                           type="submit"
                         >
@@ -780,6 +781,7 @@ export default function TeamsPage() {
                 </div>
               </div>
             </div>
+            )}
 
           </section>
         )}
@@ -793,11 +795,11 @@ export default function TeamsPage() {
           <div className="mb-3 flex items-end justify-between gap-4 sm:mb-4">
 
             <div className="min-w-0">
-              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:text-[9px] sm:tracking-[0.18em]">
+              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:text-[9px] sm:tracking-[0.18em]">
                 Competencia
               </p>
 
-              <h2 className="mt-0.5 text-lg font-black text-white sm:mt-1 sm:text-xl">
+              <h2 className="mt-0.5 text-lg font-black text-slate-900 dark:text-white sm:mt-1 sm:text-xl">
                 Participantes
               </h2>
 
@@ -806,7 +808,7 @@ export default function TeamsPage() {
               </p>
             </div>
 
-            <div className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-white/[0.02] px-2 text-[11px] font-black text-slate-300 sm:h-8 sm:min-w-8 sm:px-2.5 sm:text-xs">
+            <div className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 text-[11px] font-black text-slate-700 dark:text-slate-300 sm:h-8 sm:min-w-8 sm:px-2.5 sm:text-xs">
               {assignedTeams.length}
             </div>
 
@@ -818,7 +820,7 @@ export default function TeamsPage() {
 
               {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
                 <div
-                  className="h-[76px] animate-pulse rounded-xl border border-white/[0.04] bg-white/[0.02] sm:h-[82px] sm:rounded-2xl"
+                  className="h-[76px] animate-pulse rounded-xl border border-slate-200 dark:border-white/[0.04] bg-slate-50 dark:bg-white/[0.02] sm:h-[82px] sm:rounded-2xl"
                   key={item}
                 />
               ))}
@@ -828,13 +830,13 @@ export default function TeamsPage() {
 
           {/* Empty */}
           {!isLoading && assignedTeams.length === 0 && (
-            <div className="rounded-xl border border-dashed border-white/[0.07] bg-white/[0.012] px-4 py-9 text-center sm:rounded-2xl sm:px-6 sm:py-12">
+            <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-white/[0.012] px-4 py-9 text-center sm:rounded-2xl sm:px-6 sm:py-12">
 
               <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-400/[0.04] text-lg sm:h-12 sm:w-12 sm:rounded-2xl sm:text-xl">
                 ⚽
               </div>
 
-              <h3 className="mt-3 text-sm font-bold text-white sm:mt-4">
+              <h3 className="mt-3 text-sm font-bold text-slate-900 dark:text-white sm:mt-4">
                 Aún no hay participantes
               </h3>
 
@@ -845,7 +847,7 @@ export default function TeamsPage() {
 
               {isSuperAdmin && (
                 <button
-                  className="mt-4 min-h-10 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] px-4 py-2.5 text-xs font-bold text-emerald-400 transition hover:bg-emerald-400/[0.10] sm:mt-5"
+                  className="mt-4 min-h-10 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] px-4 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-400/[0.10] sm:mt-5"
                   onClick={() => setIsAssignOpen(true)}
                   type="button"
                 >
@@ -862,7 +864,7 @@ export default function TeamsPage() {
 
               {assignedTeams.map(({ team }, index) => (
                 <article
-                  className="group relative overflow-hidden rounded-xl border border-white/[0.06] bg-[#0a1018]/90 p-3 shadow-md shadow-black/5 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-400/20 hover:bg-[#0c131d] sm:rounded-2xl sm:p-4 sm:shadow-lg sm:shadow-black/10"
+                  className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3 shadow-md shadow-black/5 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-400/20 hover:bg-white hover:dark:bg-[#0c131d] sm:rounded-2xl sm:p-4 sm:shadow-lg sm:shadow-black/10"
                   key={team.id}
                 >
 
@@ -892,20 +894,20 @@ export default function TeamsPage() {
                     {/* Info */}
                     <div className="min-w-0 flex-1">
 
-                      <h3 className="truncate text-base font-black leading-tight text-white sm:text-lg">
+                      <h3 className="truncate text-base font-black leading-tight text-slate-900 dark:text-white sm:text-lg">
                         {team.name}
                       </h3>
 
                       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
 
-                        <span className="inline-flex min-w-0 items-center gap-1 text-[8px] font-bold uppercase tracking-wider text-emerald-400 sm:text-[9px]">
+                        <span className="inline-flex min-w-0 items-center gap-1 text-[8px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 sm:text-[9px]">
                           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.8)]" />
                           Participante
                         </span>
 
                         {team.paidUntil && new Date(team.paidUntil).getTime() < Date.now() && (
                           <span
-                            className="inline-flex min-w-0 items-center gap-1 rounded-full border border-red-400/20 bg-red-400/[0.08] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-red-300 sm:text-[9px]"
+                            className="inline-flex min-w-0 items-center gap-1 rounded-full border border-red-400/20 bg-red-400/[0.08] px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-red-700 dark:text-red-300 sm:text-[9px]"
                             title={`Pago vencido desde ${toDateInputValue(team.paidUntil)}`}
                           >
                             Pago vencido
@@ -919,10 +921,10 @@ export default function TeamsPage() {
                   </div>
 
                   {/* ACTIONS */}
-                  <div className="mt-3 flex items-center gap-1.5 border-t border-white/[0.04] pt-3">
+                  <div className="mt-3 flex items-center gap-1.5 border-t border-slate-200 dark:border-white/[0.04] pt-3">
 
                     <Link
-                      className="flex min-h-8 flex-1 items-center justify-center rounded-lg border border-cyan-400/10 bg-cyan-400/[0.04] px-2 py-1.5 text-[9px] font-semibold text-cyan-300 transition hover:bg-cyan-400/10 sm:flex-none sm:text-[10px]"
+                      className="flex min-h-8 flex-1 items-center justify-center rounded-lg border border-cyan-400/10 bg-cyan-400/[0.04] px-2 py-1.5 text-[9px] font-semibold text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/10 sm:flex-none sm:text-[10px]"
                       to={`/dashboard/tournaments/${selectedTournamentId}/teams/${team.id}/players`}
                     >
                       Agregar Jugadores
@@ -930,7 +932,7 @@ export default function TeamsPage() {
 
                     {isSuperAdmin && (
                       <button
-                        className="min-h-8 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-2 py-1.5 text-[9px] font-semibold text-emerald-400/80 transition hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-300 sm:text-[10px]"
+                        className="min-h-8 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-2 py-1.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400/80 transition hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-700 hover:dark:text-emerald-300 sm:text-[10px]"
                         onClick={() => startEditing(team)}
                         type="button"
                         title="Editar equipo"
@@ -941,7 +943,7 @@ export default function TeamsPage() {
 
                     {canCreateTeams && (
                       <button
-                        className="min-h-8 rounded-lg px-2 py-1.5 text-[9px] font-semibold text-slate-600 transition hover:bg-red-400/[0.05] hover:text-red-400 sm:text-[10px]"
+                        className="min-h-8 rounded-lg px-2 py-1.5 text-[9px] font-semibold text-slate-600 transition hover:bg-red-400/[0.05] hover:text-red-600 hover:dark:text-red-400 sm:text-[10px]"
                         onClick={() => setTeamToRemove(team)}
                         type="button"
                         title="Retirar equipo"

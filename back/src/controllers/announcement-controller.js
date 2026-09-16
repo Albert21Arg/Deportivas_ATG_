@@ -12,8 +12,21 @@ export async function updateController(request, response, next) {
   try { return response.json({ success: true, data: { announcement: await updateAnnouncement(request.params.id, request.validatedBody) } }); } catch (error) { return next(error); }
 }
 
-export async function activeController(_request, response, next) {
-  try { return response.json({ success: true, data: { announcements: await getActiveAnnouncement() } }); } catch (error) { return next(error); }
+export async function activeController(request, response, next) {
+  try {
+    const rawTournamentId = request.query.tournamentId;
+    let tournamentId;
+    if (rawTournamentId !== undefined) {
+      const parsed = Number(rawTournamentId);
+      if (!Number.isInteger(parsed) || parsed <= 0) {
+        return response.json({ success: true, data: { announcements: [] } });
+      }
+      tournamentId = parsed;
+    }
+    return response.json({ success: true, data: { announcements: await getActiveAnnouncement(tournamentId) } });
+  } catch (error) {
+    return next(error);
+  }
 }
 
 export async function deleteController(request, response, next) {

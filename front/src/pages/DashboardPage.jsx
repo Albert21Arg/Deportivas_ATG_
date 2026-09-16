@@ -70,6 +70,15 @@ const SUPERADMIN_TOOLS = [
     background: 'bg-violet-400/10',
     glow: 'bg-violet-400/10',
   },
+  {
+    label: 'Configuración del sitio',
+    description: 'Cambia el ícono de la pestaña del navegador (favicon).',
+    to: '/dashboard/site-settings',
+    icon: Settings2,
+    color: 'text-sky-400',
+    background: 'bg-sky-400/10',
+    glow: 'bg-sky-400/10',
+  },
 ];
 
 function SectionLabel({ children, color = 'emerald' }) {

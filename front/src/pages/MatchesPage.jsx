@@ -31,15 +31,15 @@ const statusLabels = {
 
 const statusStyles = {
   SCHEDULED:
-    "border-blue-400/20 bg-blue-400/[0.08] text-blue-300",
+    "border-blue-400/20 bg-blue-400/[0.08] text-blue-700 dark:text-blue-300",
   STARTED:
-    "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-300",
+    "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-700 dark:text-emerald-300",
   FINISHED:
-    "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-300",
+    "border-emerald-400/20 bg-emerald-400/[0.08] text-emerald-700 dark:text-emerald-300",
   POSTPONED:
-    "border-amber-400/20 bg-amber-400/[0.08] text-amber-300",
+    "border-amber-400/20 bg-amber-400/[0.08] text-amber-700 dark:text-amber-300",
   CANCELLED:
-    "border-red-400/20 bg-red-400/[0.08] text-red-300",
+    "border-red-400/20 bg-red-400/[0.08] text-red-700 dark:text-red-300",
 };
 
 function dateValue(value) {
@@ -215,8 +215,8 @@ function TeamLogo({ team, size = "normal" }) {
           mx-auto flex ${sizeClasses}
           items-center justify-center
           rounded-full
-          border border-white/[0.06]
-          bg-white/[0.025]
+          border border-slate-200 dark:border-white/[0.06]
+          bg-slate-100 dark:bg-white/[0.025]
           text-base sm:text-lg
         `}
         aria-label={`Sin logo para ${team?.name ?? "equipo"}`}
@@ -232,8 +232,8 @@ function TeamLogo({ team, size = "normal" }) {
         mx-auto flex ${sizeClasses}
         items-center justify-center
         rounded-full
-        border border-white/[0.06]
-        bg-white/[0.025]
+        border border-slate-200 dark:border-white/[0.06]
+        bg-slate-100 dark:bg-white/[0.025]
         p-2
       `}
     >
@@ -288,7 +288,7 @@ function TeamSearch({
 
   return (
     <div className="relative min-w-0">
-      <label className="block text-xs font-semibold text-slate-400">
+      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400">
         <span>{label}</span>
 
         <div className="relative mt-1.5">
@@ -300,13 +300,13 @@ function TeamSearch({
             className="
               box-border block h-11 w-full
               appearance-none rounded-xl
-              border border-white/[0.08]
-              bg-[#080d14]
+              border border-slate-200 dark:border-white/[0.08]
+              bg-white dark:bg-[#080d14]
               pl-10 pr-10
-              text-sm text-white
+              text-sm text-slate-900 dark:text-white
               outline-none
               transition
-              hover:border-white/[0.12]
+              hover:border-slate-300 hover:dark:border-white/[0.12]
               focus:border-emerald-400/60
               focus:ring-2 focus:ring-emerald-400/10
             "
@@ -329,8 +329,8 @@ function TeamSearch({
           className="
             absolute left-0 right-0 top-full z-30 mt-2
             max-h-48 overflow-y-auto
-            rounded-xl border border-white/[0.08]
-            bg-[#080d14]
+            rounded-xl border border-slate-200 dark:border-white/[0.08]
+            bg-white dark:bg-[#080d14]
             p-1.5 shadow-xl shadow-black/30
           "
         >
@@ -340,10 +340,10 @@ function TeamSearch({
                 className="
                   flex w-full items-center gap-2
                   rounded-lg px-2.5 py-2.5
-                  text-left text-xs text-slate-200
+                  text-left text-xs text-slate-700 dark:text-slate-200
                   transition
                   hover:bg-emerald-400/10
-                  hover:text-emerald-300
+                  hover:text-emerald-700 hover:dark:text-emerald-300
                 "
                 key={team.id}
                 type="button"
@@ -391,14 +391,14 @@ function TeamSearch({
           )}
 
           <span
-            className="min-w-0 flex-1 truncate text-[10px] font-semibold text-emerald-300"
+            className="min-w-0 flex-1 truncate text-[10px] font-semibold text-emerald-700 dark:text-emerald-300"
             title={selectedTeam.name}
           >
             {selectedTeam.name}
           </span>
 
           <button
-            className="shrink-0 text-[10px] text-slate-500 transition hover:text-white"
+            className="shrink-0 text-[10px] text-slate-500 transition hover:text-slate-900 hover:dark:text-white"
             type="button"
             onClick={() => onChange("")}
           >
@@ -424,7 +424,7 @@ function DateTimeField({
   const Icon = type === "date" ? CalendarIcon : ClockIcon;
 
   return (
-    <label className="block min-w-0 text-xs font-semibold text-slate-400">
+    <label className="block min-w-0 text-xs font-semibold text-slate-500 dark:text-slate-400">
       <span>{label}</span>
 
       <div className="relative mt-1.5">
@@ -436,13 +436,13 @@ function DateTimeField({
           className="
             box-border block h-11 w-full min-w-0
             appearance-none rounded-xl
-            border border-white/[0.08]
-            bg-[#080d14]
+            border border-slate-200 dark:border-white/[0.08]
+            bg-white dark:bg-[#080d14]
             px-3 pl-10
-            text-sm text-white
+            text-sm text-slate-900 dark:text-white
             outline-none
             transition
-            hover:border-white/[0.12]
+            hover:border-slate-300 hover:dark:border-white/[0.12]
             focus:border-emerald-400/60
             focus:ring-2 focus:ring-emerald-400/10
           "
@@ -461,12 +461,21 @@ function DateTimeField({
 }
 
 /* ================================================================
-   LIVE EVENT PANEL
+   PANEL DE GOLEADORES Y TARJETAS
+   ----------------------------------------------------------------
+   variant="live": se usa mientras el partido está en vivo, incluye
+   la corrección manual del marcador (requiere partido iniciado).
+
+   variant="finished": el admin puede registrar goleadores/tarjetas
+   de un partido ya finalizado (por ejemplo, si solo cargó el
+   resultado final con "Resultado" y quiere agregar el detalle en
+   otro momento). No toca el marcador final, que ya quedó fijo.
 ================================================================ */
 
-function LiveEventPanel({
+function MatchEventsPanel({
   match,
   blueCardEnabled = true,
+  variant = "live",
 }) {
   const { notify } = useNotifications();
 
@@ -638,68 +647,83 @@ function LiveEventPanel({
     }
   }
 
+  const isLiveVariant = variant === "live";
+
   return (
-    <div className="mt-4 space-y-2.5 border-t border-white/[0.05] pt-3.5 sm:space-y-3 sm:pt-4">
-      <form
-        className="
-          rounded-xl
-          border border-emerald-400/10
-          bg-emerald-400/[0.035]
-          p-2.5 sm:p-3
-        "
-        onSubmit={saveScore}
-      >
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-300">
-            Corrección manual del marcador
+    <div className="mt-4 space-y-2.5 border-t border-slate-200 dark:border-white/[0.05] pt-3.5 sm:space-y-3 sm:pt-4">
+      {isLiveVariant ? (
+        <form
+          className="
+            rounded-xl
+            border border-emerald-400/10
+            bg-emerald-400/[0.035]
+            p-2.5 sm:p-3
+          "
+          onSubmit={saveScore}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+              Corrección manual del marcador
+            </p>
+
+            <span className="flex items-center gap-1 text-[8px] font-bold text-red-600 dark:text-red-400">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
+              EN VIVO
+            </span>
+          </div>
+
+          <p className="mt-1 text-[9px] leading-4 text-slate-500">
+            Usa esto solo para corregir errores. Para anotar
+            goles usa los eventos.
           </p>
 
-          <span className="flex items-center gap-1 text-[8px] font-bold text-red-400">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
-            EN VIVO
-          </span>
+          <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+            <input
+              className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-center text-xl font-black text-slate-900 dark:text-white outline-none focus:border-emerald-400"
+              min="0"
+              type="number"
+              value={score.homeScore}
+              onChange={(event) =>
+                setScore((current) => ({
+                  ...current,
+                  homeScore: event.target.value,
+                }))
+              }
+            />
+
+            <span className="text-sm font-bold text-slate-600">
+              -
+            </span>
+
+            <input
+              className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-center text-xl font-black text-slate-900 dark:text-white outline-none focus:border-emerald-400"
+              min="0"
+              type="number"
+              value={score.awayScore}
+              onChange={(event) =>
+                setScore((current) => ({
+                  ...current,
+                  awayScore: event.target.value,
+                }))
+              }
+            />
+          </div>
+        </form>
+      ) : (
+        <div className="rounded-xl border border-cyan-400/10 bg-cyan-400/[0.035] p-2.5 sm:p-3">
+          <p className="text-[9px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300">
+            Goleadores y tarjetas
+          </p>
+
+          <p className="mt-1 text-[9px] leading-4 text-slate-500">
+            Registra aquí quién anotó y qué tarjetas hubo en este
+            partido finalizado. Esto no cambia el marcador final.
+          </p>
         </div>
-
-        <p className="mt-1 text-[9px] leading-4 text-slate-500">
-          Usa esto solo para corregir errores. Para anotar
-          goles usa los eventos.
-        </p>
-
-        <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <input
-            className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 text-center text-xl font-black text-white outline-none focus:border-emerald-400"
-            min="0"
-            type="number"
-            value={score.homeScore}
-            onChange={(event) =>
-              setScore((current) => ({
-                ...current,
-                homeScore: event.target.value,
-              }))
-            }
-          />
-
-          <span className="text-sm font-bold text-slate-600">
-            -
-          </span>
-
-          <input
-            className="h-10 w-full rounded-lg border border-slate-700 bg-slate-950 text-center text-xl font-black text-white outline-none focus:border-emerald-400"
-            min="0"
-            type="number"
-            value={score.awayScore}
-            onChange={(event) =>
-              setScore((current) => ({
-                ...current,
-                awayScore: event.target.value,
-              }))
-            }
-          />
-        </div>
-      </form>
+      )}
 
       <form
-        className="rounded-xl border border-white/[0.06] bg-slate-950/30 p-2.5 sm:p-3"
+        className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950/30 p-2.5 sm:p-3"
         onSubmit={saveCard}
       >
         <div
@@ -712,8 +736,8 @@ function LiveEventPanel({
           <button
             className={`h-9 rounded-lg text-[9px] font-bold transition ${
               type === "GOAL"
-                ? "bg-emerald-400 text-slate-950"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                ? "bg-emerald-400 text-slate-950 dark:text-slate-950"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
             }`}
             type="button"
             onClick={() => {
@@ -728,8 +752,8 @@ function LiveEventPanel({
           <button
             className={`flex h-9 items-center justify-center rounded-lg text-[9px] font-bold transition ${
               type === "OWN_GOAL"
-                ? "bg-orange-400 text-slate-950"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                ? "bg-orange-400 text-slate-950 dark:text-slate-950"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
             }`}
             type="button"
             onClick={() => {
@@ -750,8 +774,8 @@ function LiveEventPanel({
           <button
             className={`h-9 rounded-lg text-[9px] font-bold transition ${
               type === "YELLOW_CARD"
-                ? "bg-amber-400 text-slate-950"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                ? "bg-amber-400 text-slate-950 dark:text-slate-950"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
             }`}
             type="button"
             onClick={() => {
@@ -766,8 +790,8 @@ function LiveEventPanel({
           <button
             className={`h-9 rounded-lg text-[9px] font-bold transition ${
               type === "RED_CARD"
-                ? "bg-red-500 text-white"
-                : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                ? "bg-red-500 text-slate-900 dark:text-white"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
             }`}
             type="button"
             onClick={() => {
@@ -783,8 +807,8 @@ function LiveEventPanel({
             <button
               className={`h-9 rounded-lg text-[9px] font-bold transition ${
                 type === "BLUE_CARD"
-                  ? "bg-blue-500 text-white"
-                  : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                  ? "bg-blue-500 text-slate-900 dark:text-white"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
               }`}
               type="button"
               onClick={() => {
@@ -799,14 +823,14 @@ function LiveEventPanel({
         </div>
 
         {isOwnGoal && (
-          <p className="mt-1.5 text-[9px] leading-4 text-orange-300">
+          <p className="mt-1.5 text-[9px] leading-4 text-orange-700 dark:text-orange-300">
             Autogol: el jugador debe pertenecer a{" "}
             {rivalTeamName}.
           </p>
         )}
 
         <select
-          className="mt-2 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none focus:border-emerald-400"
+          className="mt-2 h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 text-xs text-slate-900 dark:text-white outline-none focus:border-emerald-400"
           value={teamId}
           onChange={(event) => {
             setTeamId(event.target.value);
@@ -825,7 +849,7 @@ function LiveEventPanel({
 
         <div className="relative">
           <input
-            className="mt-2 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-xs text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
+            className="mt-2 h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
             placeholder="Buscar jugador..."
             value={query}
             onChange={(event) => {
@@ -836,10 +860,10 @@ function LiveEventPanel({
           />
 
           {query && !player && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-32 overflow-y-auto rounded-lg border border-slate-700 bg-slate-950 shadow-xl">
+            <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-32 overflow-y-auto rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-xl">
               {results.map((item) => (
                 <button
-                  className="block w-full truncate px-3 py-2.5 text-left text-xs text-slate-300 hover:bg-slate-800"
+                  className="block w-full truncate px-3 py-2.5 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-800"
                   key={item.id}
                   type="button"
                   onClick={() => {
@@ -862,7 +886,7 @@ function LiveEventPanel({
 
         <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
           <input
-            className="h-10 min-w-0 rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
+            className="h-10 min-w-0 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
             type="number"
             min="0"
             max="130"
@@ -874,7 +898,7 @@ function LiveEventPanel({
           />
 
           <button
-            className="rounded-lg bg-slate-100 px-3 text-[10px] font-bold text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg bg-slate-100 px-3 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!player}
           >
             Registrar
@@ -885,7 +909,7 @@ function LiveEventPanel({
       <div className="space-y-1.5">
         {(currentMatch.events ?? []).map((event) => (
           <div
-            className="flex min-w-0 items-center gap-2 rounded-lg bg-slate-950/50 px-2.5 py-2 text-[10px]"
+            className="flex min-w-0 items-center gap-2 rounded-lg bg-white dark:bg-slate-950/50 px-2.5 py-2 text-[10px]"
             key={event.id}
           >
             <span className="flex shrink-0 items-center">
@@ -909,7 +933,7 @@ function LiveEventPanel({
             </span>
 
             <span
-              className="min-w-0 flex-1 truncate font-semibold text-slate-300"
+              className="min-w-0 flex-1 truncate font-semibold text-slate-700 dark:text-slate-300"
               title={
                 event.player?.name ??
                 event.team?.name
@@ -922,7 +946,7 @@ function LiveEventPanel({
             </span>
 
             <button
-              className="shrink-0 text-[9px] text-red-300 transition hover:text-red-200"
+              className="shrink-0 text-[9px] text-red-700 dark:text-red-300 transition hover:text-red-700 hover:dark:text-red-200"
               type="button"
               onClick={() =>
                 setEventToRemove(event)
@@ -937,7 +961,11 @@ function LiveEventPanel({
       <ConfirmActionModal
         isOpen={Boolean(eventToRemove)}
         title="¿Eliminar evento?"
-        message="El evento se quitará del registro en vivo de este partido."
+        message={
+          isLiveVariant
+            ? "El evento se quitará del registro en vivo de este partido."
+            : "El evento se quitará del registro de este partido finalizado."
+        }
         confirmLabel="Sí, eliminar"
         isLoading={isRemovingEvent}
         onCancel={() => setEventToRemove(null)}
@@ -967,6 +995,9 @@ function MatchCard({
     awayScore: "",
   });
 
+  const [showFinishedEvents, setShowFinishedEvents] =
+    useState(false);
+
   const isFinished = match.status === "FINISHED";
   const isLive = match.status === "STARTED";
   const isPostponed = match.status === "POSTPONED";
@@ -994,7 +1025,7 @@ function MatchCard({
         group relative overflow-hidden
         rounded-2xl
         border
-        bg-[#0b111a]
+        bg-white dark:bg-[#0b111a]
         shadow-2xl shadow-black/20
         transition-all duration-300
         hover:-translate-y-0.5
@@ -1005,7 +1036,7 @@ function MatchCard({
               ? "border-amber-400/15"
               : isCancelled
                 ? "border-red-400/10 opacity-90"
-                : "border-white/[0.07] hover:border-white/[0.12]"
+                : "border-slate-200 dark:border-white/[0.07] hover:border-slate-300 hover:dark:border-white/[0.12]"
         }
       `}
     >
@@ -1035,20 +1066,20 @@ function MatchCard({
                 ? "bg-gradient-to-r from-transparent via-amber-400/60 to-transparent"
                 : isFinished
                   ? "bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent"
-                  : "bg-white/[0.06]"
+                  : "bg-slate-200 dark:bg-white/[0.06]"
           }
         `}
       />
 
       {/* HEADER */}
-      <div className="relative border-b border-white/[0.05] px-4 py-3.5">
+      <div className="relative border-b border-slate-200 dark:border-white/[0.05] px-4 py-3.5">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               {isLive ? (
                 <LiveIcon />
               ) : (
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white/[0.035] text-[9px]">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/[0.035] text-[9px]">
                   ⚽
                 </span>
               )}
@@ -1071,7 +1102,7 @@ function MatchCard({
                 •
               </span>
 
-              <span className="font-semibold text-slate-400">
+              <span className="font-semibold text-slate-500 dark:text-slate-400">
                 {timeValue(match.time) || "--:--"}
               </span>
             </div>
@@ -1083,7 +1114,7 @@ function MatchCard({
               px-2.5 py-1.5
               text-[8px] font-bold
               ${statusStyles[match.status] ??
-              "border-slate-700 bg-slate-800 text-slate-300"}
+              "border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"}
             `}
           >
             {statusLabels[match.status] ??
@@ -1100,7 +1131,7 @@ function MatchCard({
             <TeamLogo team={match.homeTeam} />
 
             <h3
-              className="mx-auto mt-3 max-w-[125px] truncate text-xs font-bold text-white sm:max-w-[145px] sm:text-sm"
+              className="mx-auto mt-3 max-w-[125px] truncate text-xs font-bold text-slate-900 dark:text-white sm:max-w-[145px] sm:text-sm"
               title={match.homeTeam.name}
             >
               {match.homeTeam.name}
@@ -1113,8 +1144,8 @@ function MatchCard({
                   sm:text-4xl
                   ${
                     isLive
-                      ? "text-white"
-                      : "text-emerald-300"
+                      ? "text-slate-900 dark:text-white"
+                      : "text-emerald-700 dark:text-emerald-300"
                   }
                 `}
               >
@@ -1124,7 +1155,7 @@ function MatchCard({
               </p>
             ) : canEdit ? (
               <input
-                className="mx-auto mt-2 block h-10 w-14 rounded-xl border border-slate-700 bg-slate-950 text-center text-lg font-black text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
+                className="mx-auto mt-2 block h-10 w-14 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-center text-lg font-black text-slate-900 dark:text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
                 type="number"
                 min="0"
                 placeholder="0"
@@ -1144,7 +1175,7 @@ function MatchCard({
           <div className="flex flex-col items-center justify-center">
             {isLive ? (
               <>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-400">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
                   LIVE
                 </span>
 
@@ -1165,7 +1196,7 @@ function MatchCard({
                 </span>
 
                 <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-emerald-400/10 bg-emerald-400/[0.03]">
-                  <span className="text-sm font-black text-emerald-400">
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
                     VS
                   </span>
                 </div>
@@ -1196,7 +1227,7 @@ function MatchCard({
                   VS
                 </span>
 
-                <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-white/[0.06] bg-slate-950">
+                <div className="my-1 flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950">
                   <span className="text-[10px] font-black text-slate-500">
                     VS
                   </span>
@@ -1214,7 +1245,7 @@ function MatchCard({
             <TeamLogo team={match.awayTeam} />
 
             <h3
-              className="mx-auto mt-3 max-w-[125px] truncate text-xs font-bold text-white sm:max-w-[145px] sm:text-sm"
+              className="mx-auto mt-3 max-w-[125px] truncate text-xs font-bold text-slate-900 dark:text-white sm:max-w-[145px] sm:text-sm"
               title={match.awayTeam.name}
             >
               {match.awayTeam.name}
@@ -1227,8 +1258,8 @@ function MatchCard({
                   sm:text-4xl
                   ${
                     isLive
-                      ? "text-white"
-                      : "text-emerald-300"
+                      ? "text-slate-900 dark:text-white"
+                      : "text-emerald-700 dark:text-emerald-300"
                   }
                 `}
               >
@@ -1238,7 +1269,7 @@ function MatchCard({
               </p>
             ) : canEdit ? (
               <input
-                className="mx-auto mt-2 block h-10 w-14 rounded-xl border border-slate-700 bg-slate-950 text-center text-lg font-black text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
+                className="mx-auto mt-2 block h-10 w-14 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-center text-lg font-black text-slate-900 dark:text-white outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20"
                 type="number"
                 min="0"
                 placeholder="0"
@@ -1258,7 +1289,7 @@ function MatchCard({
         {/* FINISHED RESULT */}
         {isFinished && hasCurrentScore && (
           <div className="mt-4 flex justify-center">
-            <div className="rounded-full border border-emerald-400/10 bg-emerald-400/[0.035] px-3 py-1.5 text-[9px] font-bold text-emerald-300">
+            <div className="rounded-full border border-emerald-400/10 bg-emerald-400/[0.035] px-3 py-1.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-300">
               Resultado final{" "}
               <span className="mx-1.5 text-slate-700">
                 •
@@ -1267,7 +1298,7 @@ function MatchCard({
               {match.awayScore}
               {match.homePenaltyScore != null &&
                 match.awayPenaltyScore != null && (
-                  <span className="ml-1.5 text-amber-300">
+                  <span className="ml-1.5 text-amber-700 dark:text-amber-300">
                     P({match.homePenaltyScore}-
                     {match.awayPenaltyScore})
                   </span>
@@ -1276,10 +1307,39 @@ function MatchCard({
           </div>
         )}
 
+        {/* GOLEADORES Y TARJETAS (partido finalizado) */}
+        {isFinished && isAdmin && (
+          <div className="mt-4">
+            <button
+              className="w-full rounded-lg border border-cyan-400/15 bg-cyan-400/[0.04] px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/[0.08]"
+              onClick={() =>
+                setShowFinishedEvents(
+                  (current) => !current,
+                )
+              }
+              type="button"
+            >
+              {showFinishedEvents
+                ? "▲ Ocultar goleadores y tarjetas"
+                : "⚽ Agregar goleadores y tarjetas"}
+            </button>
+
+            {showFinishedEvents && (
+              <MatchEventsPanel
+                match={match}
+                blueCardEnabled={
+                  tournament?.blueCardEnabled ?? true
+                }
+                variant="finished"
+              />
+            )}
+          </div>
+        )}
+
         {/* POSTPONED INFO */}
         {isPostponed && (
           <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.035] px-3 py-2.5 text-center">
-            <p className="text-[9px] font-semibold text-amber-200">
+            <p className="text-[9px] font-semibold text-amber-700 dark:text-amber-200">
               Este partido está aplazado
             </p>
 
@@ -1291,22 +1351,23 @@ function MatchCard({
 
         {/* LIVE */}
         {isLive && (
-          <LiveEventPanel
+          <MatchEventsPanel
             match={match}
             blueCardEnabled={
               tournament?.blueCardEnabled ?? true
             }
+            variant="live"
           />
         )}
       </div>
 
       {/* ACTIONS */}
       {isAdmin && canEdit && (
-        <div className="border-t border-white/[0.05] bg-black/10 p-2.5">
+        <div className="border-t border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-black/10 p-2.5">
           <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center">
             {match.status === "SCHEDULED" && (
               <button
-                className="rounded-lg bg-red-500 px-3 py-2 text-[9px] font-bold text-white transition hover:bg-red-400"
+                className="rounded-lg bg-red-500 px-3 py-2 text-[9px] font-bold text-slate-900 dark:text-white transition hover:bg-red-400"
                 onClick={() =>
                   changeStatus(match, "start")
                 }
@@ -1318,7 +1379,7 @@ function MatchCard({
 
             {match.status === "STARTED" && (
               <button
-                className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 transition hover:bg-emerald-400"
+                className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400"
                 onClick={() =>
                   changeStatus(match, "finish")
                 }
@@ -1331,7 +1392,7 @@ function MatchCard({
             {match.status !== "STARTED" && (
               <>
                 <button
-                  className="rounded-lg border border-white/[0.08] px-3 py-2 text-[9px] font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white"
+                  className="rounded-lg border border-slate-200 dark:border-white/[0.08] px-3 py-2 text-[9px] font-semibold text-slate-700 dark:text-slate-300 transition hover:border-slate-400 hover:dark:border-slate-500 hover:text-slate-900 hover:dark:text-white"
                   onClick={() =>
                     startEditing(match)
                   }
@@ -1344,7 +1405,7 @@ function MatchCard({
                 </button>
 
                 <button
-                  className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 transition hover:bg-emerald-400"
+                  className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400"
                   onClick={
                     handleRegisterResult
                   }
@@ -1361,7 +1422,7 @@ function MatchCard({
             {match.status !== "FINISHED" &&
               match.status !== "POSTPONED" && (
                 <button
-                  className="rounded-lg border border-amber-800/60 px-3 py-2 text-[9px] font-semibold text-amber-200 transition hover:border-amber-500 hover:bg-amber-500/10"
+                  className="rounded-lg border border-amber-800/60 px-3 py-2 text-[9px] font-semibold text-amber-700 dark:text-amber-200 transition hover:border-amber-500 hover:bg-amber-500/10"
                   onClick={() =>
                     changeStatus(
                       match,
@@ -1375,7 +1436,7 @@ function MatchCard({
               )}
 
             <button
-              className="rounded-lg border border-red-900/60 px-3 py-2 text-[9px] font-semibold text-red-300 transition hover:border-red-500 hover:bg-red-500/10"
+              className="rounded-lg border border-red-900/60 px-3 py-2 text-[9px] font-semibold text-red-700 dark:text-red-300 transition hover:border-red-500 hover:bg-red-500/10"
               onClick={() =>
                 changeStatus(match, "cancel")
               }
@@ -1409,8 +1470,8 @@ function MatchAccordion({
       className="
         overflow-hidden
         rounded-2xl
-        border border-white/[0.07]
-        bg-[#0a1018]/90
+        border border-slate-200 dark:border-white/[0.07]
+        bg-white dark:bg-[#0a1018]/90
         shadow-xl shadow-black/10
       "
     >
@@ -1422,7 +1483,7 @@ function MatchAccordion({
           px-4 py-4
           text-left
           transition
-          hover:bg-white/[0.025]
+          hover:bg-slate-100 hover:dark:bg-white/[0.025]
           sm:px-5 sm:py-4.5
         "
         onClick={onToggle}
@@ -1435,8 +1496,8 @@ function MatchAccordion({
               flex h-10 w-10 shrink-0
               items-center justify-center
               rounded-xl
-              border border-white/[0.06]
-              bg-white/[0.025]
+              border border-slate-200 dark:border-white/[0.06]
+              bg-slate-100 dark:bg-white/[0.025]
               text-sm
             "
           >
@@ -1451,7 +1512,7 @@ function MatchAccordion({
                 {title}
               </h3>
 
-              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-white/[0.05] bg-slate-800/70 px-1.5 text-[8px] font-bold text-slate-400 sm:text-[9px]">
+              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-slate-800/70 px-1.5 text-[8px] font-bold text-slate-500 dark:text-slate-400 sm:text-[9px]">
                 {count}
               </span>
             </div>
@@ -1467,8 +1528,8 @@ function MatchAccordion({
             flex h-8 w-8 shrink-0
             items-center justify-center
             rounded-lg
-            border border-white/[0.06]
-            bg-white/[0.015]
+            border border-slate-200 dark:border-white/[0.06]
+            bg-slate-50 dark:bg-white/[0.015]
             text-xs text-slate-500
             transition-transform duration-300
             ${isOpen ? "rotate-180" : ""}
@@ -1499,7 +1560,7 @@ function MatchAccordion({
         `}
       >
         <div className="min-h-0 overflow-hidden">
-          <div className="border-t border-white/[0.05] p-2.5 sm:p-4">
+          <div className="border-t border-slate-200 dark:border-white/[0.05] p-2.5 sm:p-4">
             {children}
           </div>
         </div>
@@ -1514,8 +1575,8 @@ function MatchAccordion({
 
 function EmptySection({ message }) {
   return (
-    <div className="rounded-xl border border-dashed border-white/[0.06] bg-black/10 px-4 py-8 text-center">
-      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.025] text-sm">
+    <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/10 px-4 py-8 text-center">
+      <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/[0.025] text-sm">
         ✦
       </div>
 
@@ -1534,8 +1595,8 @@ function StatCard({
   label,
   value,
   icon,
-  tone = "text-white",
-  accent = "border-white/[0.06]",
+  tone = "text-slate-900 dark:text-white",
+  accent = "border-slate-200 dark:border-white/[0.06]",
 }) {
   return (
     <div
@@ -1543,14 +1604,14 @@ function StatCard({
         relative overflow-hidden
         rounded-2xl
         border ${accent}
-        bg-[#0a1018]/90
+        bg-white dark:bg-[#0a1018]/90
         p-4
       `}
     >
-      <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-white/[0.02] blur-2xl" />
+      <div className="absolute -right-8 -top-8 h-20 w-20 rounded-full bg-slate-50 dark:bg-white/[0.02] blur-2xl" />
 
       <div className="relative flex items-center justify-between">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/[0.03] text-xs">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-white/[0.03] text-xs">
           {icon}
         </span>
 
@@ -1666,14 +1727,14 @@ function PenaltyShootoutModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto bg-slate-950/85 px-2 py-2 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+    <div className="fixed inset-0 z-[70] flex items-end justify-center overflow-y-auto bg-white dark:bg-slate-950/85 px-2 py-2 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
       <div
-        className="my-auto w-full max-w-md max-h-[94vh] overflow-y-auto rounded-2xl border border-amber-500/20 bg-slate-900 shadow-2xl sm:max-h-[90vh]"
+        className="my-auto w-full max-w-md max-h-[94vh] overflow-y-auto rounded-2xl border border-amber-500/20 bg-white dark:bg-slate-900 shadow-2xl sm:max-h-[90vh]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="penalty-shootout-title"
       >
-        <div className="border-b border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
+        <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
           <div className="flex items-center gap-2.5 sm:gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/10 bg-amber-400/[0.06] text-sm">
               🥅
@@ -1682,7 +1743,7 @@ function PenaltyShootoutModal({
             <div className="min-w-0">
               <h2
                 id="penalty-shootout-title"
-                className="text-sm font-bold text-white sm:text-base"
+                className="text-sm font-bold text-slate-900 dark:text-white sm:text-base"
               >
                 Definición por penales
               </h2>
@@ -1696,13 +1757,13 @@ function PenaltyShootoutModal({
         </div>
 
         <div className="px-4 py-4 sm:px-5 sm:py-5">
-          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:gap-3 sm:p-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3 sm:gap-3 sm:p-4">
             <div className="min-w-0 text-center">
-              <p className="truncate text-[11px] font-bold text-slate-200 sm:text-xs">
+              <p className="truncate text-[11px] font-bold text-slate-700 dark:text-slate-200 sm:text-xs">
                 {match.homeTeam.name}
               </p>
 
-              <p className="mt-1 text-2xl font-black text-amber-300 sm:text-3xl">
+              <p className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300 sm:text-3xl">
                 {homeCount}
               </p>
             </div>
@@ -1712,18 +1773,18 @@ function PenaltyShootoutModal({
             </span>
 
             <div className="min-w-0 text-center">
-              <p className="truncate text-[11px] font-bold text-slate-200 sm:text-xs">
+              <p className="truncate text-[11px] font-bold text-slate-700 dark:text-slate-200 sm:text-xs">
                 {match.awayTeam.name}
               </p>
 
-              <p className="mt-1 text-2xl font-black text-amber-300 sm:text-3xl">
+              <p className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300 sm:text-3xl">
                 {awayCount}
               </p>
             </div>
           </div>
 
           <form
-            className="mt-4 rounded-xl border border-white/[0.06] bg-slate-950/30 p-3"
+            className="mt-4 rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950/30 p-3"
             onSubmit={addGoal}
           >
             <div className="grid grid-cols-2 gap-1.5">
@@ -1731,8 +1792,8 @@ function PenaltyShootoutModal({
                 className={`h-9 truncate rounded-lg px-2 text-[11px] font-bold transition ${
                   String(teamId) ===
                   String(match.homeTeamId)
-                    ? "bg-emerald-400 text-slate-950"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                    ? "bg-emerald-400 text-slate-950 dark:text-slate-950"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
                 }`}
                 type="button"
                 onClick={() =>
@@ -1748,8 +1809,8 @@ function PenaltyShootoutModal({
                 className={`h-9 truncate rounded-lg px-2 text-[11px] font-bold transition ${
                   String(teamId) ===
                   String(match.awayTeamId)
-                    ? "bg-emerald-400 text-slate-950"
-                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                    ? "bg-emerald-400 text-slate-950 dark:text-slate-950"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
                 }`}
                 type="button"
                 onClick={() =>
@@ -1763,7 +1824,7 @@ function PenaltyShootoutModal({
             </div>
 
             <select
-              className="mt-2 h-10 w-full rounded-lg border border-slate-700 bg-slate-950 px-2.5 text-xs text-white outline-none transition focus:border-emerald-400"
+              className="mt-2 h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2.5 text-xs text-slate-900 dark:text-white outline-none transition focus:border-emerald-400"
               value={selectedPlayerId}
               onChange={(event) =>
                 setSelectedPlayerId(
@@ -1786,7 +1847,7 @@ function PenaltyShootoutModal({
             </select>
 
             <button
-              className="mt-2 h-9 w-full rounded-lg bg-emerald-500 text-[11px] font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-2 h-9 w-full rounded-lg bg-emerald-500 text-[11px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
               type="submit"
               disabled={!selectedPlayerId}
             >
@@ -1798,10 +1859,10 @@ function PenaltyShootoutModal({
             <div className="mt-3 max-h-40 space-y-1.5 overflow-y-auto pr-1">
               {entries.map((entry, index) => (
                 <div
-                  className="flex items-center justify-between gap-2 rounded-lg bg-slate-950/50 px-2.5 py-2 text-[10px]"
+                  className="flex items-center justify-between gap-2 rounded-lg bg-white dark:bg-slate-950/50 px-2.5 py-2 text-[10px]"
                   key={entry.id}
                 >
-                  <span className="min-w-0 flex-1 truncate text-slate-300">
+                  <span className="min-w-0 flex-1 truncate text-slate-700 dark:text-slate-300">
                     {index + 1}.{" "}
                     {entry.playerName}
 
@@ -1816,7 +1877,7 @@ function PenaltyShootoutModal({
                   </span>
 
                   <button
-                    className="shrink-0 text-[9px] text-red-300 transition hover:text-red-200"
+                    className="shrink-0 text-[9px] text-red-700 dark:text-red-300 transition hover:text-red-700 hover:dark:text-red-200"
                     type="button"
                     onClick={() =>
                       removeEntry(entry.id)
@@ -1831,16 +1892,16 @@ function PenaltyShootoutModal({
 
           {entries.length > 0 &&
             homeCount === awayCount && (
-              <p className="mt-2 text-[10px] text-amber-300">
+              <p className="mt-2 text-[10px] text-amber-700 dark:text-amber-300">
                 Sigue registrando penales hasta que
                 un equipo quede arriba.
               </p>
             )}
         </div>
 
-        <div className="flex items-center justify-end gap-2 border-t border-slate-800 px-4 py-3 sm:px-5 sm:py-4">
+        <div className="flex items-center justify-end gap-2 border-t border-slate-200 dark:border-slate-800 px-4 py-3 sm:px-5 sm:py-4">
           <button
-            className="h-10 rounded-xl border border-slate-700 px-4 text-xs font-semibold text-slate-400 transition hover:bg-slate-800"
+            className="h-10 rounded-xl border border-slate-300 dark:border-slate-700 px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-slate-800"
             type="button"
             onClick={onCancel}
             disabled={isSaving}
@@ -1849,7 +1910,7 @@ function PenaltyShootoutModal({
           </button>
 
           <button
-            className="h-10 rounded-xl bg-emerald-500 px-4 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-10 rounded-xl bg-emerald-500 px-4 text-xs font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             onClick={() =>
               onConfirm(entries)
@@ -2808,7 +2869,7 @@ export default function MatchesPage() {
   ============================================================== */
 
   return (
-    <main className="min-h-screen bg-[#05090e] text-slate-100">
+    <main className="lm-ready min-h-screen bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
       {/* BACKGROUND */}
       <div className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
         <div className="absolute -left-40 -top-40 h-96 w-96 rounded-full bg-emerald-500/[0.045] blur-3xl" />
@@ -2834,18 +2895,18 @@ export default function MatchesPage() {
             HERO
         ====================================================== */}
 
-        <div className="relative overflow-hidden rounded-3xl border border-white/[0.07] bg-gradient-to-br from-[#101923] via-[#0a111a] to-[#070c12] shadow-2xl shadow-black/20">
+        <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.07] bg-gradient-to-br from-white via-slate-50 to-emerald-50/60 dark:from-[#101923] dark:via-[#0a111a] dark:to-[#070c12] shadow-2xl shadow-black/5 dark:shadow-black/20">
           <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400/[0.045] blur-3xl" />
 
           <div className="relative p-5 sm:p-7 lg:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.05] px-2.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-300">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.05] px-2.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   Gestión deportiva
                 </div>
 
-                <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
+                <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-4xl lg:text-5xl">
                   Partidos
                 </h1>
 
@@ -2868,7 +2929,7 @@ export default function MatchesPage() {
                       label="En vivo"
                       value={liveMatches.length}
                       icon="●"
-                      tone="text-emerald-400"
+                      tone="text-emerald-600 dark:text-emerald-400"
                       accent="border-emerald-400/10"
                     />
 
@@ -2878,7 +2939,7 @@ export default function MatchesPage() {
                         finishedMatches.length
                       }
                       icon="✓"
-                      tone="text-cyan-300"
+                      tone="text-slate-900 dark:text-cyan-300"
                       accent="border-cyan-400/10"
                     />
                   </div>
@@ -2891,19 +2952,19 @@ export default function MatchesPage() {
             TOURNAMENT
         ====================================================== */}
 
-        <div className="mt-4 rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 p-3.5 shadow-xl shadow-black/10 sm:mt-5 sm:p-4">
+        <div className="mt-4 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3.5 shadow-xl shadow-black/10 sm:mt-5 sm:p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/10 bg-emerald-400/[0.05] text-emerald-300">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/10 bg-emerald-400/[0.05] text-emerald-700 dark:text-emerald-300">
                 <TrophyIcon />
               </div>
 
               <div className="min-w-0">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-400">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
                   Competición
                 </p>
 
-                <h2 className="mt-0.5 truncate text-xs font-bold text-white sm:text-sm">
+                <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                   {isTournamentLocked
                     ? selectedTournament?.name ||
                       "Cargando torneo..."
@@ -2914,7 +2975,7 @@ export default function MatchesPage() {
 
             {!isTournamentLocked ? (
               <select
-                className="h-11 w-full rounded-xl border border-white/[0.08] bg-black/30 px-3 text-xs text-white outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 sm:max-w-sm"
+                className="h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.08] bg-slate-200 dark:bg-black/30 px-3 text-xs text-slate-900 dark:text-white outline-none transition focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10 sm:max-w-sm"
                 value={selectedTournamentId}
                 onChange={(event) => {
                   setSelectedTournamentId(
@@ -2942,7 +3003,7 @@ export default function MatchesPage() {
                 )}
               </select>
             ) : (
-              <div className="max-w-full truncate rounded-xl border border-emerald-400/15 bg-emerald-400/[0.04] px-3 py-2.5 text-[10px] font-semibold text-emerald-300 sm:text-xs">
+              <div className="max-w-full truncate rounded-xl border border-emerald-400/15 bg-emerald-400/[0.04] px-3 py-2.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 sm:text-xs">
                 {selectedTournament?.name ||
                   "Cargando..."}
               </div>
@@ -2961,11 +3022,11 @@ export default function MatchesPage() {
             "ROUND_ROBIN" && (
             <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-cyan-400/10 bg-cyan-400/[0.035] px-4 py-3.5 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-cyan-400">
+                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-900 dark:text-cyan-400">
                   Automatización
                 </p>
 
-                <p className="mt-1 text-[11px] text-cyan-100 sm:text-xs">
+                <p className="mt-1 text-[11px] text-slate-600 dark:text-cyan-100 sm:text-xs">
                   Genera automáticamente el fixture
                   completo de todos contra todos.
                 </p>
@@ -2973,7 +3034,7 @@ export default function MatchesPage() {
 
               <div className="flex shrink-0 gap-2">
                 <button
-                  className="rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                  className="rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
                   type="button"
                   disabled={isGeneratingFixtures}
                   onClick={() =>
@@ -2987,7 +3048,7 @@ export default function MatchesPage() {
 
                 {matches.length > 0 && (
                   <button
-                    className="rounded-xl border border-red-400/25 bg-red-400/[0.06] px-4 py-2.5 text-[10px] font-bold text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                    className="rounded-xl border border-red-400/25 bg-red-400/[0.06] px-4 py-2.5 text-[10px] font-bold text-red-700 dark:text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
                     type="button"
                     disabled={isDeletingFixtures}
                     onClick={() =>
@@ -3008,9 +3069,9 @@ export default function MatchesPage() {
         ====================================================== */}
 
         {isAdmin && selectedTournamentId && (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 shadow-xl shadow-black/10 sm:mt-5">
+          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 shadow-xl shadow-black/10 sm:mt-5">
             <button
-              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-white/[0.025] sm:px-5"
+              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:px-5"
               onClick={() =>
                 setIsScheduleOpen(
                   (current) => !current,
@@ -3025,11 +3086,11 @@ export default function MatchesPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-300">
+                  <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
                     Calendario
                   </p>
 
-                  <h2 className="mt-0.5 truncate text-xs font-bold text-white sm:text-sm">
+                  <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
                     {editingId
                       ? "Editar partido"
                       : "Programar partido"}
@@ -3042,7 +3103,7 @@ export default function MatchesPage() {
               </div>
 
               <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/[0.06] text-xs text-slate-500 transition-transform ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-white/[0.06] text-xs text-slate-500 transition-transform ${
                   isScheduleOpen
                     ? "rotate-180"
                     : ""
@@ -3059,7 +3120,7 @@ export default function MatchesPage() {
                   : "max-h-0 opacity-0"
               }`}
             >
-              <div className="border-t border-white/[0.05] p-3.5 sm:p-5">
+              <div className="border-t border-slate-200 dark:border-white/[0.05] p-3.5 sm:p-5">
                 <form onSubmit={saveMatch}>
                   <div className="grid gap-3.5 md:grid-cols-2">
                     <TeamSearch
@@ -3118,7 +3179,7 @@ export default function MatchesPage() {
                   <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                     {editingId && (
                       <button
-                        className="h-11 rounded-xl border border-white/[0.08] px-4 text-xs font-semibold text-slate-400 transition hover:bg-white/[0.03] hover:text-white"
+                        className="h-11 rounded-xl border border-slate-200 dark:border-white/[0.08] px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-white/[0.03] hover:text-slate-900 hover:dark:text-white"
                         onClick={() => {
                           cancelEditing();
                           setIsScheduleOpen(false);
@@ -3130,7 +3191,7 @@ export default function MatchesPage() {
                     )}
 
                     <button
-                      className="h-11 rounded-xl bg-emerald-500 px-5 text-xs font-bold text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="h-11 rounded-xl bg-emerald-500 px-5 text-xs font-bold text-slate-950 dark:text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                       disabled={isSaving}
                       type="submit"
                     >
@@ -3157,12 +3218,12 @@ export default function MatchesPage() {
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
 
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-emerald-400">
+                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
                   Centro de partidos
                 </p>
               </div>
 
-              <h2 className="mt-1 text-xl font-black text-white sm:text-2xl">
+              <h2 className="mt-1 text-xl font-black text-slate-900 dark:text-white sm:text-2xl">
                 Calendario
               </h2>
 
@@ -3172,12 +3233,12 @@ export default function MatchesPage() {
             </div>
 
             {!isLoading && (
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-right">
+              <div className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-3 py-2 text-right">
                 <p className="text-[8px] font-bold uppercase tracking-wider text-slate-600">
                   Total
                 </p>
 
-                <p className="text-lg font-black text-white">
+                <p className="text-lg font-black text-slate-900 dark:text-white">
                   {matches.length}
                 </p>
               </div>
@@ -3187,20 +3248,20 @@ export default function MatchesPage() {
           {/* LOADING */}
 
           {isLoading ? (
-            <div className="rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 p-12 text-center">
-              <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-slate-700 border-t-emerald-400" />
+            <div className="rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-12 text-center">
+              <div className="mx-auto h-7 w-7 animate-spin rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-emerald-400" />
 
               <p className="mt-3 text-xs text-slate-500">
                 Cargando partidos...
               </p>
             </div>
           ) : !selectedTournamentId ? (
-            <div className="rounded-2xl border border-dashed border-white/[0.07] bg-[#0a1018]/70 p-12 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.03] text-lg">
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#0a1018]/70 p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.03] text-lg">
                 🏆
               </div>
 
-              <h3 className="mt-3 text-sm font-bold text-slate-200">
+              <h3 className="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">
                 Selecciona un torneo
               </h3>
 
@@ -3209,12 +3270,12 @@ export default function MatchesPage() {
               </p>
             </div>
           ) : matches.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/[0.07] bg-[#0a1018]/70 p-12 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.03] text-lg">
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#0a1018]/70 p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.03] text-lg">
                 🏟️
               </div>
 
-              <h3 className="mt-3 text-sm font-bold text-slate-200">
+              <h3 className="mt-3 text-sm font-bold text-slate-700 dark:text-slate-200">
                 No hay partidos
               </h3>
 
@@ -3232,7 +3293,7 @@ export default function MatchesPage() {
                 title="Próximos partidos"
                 description="Encuentros programados y partidos actualmente en vivo"
                 icon="📅"
-                tone="text-blue-300"
+                tone="text-blue-700 dark:text-blue-300"
                 count={pendingMatches.length}
                 isOpen={
                   openSections.pending
@@ -3282,7 +3343,7 @@ export default function MatchesPage() {
                 title="Partidos aplazados"
                 description="Encuentros pendientes de nueva programación"
                 icon="⏸️"
-                tone="text-amber-300"
+                tone="text-amber-700 dark:text-amber-300"
                 count={
                   postponedMatches.length
                 }
@@ -3334,7 +3395,7 @@ export default function MatchesPage() {
                 title="Partidos finalizados"
                 description="Resultados registrados, mostrando los más recientes primero"
                 icon="🏁"
-                tone="text-emerald-300"
+                tone="text-emerald-700 dark:text-emerald-300"
                 count={
                   finishedMatches.length
                 }
@@ -3386,7 +3447,7 @@ export default function MatchesPage() {
                 title="Partidos cancelados"
                 description="Encuentros que no se disputarán"
                 icon="✕"
-                tone="text-red-300"
+                tone="text-red-700 dark:text-red-300"
                 count={
                   cancelledMatches.length
                 }
@@ -3439,14 +3500,14 @@ export default function MatchesPage() {
       ========================================================== */}
 
       {confirmation && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-slate-950/80 px-2 py-2 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
+        <div className="fixed inset-0 z-[60] flex items-end justify-center overflow-y-auto bg-white dark:bg-slate-950/80 px-2 py-2 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6">
           <div
-            className="my-auto w-full max-w-md max-h-[94vh] overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl sm:max-h-[90vh]"
+            className="my-auto w-full max-w-md max-h-[94vh] overflow-y-auto rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xl sm:max-h-[90vh]"
             role="dialog"
             aria-modal="true"
             aria-labelledby="match-confirmation-title"
           >
-            <div className="border-b border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
+            <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-3.5 sm:px-5 sm:py-4">
               <div className="flex items-center gap-2.5 sm:gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-amber-400/10 bg-amber-400/[0.05] text-sm">
                   {confirmation.type ===
@@ -3464,7 +3525,7 @@ export default function MatchesPage() {
                 <div className="min-w-0">
                   <h2
                     id="match-confirmation-title"
-                    className="text-sm font-bold text-white sm:text-base"
+                    className="text-sm font-bold text-slate-900 dark:text-white sm:text-base"
                   >
                     {confirmation.type ===
                     "result"
@@ -3497,14 +3558,14 @@ export default function MatchesPage() {
               {confirmation.type ===
               "result" ? (
                 <>
-                  <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
+                  <p className="text-[11px] leading-5 text-slate-700 dark:text-slate-300 sm:text-xs">
                     {confirmation.match
                       .status === "FINISHED"
                       ? "Modifica el marcador actual y confirma el nuevo resultado."
                       : "Ingresa el marcador final del partido."}
                   </p>
 
-                  <div className="mt-3 rounded-xl border border-slate-800 bg-slate-950 p-3 sm:mt-4 sm:p-4">
+                  <div className="mt-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-3 sm:mt-4 sm:p-4">
                     <div className="grid grid-cols-[minmax(0,1fr)_20px_minmax(0,1fr)] items-start gap-2 sm:grid-cols-[1fr_auto_1fr] sm:gap-3">
                       <div className="min-w-0 text-center">
                         <TeamLogo
@@ -3515,7 +3576,7 @@ export default function MatchesPage() {
                           size="large"
                         />
 
-                        <p className="mx-auto mt-2 max-w-[130px] truncate text-xs font-bold text-slate-100">
+                        <p className="mx-auto mt-2 max-w-[130px] truncate text-xs font-bold text-slate-900 dark:text-slate-100">
                           {
                             confirmation
                               .match.homeTeam
@@ -3524,7 +3585,7 @@ export default function MatchesPage() {
                         </p>
 
                         <input
-                          className="mx-auto mt-2 block h-11 w-16 rounded-xl border border-slate-700 bg-slate-900 text-center text-xl font-black text-emerald-300 outline-none transition focus:border-emerald-400 sm:h-12 sm:w-20 sm:text-2xl"
+                          className="mx-auto mt-2 block h-11 w-16 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-center text-xl font-black text-emerald-700 dark:text-emerald-300 outline-none transition focus:border-emerald-400 sm:h-12 sm:w-20 sm:text-2xl"
                           type="number"
                           min="0"
                           value={
@@ -3558,7 +3619,7 @@ export default function MatchesPage() {
                           size="large"
                         />
 
-                        <p className="mx-auto mt-2 max-w-[130px] truncate text-xs font-bold text-slate-100">
+                        <p className="mx-auto mt-2 max-w-[130px] truncate text-xs font-bold text-slate-900 dark:text-slate-100">
                           {
                             confirmation
                               .match.awayTeam
@@ -3567,7 +3628,7 @@ export default function MatchesPage() {
                         </p>
 
                         <input
-                          className="mx-auto mt-2 block h-11 w-16 rounded-xl border border-slate-700 bg-slate-900 text-center text-xl font-black text-emerald-300 outline-none transition focus:border-emerald-400 sm:h-12 sm:w-20 sm:text-2xl"
+                          className="mx-auto mt-2 block h-11 w-16 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-center text-xl font-black text-emerald-700 dark:text-emerald-300 outline-none transition focus:border-emerald-400 sm:h-12 sm:w-20 sm:text-2xl"
                           type="number"
                           min="0"
                           value={
@@ -3597,17 +3658,17 @@ export default function MatchesPage() {
               ) : confirmation.type ===
                 "postpone" ? (
                 <>
-                  <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
+                  <p className="text-[11px] leading-5 text-slate-700 dark:text-slate-300 sm:text-xs">
                     ¿Confirmas aplazar el partido
                     entre{" "}
-                    <strong className="text-amber-200">
+                    <strong className="text-amber-700 dark:text-amber-200">
                       {
                         confirmation.match
                           .homeTeam.name
                       }
                     </strong>{" "}
                     y{" "}
-                    <strong className="text-amber-200">
+                    <strong className="text-amber-700 dark:text-amber-200">
                       {
                         confirmation.match
                           .awayTeam.name
@@ -3617,7 +3678,7 @@ export default function MatchesPage() {
                   </p>
 
                   <div className="mt-4 rounded-xl border border-amber-900/40 bg-amber-500/5 p-3">
-                    <p className="text-[10px] leading-5 text-amber-200 sm:text-xs">
+                    <p className="text-[10px] leading-5 text-amber-700 dark:text-amber-200 sm:text-xs">
                       El partido pasará a la sección
                       independiente de aplazados y no
                       afectará la tabla.
@@ -3626,17 +3687,17 @@ export default function MatchesPage() {
                 </>
               ) : confirmation.type ===
                 "finish" ? (
-                <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
+                <p className="text-[11px] leading-5 text-slate-700 dark:text-slate-300 sm:text-xs">
                   ¿Confirmas finalizar el partido
                   entre{" "}
-                  <strong className="text-emerald-200">
+                  <strong className="text-emerald-700 dark:text-emerald-200">
                     {
                       confirmation.match
                         .homeTeam.name
                     }
                   </strong>{" "}
                   y{" "}
-                  <strong className="text-emerald-200">
+                  <strong className="text-emerald-700 dark:text-emerald-200">
                     {
                       confirmation.match
                         .awayTeam.name
@@ -3645,17 +3706,17 @@ export default function MatchesPage() {
                   ?
                 </p>
               ) : (
-                <p className="text-[11px] leading-5 text-slate-300 sm:text-xs">
+                <p className="text-[11px] leading-5 text-slate-700 dark:text-slate-300 sm:text-xs">
                   ¿Confirmas cancelar el partido
                   entre{" "}
-                  <strong className="text-red-200">
+                  <strong className="text-red-700 dark:text-red-200">
                     {
                       confirmation.match
                         .homeTeam.name
                     }
                   </strong>{" "}
                   y{" "}
-                  <strong className="text-red-200">
+                  <strong className="text-red-700 dark:text-red-200">
                     {
                       confirmation.match
                         .awayTeam.name
@@ -3666,9 +3727,9 @@ export default function MatchesPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-2 border-t border-slate-800 bg-slate-950/30 px-4 py-3 sm:flex sm:justify-end sm:px-5">
+            <div className="grid grid-cols-2 gap-2 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950/30 px-4 py-3 sm:flex sm:justify-end sm:px-5">
               <button
-                className="h-10 rounded-xl border border-slate-700 px-3 text-[10px] font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white sm:px-4 sm:text-xs"
+                className="h-10 rounded-xl border border-slate-300 dark:border-slate-700 px-3 text-[10px] font-semibold text-slate-700 dark:text-slate-300 transition hover:border-slate-400 hover:dark:border-slate-500 hover:text-slate-900 hover:dark:text-white sm:px-4 sm:text-xs"
                 type="button"
                 onClick={() => {
                   setConfirmation(null);
@@ -3685,7 +3746,7 @@ export default function MatchesPage() {
               </button>
 
               <button
-                className="h-10 rounded-xl bg-emerald-500 px-3 text-[10px] font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-xs"
+                className="h-10 rounded-xl bg-emerald-500 px-3 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4 sm:text-xs"
                 type="button"
                 onClick={
                   confirmPendingAction

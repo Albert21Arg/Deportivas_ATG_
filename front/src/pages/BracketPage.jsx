@@ -38,14 +38,14 @@ function TieCard({ tie }) {
   }
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-[#0a1018]/90 p-3">
+    <div className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3">
       <div className="flex items-center justify-between gap-2 text-xs">
-        <span className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 truncate text-center font-semibold ${tie.winnerTeam?.id === tie.homeTeamId ? 'text-emerald-300' : 'text-slate-300'}`}>
+        <span className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 truncate text-center font-semibold ${tie.winnerTeam?.id === tie.homeTeamId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}>
           <TeamShield team={tie.homeTeam} />
           <span className="truncate">{homeName}</span>
         </span>
         <span className="text-slate-600">vs</span>
-        <span className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 truncate text-center font-semibold ${tie.winnerTeam?.id === tie.awayTeamId ? 'text-emerald-300' : 'text-slate-300'}`}>
+        <span className={`flex min-w-0 flex-1 flex-col items-center gap-1.5 truncate text-center font-semibold ${tie.winnerTeam?.id === tie.awayTeamId ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}>
           <TeamShield team={tie.awayTeam} />
           <span className="truncate">{awayName}</span>
         </span>
@@ -70,7 +70,7 @@ function TieCard({ tie }) {
       )}
 
       {tie.winnerTeam && (
-        <p className="mt-2 text-[10px] font-bold text-emerald-300">Gana {tie.winnerTeam.name}</p>
+        <p className="mt-2 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">Gana {tie.winnerTeam.name}</p>
       )}
 
       {!tie.winnerTeam && tie.homeTeam && tie.awayTeam && (
@@ -233,11 +233,11 @@ export default function BracketPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+    <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
       <DashboardNavbar />
 
       <section className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-24 sm:px-6 sm:pt-28">
-        <Link className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-400" to="/dashboard/tournaments">
+        <Link className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600 hover:dark:text-emerald-400" to="/dashboard/tournaments">
           ← Volver a torneos
         </Link>
 
@@ -246,7 +246,7 @@ export default function BracketPage() {
 
         {!isTournamentLocked && (
           <select
-            className="mt-4 min-h-10 w-full max-w-sm rounded-xl border border-white/[0.07] bg-black/30 px-3 py-2 text-xs font-medium text-slate-300 outline-none focus:border-emerald-400/50"
+            className="mt-4 min-h-10 w-full max-w-sm rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-emerald-400/50"
             value={selectedTournamentId}
             onChange={(event) => setSelectedTournamentId(event.target.value)}
           >
@@ -260,7 +260,7 @@ export default function BracketPage() {
         )}
 
         {selectedTournament && !['KNOCKOUT_SINGLE', 'KNOCKOUT_TWO_LEG'].includes(selectedTournament.mode) && (
-          <p className="mt-4 rounded-xl border border-amber-400/15 bg-amber-400/[0.05] px-4 py-3 text-xs text-amber-300">
+          <p className="mt-4 rounded-xl border border-amber-400/15 bg-amber-400/[0.05] px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
             Este torneo está en modo &quot;{selectedTournament.mode}&quot;, no en eliminación directa ni ida y vuelta.
           </p>
         )}
@@ -270,16 +270,16 @@ export default function BracketPage() {
         ) : (
           <>
             {isAdmin && ties.length === 0 && (
-              <div className="mt-8 rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 p-4 sm:p-6">
+              <div className="mt-8 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-4 sm:p-6">
                 <h2 className="text-sm font-bold text-cyan-500 dark:text-white">Armar llave</h2>
                 <p className="mt-1 text-xs text-slate-500">
                   Elige cuántos equipos participan (potencia de 2) y en qué orden se enfrentan en la primera ronda.
                 </p>
 
-                <label className="mt-4 block max-w-[200px] text-xs font-semibold text-slate-400">
+                <label className="mt-4 block max-w-[200px] text-xs font-semibold text-slate-500 dark:text-slate-400">
                   N.º de equipos
                   <select
-                    className="mt-1.5 min-h-10 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3 py-2 text-sm text-cyan-500 outline-none focus:border-emerald-400/50 dark:text-white"
+                    className="mt-1.5 min-h-10 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3 py-2 text-sm text-cyan-500 outline-none focus:border-emerald-400/50 dark:text-white"
                     value={size}
                     onChange={(event) => {
                       setSize(event.target.value);
@@ -296,7 +296,7 @@ export default function BracketPage() {
 
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <button
-                    className="min-h-10 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.07] px-5 py-2.5 text-xs font-bold text-emerald-300 transition hover:bg-emerald-400/[0.13] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-10 rounded-xl border border-emerald-400/20 bg-emerald-400/[0.07] px-5 py-2.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-400/[0.13] disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     disabled={teams.length < Number(size)}
                     onClick={() => generateSeeds('POINTS')}
@@ -305,7 +305,7 @@ export default function BracketPage() {
                   </button>
 
                   <button
-                    className="min-h-10 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.07] px-5 py-2.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-400/[0.13] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-10 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.07] px-5 py-2.5 text-xs font-bold text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/[0.13] disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     disabled={teams.length < Number(size)}
                     onClick={() => generateSeeds('RANDOM')}
@@ -316,10 +316,10 @@ export default function BracketPage() {
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   {Array.from({ length: Number(size) }).map((_, index) => (
-                    <label key={index} className="block text-xs font-semibold text-slate-400">
+                    <label key={index} className="block text-xs font-semibold text-slate-500 dark:text-slate-400">
                       Posición {index + 1}
                       <select
-                        className="mt-1.5 min-h-10 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3 py-2 text-sm text-cyan-500 outline-none focus:border-emerald-400/50 dark:text-white"
+                        className="mt-1.5 min-h-10 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3 py-2 text-sm text-cyan-500 outline-none focus:border-emerald-400/50 dark:text-white"
                         value={seeds[index] ?? ''}
                         onChange={(event) =>
                           setSeeds((current) => {
@@ -341,7 +341,7 @@ export default function BracketPage() {
                 </div>
 
                 <button
-                  className="mt-4 min-h-10 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="mt-4 min-h-10 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                   type="button"
                   disabled={isCreating}
                   onClick={requestCreateBracket}
@@ -354,7 +354,7 @@ export default function BracketPage() {
             {isAdmin && ties.length > 0 && (
               <div className="mt-6 flex justify-end">
                 <button
-                  className="rounded-lg border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] font-semibold text-red-300 hover:bg-red-400/[0.1]"
+                  className="rounded-lg border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] font-semibold text-red-700 dark:text-red-300 hover:bg-red-400/[0.1]"
                   type="button"
                   onClick={() => setIsResetConfirmOpen(true)}
                 >
@@ -366,7 +366,7 @@ export default function BracketPage() {
             <div className="mt-6 grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               {stages.map(({ stage, ties: stageTies }) => (
                 <div key={stage}>
-                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-300">
+                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
                     {STAGE_LABELS[stage] ?? stage}
                   </h3>
                   <div className="space-y-2">

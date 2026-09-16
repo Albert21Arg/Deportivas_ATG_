@@ -30,16 +30,16 @@ export default function TournamentWorkspacePage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+      <main className="lm-ready min-h-screen bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
         <DashboardNavbar />
 
         <div className="flex min-h-[calc(100vh-72px)] items-center justify-center px-4 sm:px-6">
           <div className="text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] sm:h-14 sm:w-14 sm:rounded-2xl">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-700 border-t-emerald-400 sm:h-5 sm:w-5" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-emerald-400 sm:h-5 sm:w-5" />
             </div>
 
-            <p className="mt-4 text-sm font-medium text-slate-400 sm:mt-5">
+            <p className="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400 sm:mt-5">
               Cargando torneo...
             </p>
 
@@ -54,16 +54,16 @@ export default function TournamentWorkspacePage() {
 
   if (!tournament) {
     return (
-      <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+      <main className="lm-ready min-h-screen bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
         <DashboardNavbar />
 
         <div className="flex min-h-[calc(100vh-72px)] items-center justify-center px-4 sm:px-6">
-          <div className="w-full max-w-md rounded-2xl border border-white/[0.07] bg-white/[0.025] p-6 text-center sm:rounded-3xl sm:p-8">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.025] p-6 text-center sm:rounded-3xl sm:p-8">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl border border-red-400/10 bg-red-400/[0.05] text-xl sm:h-16 sm:w-16 sm:rounded-2xl sm:text-2xl">
               !
             </div>
 
-            <h1 className="mt-4 text-lg font-bold text-white sm:mt-5 sm:text-xl">
+            <h1 className="mt-4 text-lg font-bold text-slate-900 dark:text-white sm:mt-5 sm:text-xl">
               No encontramos este torneo
             </h1>
 
@@ -73,7 +73,7 @@ export default function TournamentWorkspacePage() {
             </p>
 
             <Link
-              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 transition hover:bg-emerald-400 sm:mt-6"
+              className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 sm:mt-6"
               to="/dashboard/tournaments"
             >
               ← Volver a torneos
@@ -163,40 +163,40 @@ export default function TournamentWorkspacePage() {
 
   const colorStyles = {
     emerald: {
-      icon: 'border-emerald-400/15 bg-emerald-400/[0.06] text-emerald-400 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/[0.10]',
+      icon: 'border-emerald-400/15 bg-emerald-400/[0.06] text-emerald-600 dark:text-emerald-400 group-hover:border-emerald-400/30 group-hover:bg-emerald-400/[0.10]',
       glow: 'bg-emerald-400/[0.08]',
       border: 'hover:border-emerald-400/30',
-      text: 'text-emerald-400',
+      text: 'text-emerald-600 dark:text-emerald-400',
       cta: 'border-emerald-400/20 bg-emerald-400/[0.07] group-hover:border-emerald-400/30 group-hover:bg-emerald-400/[0.13]',
     },
 
     cyan: {
-      icon: 'border-cyan-400/15 bg-cyan-400/[0.06] text-cyan-400 group-hover:border-cyan-400/30 group-hover:bg-cyan-400/[0.10]',
+      icon: 'border-cyan-400/15 bg-cyan-400/[0.06] text-slate-900 dark:text-cyan-400 group-hover:border-cyan-400/30 group-hover:bg-cyan-400/[0.10]',
       glow: 'bg-cyan-400/[0.07]',
       border: 'hover:border-cyan-400/30',
-      text: 'text-cyan-400',
+      text: 'text-slate-900 dark:text-cyan-400',
       cta: 'border-cyan-400/20 bg-cyan-400/[0.07] group-hover:border-cyan-400/30 group-hover:bg-cyan-400/[0.13]',
     },
 
     violet: {
-      icon: 'border-violet-400/15 bg-violet-400/[0.06] text-violet-400 group-hover:border-violet-400/30 group-hover:bg-violet-400/[0.10]',
+      icon: 'border-violet-400/15 bg-violet-400/[0.06] text-violet-600 dark:text-violet-400 group-hover:border-violet-400/30 group-hover:bg-violet-400/[0.10]',
       glow: 'bg-violet-400/[0.07]',
       border: 'hover:border-violet-400/30',
-      text: 'text-violet-400',
+      text: 'text-violet-600 dark:text-violet-400',
       cta: 'border-violet-400/20 bg-violet-400/[0.07] group-hover:border-violet-400/30 group-hover:bg-violet-400/[0.13]',
     },
 
     amber: {
-      icon: 'border-amber-400/15 bg-amber-400/[0.06] text-amber-400 group-hover:border-amber-400/30 group-hover:bg-amber-400/[0.10]',
+      icon: 'border-amber-400/15 bg-amber-400/[0.06] text-amber-600 dark:text-amber-400 group-hover:border-amber-400/30 group-hover:bg-amber-400/[0.10]',
       glow: 'bg-amber-400/[0.07]',
       border: 'hover:border-amber-400/30',
-      text: 'text-amber-400',
+      text: 'text-amber-600 dark:text-amber-400',
       cta: 'border-amber-400/20 bg-amber-400/[0.07] group-hover:border-amber-400/30 group-hover:bg-amber-400/[0.13]',
     },
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+    <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
 
       {/* =========================================================
           BACKGROUND
@@ -231,7 +231,7 @@ export default function TournamentWorkspacePage() {
             TOURNAMENT HERO
         ======================================================= */}
 
-        <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.055] via-white/[0.02] to-transparent shadow-xl shadow-black/20 sm:mt-6 sm:rounded-3xl sm:shadow-2xl">
+        <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-gradient-to-br from-white/[0.055] via-white/[0.02] to-transparent shadow-xl shadow-black/20 sm:mt-6 sm:rounded-3xl sm:shadow-2xl">
 
           {/* Desktop glows */}
 
@@ -245,7 +245,7 @@ export default function TournamentWorkspacePage() {
 
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
 
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:gap-2 sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:gap-2 sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.7)]" />
 
                 Espacio del torneo
@@ -254,8 +254,8 @@ export default function TournamentWorkspacePage() {
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] sm:gap-2 sm:px-3 sm:text-[10px] sm:tracking-[0.15em] ${
                   isActive
-                    ? 'border-emerald-400/15 bg-emerald-400/[0.035] text-emerald-300'
-                    : 'border-white/[0.07] bg-white/[0.025] text-slate-500'
+                    ? 'border-emerald-400/15 bg-emerald-400/[0.035] text-emerald-700 dark:text-emerald-300'
+                    : 'border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.025] text-slate-500'
                 }`}
               >
                 <span
@@ -275,11 +275,11 @@ export default function TournamentWorkspacePage() {
 
             <div className="mt-5 max-w-4xl sm:mt-7">
 
-              <h1 className="break-words text-2xl font-black leading-tight tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+              <h1 className="break-words text-2xl font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:text-4xl md:text-5xl lg:text-6xl">
                 {tournament.name}
               </h1>
 
-              <p className="mt-3 max-w-2xl text-xs leading-6 text-slate-400 sm:mt-5 sm:text-base sm:leading-7">
+              <p className="mt-3 max-w-2xl text-xs leading-6 text-slate-500 dark:text-slate-400 sm:mt-5 sm:text-base sm:leading-7">
                 {tournament.description ||
                   'Gestiona equipos, calendario y clasificación desde este espacio.'}
               </p>
@@ -316,10 +316,10 @@ export default function TournamentWorkspacePage() {
               <Link
                 key={section.title}
                 to={section.to}
-                className={`group relative min-h-[245px] overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1018]/95 p-4 shadow-lg shadow-black/15 transition-all duration-300 ease-out
+                className={`group relative min-h-[245px] overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/95 p-4 shadow-lg shadow-black/15 transition-all duration-300 ease-out
                   hover:-translate-y-2
-                  hover:border-white/[0.12]
-                  hover:bg-[#0c141e]
+                  hover:border-slate-300 hover:dark:border-white/[0.12]
+                  hover:bg-slate-50 hover:dark:bg-[#0c141e]
                   hover:shadow-2xl
                   hover:shadow-black/40
                   sm:min-h-[310px]
@@ -350,7 +350,7 @@ export default function TournamentWorkspacePage() {
                     NUMBER
                 ================================================= */}
 
-                <span className="absolute right-4 top-4 text-4xl font-black tracking-tighter text-white/[0.025] transition-all duration-300 group-hover:text-white/[0.05] sm:right-6 sm:top-6 sm:text-5xl">
+                <span className="absolute right-4 top-4 text-4xl font-black tracking-tighter text-slate-900 dark:text-white/[0.025] transition-all duration-300 group-hover:text-slate-900 group-hover:dark:text-white/[0.05] sm:right-6 sm:top-6 sm:text-5xl">
                   {section.number}
                 </span>
 
@@ -382,11 +382,11 @@ export default function TournamentWorkspacePage() {
 
                   <div className="mt-5 sm:mt-7 lg:mt-8">
 
-                    <h3 className="mt-1.5 text-lg font-bold tracking-tight text-white transition-transform duration-300 group-hover:translate-x-1 sm:mt-2 sm:text-xl lg:text-2xl">
+                    <h3 className="mt-1.5 text-lg font-bold tracking-tight text-slate-900 dark:text-white transition-transform duration-300 group-hover:translate-x-1 sm:mt-2 sm:text-xl lg:text-2xl">
                       {section.title}
                     </h3>
 
-                    <p className="mt-2 max-w-sm text-xs leading-5 text-slate-500 transition-colors duration-300 group-hover:text-slate-400 sm:mt-3 sm:text-sm sm:leading-6">
+                    <p className="mt-2 max-w-sm text-xs leading-5 text-slate-500 transition-colors duration-300 group-hover:text-slate-500 group-hover:dark:text-slate-400 sm:mt-3 sm:text-sm sm:leading-6">
                       {section.description}
                     </p>
 

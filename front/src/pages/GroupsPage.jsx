@@ -50,14 +50,14 @@ function GroupStandings({ tournamentId, groupId }) {
         </thead>
         <tbody>
           {standings.map((row) => (
-            <tr key={row.team.id} className="border-t border-white/[0.05] text-slate-300">
-              <td className="px-2 py-2 font-bold text-white">{row.position}</td>
+            <tr key={row.team.id} className="border-t border-slate-200 dark:border-white/[0.05] text-slate-700 dark:text-slate-300">
+              <td className="px-2 py-2 font-bold text-slate-900 dark:text-white">{row.position}</td>
               <td className="px-2 py-2 truncate">{row.team.name}</td>
               <td className="px-2 py-2 text-center">{row.played}</td>
               <td className="px-2 py-2 text-center">{row.goalsFor}</td>
               <td className="px-2 py-2 text-center">{row.goalsAgainst}</td>
               <td className="px-2 py-2 text-center">{row.goalDifference}</td>
-              <td className="px-2 py-2 text-center font-bold text-emerald-300">{row.points}</td>
+              <td className="px-2 py-2 text-center font-bold text-emerald-700 dark:text-emerald-300">{row.points}</td>
             </tr>
           ))}
         </tbody>
@@ -212,20 +212,20 @@ export default function GroupsPage() {
   }
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+    <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
       <DashboardNavbar />
 
       <section className="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-24 sm:px-6 sm:pt-28">
-        <Link className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-400" to="/dashboard/tournaments">
+        <Link className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600 hover:dark:text-emerald-400" to="/dashboard/tournaments">
           ← Volver a torneos
         </Link>
 
-        <h1 className="mt-4 text-2xl font-black tracking-tight text-white sm:text-3xl">Fase de grupos</h1>
+        <h1 className="mt-4 text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">Fase de grupos</h1>
         <p className="mt-1 text-sm text-slate-500">Arma los bombos, sortea los grupos y genera sus partidos.</p>
 
         {!isTournamentLocked && (
           <select
-            className="mt-4 min-h-10 w-full max-w-sm rounded-xl border border-white/[0.07] bg-black/30 px-3 py-2 text-xs font-medium text-slate-300 outline-none focus:border-emerald-400/50"
+            className="mt-4 min-h-10 w-full max-w-sm rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-300 outline-none focus:border-emerald-400/50"
             value={selectedTournamentId}
             onChange={(event) => setSelectedTournamentId(event.target.value)}
           >
@@ -239,7 +239,7 @@ export default function GroupsPage() {
         )}
 
         {selectedTournament && selectedTournament.mode !== 'GROUP_STAGE' && (
-          <p className="mt-4 rounded-xl border border-amber-400/15 bg-amber-400/[0.05] px-4 py-3 text-xs text-amber-300">
+          <p className="mt-4 rounded-xl border border-amber-400/15 bg-amber-400/[0.05] px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
             Este torneo está en modo &quot;{selectedTournament.mode}&quot;, no en fase de grupos. Cambia el modo desde la edición del torneo si quieres usar esta sección.
           </p>
         )}
@@ -249,19 +249,19 @@ export default function GroupsPage() {
         ) : (
           <>
             {isAdmin && (
-              <div className="mt-8 rounded-2xl border border-white/[0.06] bg-[#0a1018]/90 p-4 sm:p-6">
-                <h2 className="text-sm font-bold text-white">Sorteo de bombos</h2>
+              <div className="mt-8 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-4 sm:p-6">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">Sorteo de bombos</h2>
                 <p className="mt-1 text-xs text-slate-500">
                   Asigna un bombo a cada equipo y elige cuántos grupos quieres. Cada bombo debe tener exactamente
                   tantos equipos como grupos, para repartir uno por grupo.
                 </p>
 
-                <label className="mt-4 block max-w-[160px] text-xs font-semibold text-slate-400">
+                <label className="mt-4 block max-w-[160px] text-xs font-semibold text-slate-500 dark:text-slate-400">
                   N.º de grupos
                   <input
                     type="number"
                     min="2"
-                    className="mt-1.5 min-h-10 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-emerald-400/50"
+                    className="mt-1.5 min-h-10 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3 py-2 text-sm text-slate-900 dark:text-white outline-none focus:border-emerald-400/50"
                     value={groupCount}
                     onChange={(event) => setGroupCount(event.target.value)}
                   />
@@ -269,12 +269,12 @@ export default function GroupsPage() {
 
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   {teams.map((team) => (
-                    <div key={team.id} className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.05] bg-black/20 px-3 py-2">
-                      <span className="truncate text-xs text-slate-300">{team.name}</span>
+                    <div key={team.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-black/20 px-3 py-2">
+                      <span className="truncate text-xs text-slate-700 dark:text-slate-300">{team.name}</span>
                       <input
                         type="number"
                         min="1"
-                        className="h-8 w-16 rounded-lg border border-slate-700 bg-slate-950 px-2 text-center text-xs text-white outline-none focus:border-emerald-400"
+                        className="h-8 w-16 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 text-center text-xs text-slate-900 dark:text-white outline-none focus:border-emerald-400"
                         value={pots[team.id] ?? 1}
                         onChange={(event) =>
                           setPots((current) => ({ ...current, [team.id]: Number(event.target.value) }))
@@ -286,7 +286,7 @@ export default function GroupsPage() {
 
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <button
-                    className="min-h-10 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.07] px-5 py-2.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-400/[0.13] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-10 rounded-xl border border-cyan-400/20 bg-cyan-400/[0.07] px-5 py-2.5 text-xs font-bold text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/[0.13] disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     disabled={isDrawing || teams.length < 2}
                     onClick={randomizePots}
@@ -295,7 +295,7 @@ export default function GroupsPage() {
                   </button>
 
                   <button
-                    className="min-h-10 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="min-h-10 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
                     type="button"
                     disabled={isDrawing || teams.length < 2}
                     onClick={() => setIsConfirmingDraw(true)}
@@ -331,7 +331,7 @@ export default function GroupsPage() {
 
             {potStandings.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-sm font-bold text-white sm:text-base">Tabla de posiciones por bombo</h2>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white sm:text-base">Tabla de posiciones por bombo</h2>
                 <p className="mt-1 text-xs text-slate-500">
                   Compara a los equipos que comparten bombo usando lo que ya jugaron en su propio grupo, aunque no se enfrenten directamente entre ellos.
                 </p>
@@ -339,7 +339,7 @@ export default function GroupsPage() {
                 <div className="mt-4 grid gap-4 lg:grid-cols-2">
                   {potStandings.map(({ pot, standings }) => (
                     <div key={pot}>
-                      <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-400">
+                      <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
                         Bombo {pot}
                       </h3>
                       <StandingsTable standings={standings} />
@@ -352,7 +352,7 @@ export default function GroupsPage() {
             {isAdmin && groups.length > 0 && (
               <div className="mt-6 flex justify-end">
                 <button
-                  className="rounded-lg border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] font-semibold text-red-300 hover:bg-red-400/[0.1]"
+                  className="rounded-lg border border-red-400/20 bg-red-400/[0.05] px-3 py-2 text-[11px] font-semibold text-red-700 dark:text-red-300 hover:bg-red-400/[0.1]"
                   type="button"
                   onClick={() => setIsConfirmingReset(true)}
                 >
@@ -363,12 +363,12 @@ export default function GroupsPage() {
 
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               {groups.map((group) => (
-                <div key={group.id} className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#0a1018]/90">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
-                    <h3 className="text-sm font-bold text-white">{group.name}</h3>
+                <div key={group.id} className="overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90">
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/[0.06] px-4 py-3">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">{group.name}</h3>
                     {isAdmin && (
                       <button
-                        className="text-[11px] font-semibold text-emerald-300 hover:text-emerald-200"
+                        className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-700 hover:dark:text-emerald-200"
                         type="button"
                         onClick={() => generateFixtures(group.id)}
                       >
@@ -379,7 +379,7 @@ export default function GroupsPage() {
 
                   <div className="flex flex-wrap gap-1.5 px-4 py-3">
                     {group.teams.map(({ team, pot }) => (
-                      <span key={team.id} className="rounded-full border border-white/[0.07] bg-black/20 px-2.5 py-1 text-[10px] text-slate-300">
+                      <span key={team.id} className="rounded-full border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-black/20 px-2.5 py-1 text-[10px] text-slate-700 dark:text-slate-300">
                         {team.name} · bombo {pot}
                       </span>
                     ))}

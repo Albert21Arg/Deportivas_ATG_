@@ -8,20 +8,33 @@ const select = {
   delaySeconds: true,
   durationSeconds: true,
   status: true,
+  tournamentId: true,
   createdAt: true,
   updatedAt: true,
+  tournament: { select: { id: true, name: true } },
 };
 
 export function findAll() {
   return prisma.announcement.findMany({ select, orderBy: { createdAt: 'desc' } });
 }
 
-export function findActive() {
+export function findActive(tournamentId) {
+  // Sin tournamentId (portada general): solo los anuncios marcados
+  // "todas las páginas" (tournamentId null). Con tournamentId (página de un
+  // torneo): solo los anuncios asociados justo a ese torneo.
+  const where = {
+    status: 'ACTIVE',
+    tournamentId: tournamentId !== undefined ? tournamentId : null,
+  };
   return prisma.announcement.findMany({
-    where: { status: 'ACTIVE' },
+    where,
     select,
     orderBy: { createdAt: 'asc' },
   });
+}
+
+export function findTournamentById(tournamentId) {
+  return prisma.tournament.findUnique({ where: { id: tournamentId }, select: { id: true } });
 }
 
 export function create(data) {

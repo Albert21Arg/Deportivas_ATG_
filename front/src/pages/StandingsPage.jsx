@@ -118,6 +118,7 @@ export default function StandingsPage() {
   return (
     <main
       className="
+        lm-ready
         min-h-screen
         overflow-x-hidden
         bg-slate-50
@@ -153,7 +154,7 @@ export default function StandingsPage() {
             font-medium
             text-slate-500
             transition
-            hover:text-emerald-400
+            hover:text-emerald-600 hover:dark:text-emerald-400
             sm:text-sm
           "
           to="/dashboard"
@@ -175,14 +176,17 @@ export default function StandingsPage() {
             overflow-hidden
             rounded-2xl
             border
-            border-white/[0.06]
+            border-slate-200 dark:border-white/[0.06]
             bg-gradient-to-br
-            from-slate-900
-            via-slate-900
-            to-emerald-950/30
+            from-white via-white to-emerald-50/60
+            dark:from-slate-900
+            dark:via-slate-900
+            dark:to-emerald-950/30
             p-4
-            shadow-xl
-            shadow-black/15
+            shadow-lg
+            shadow-black/5
+            dark:shadow-xl
+            dark:shadow-black/15
             sm:mt-6
             sm:rounded-3xl
             sm:p-7
@@ -240,7 +244,7 @@ export default function StandingsPage() {
                 font-bold
                 uppercase
                 tracking-[0.16em]
-                text-emerald-300
+                text-emerald-700 dark:text-emerald-300
                 sm:mb-4
                 sm:px-3
                 sm:text-xs
@@ -259,7 +263,7 @@ export default function StandingsPage() {
                 font-black
                 leading-[1.1]
                 tracking-tight
-                text-white
+                text-slate-900 dark:text-white
               "
             >
               Tabla de posiciones
@@ -268,7 +272,7 @@ export default function StandingsPage() {
                 |
               </span>
 
-              <span className="text-slate-300">
+              <span className="text-slate-700 dark:text-slate-300">
                 {tournamentName}
               </span>
 
@@ -287,7 +291,7 @@ export default function StandingsPage() {
                 max-w-2xl
                 text-xs
                 leading-5
-                text-slate-400
+                text-slate-500 dark:text-slate-400
                 sm:mt-3
                 sm:text-base
                 sm:leading-6
@@ -326,13 +330,13 @@ export default function StandingsPage() {
                   w-full
                   rounded-xl
                   border
-                  border-slate-800
-                  bg-slate-900
+                  border-slate-200 dark:border-slate-800
+                  bg-white dark:bg-slate-900
                   px-3.5
                   py-2.5
                   text-sm
                   font-medium
-                  text-slate-200
+                  text-slate-700 dark:text-slate-200
                   outline-none
                   transition
                   focus:border-emerald-400/50
@@ -367,8 +371,8 @@ export default function StandingsPage() {
             overflow-hidden
             rounded-xl
             border
-            border-slate-800
-            bg-slate-900
+            border-slate-200 dark:border-slate-800
+            bg-white dark:bg-slate-900
             shadow-lg
             shadow-black/10
             sm:mt-6
@@ -396,7 +400,7 @@ export default function StandingsPage() {
                   animate-spin
                   rounded-full
                   border-2
-                  border-slate-700
+                  border-slate-300 dark:border-slate-700
                   border-t-emerald-400
                   sm:h-8
                   sm:w-8
@@ -430,7 +434,7 @@ export default function StandingsPage() {
                   items-center
                   justify-center
                   rounded-xl
-                  bg-slate-800
+                  bg-slate-100 dark:bg-slate-800
                   text-lg
                   sm:h-12
                   sm:w-12
@@ -444,7 +448,7 @@ export default function StandingsPage() {
                   mt-3
                   text-xs
                   font-medium
-                  text-slate-400
+                  text-slate-500 dark:text-slate-400
                   sm:mt-4
                   sm:text-sm
                 "
@@ -469,7 +473,7 @@ export default function StandingsPage() {
                     text-xs
                   "
                 >
-                  <thead className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950">
+                  <thead className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
                     <tr
                       className="
                         text-[9px]
@@ -487,7 +491,7 @@ export default function StandingsPage() {
                           z-30
                           w-[170px]
                           min-w-[170px]
-                          bg-slate-950
+                          bg-white dark:bg-slate-950
                           px-2
                           py-3
                           text-left
@@ -505,12 +509,12 @@ export default function StandingsPage() {
                           w-[56px]
                           min-w-[56px]
                           border-l
-                          border-slate-800
-                          bg-slate-950
+                          border-slate-200 dark:border-slate-800
+                          bg-white dark:bg-slate-950
                           px-2
                           py-3
                           text-center
-                          text-emerald-400
+                          text-emerald-600 dark:text-emerald-400
                         "
                       >
                         PTS
@@ -562,7 +566,7 @@ export default function StandingsPage() {
                           className={`
                             group
                             relative
-                            ${index === 0 ? 'sticky top-[42px] z-10 bg-slate-900' : ''}
+                            ${index === 0 ? 'sticky top-[42px] z-10 bg-white dark:bg-slate-900' : ''}
                             transition-colors
                             duration-150
                             ${
@@ -591,7 +595,7 @@ export default function StandingsPage() {
                                     to-transparent
                                     hover:from-slate-300/[0.11]
                                   `
-                                  : 'hover:bg-slate-800/40'
+                                  : 'hover:bg-slate-100 hover:dark:bg-slate-800/40'
                             }
                           `}
                         >
@@ -609,10 +613,10 @@ export default function StandingsPage() {
                               py-3
                               ${
                                 isLeader
-                                  ? 'bg-[#17150f]'
+                                  ? 'bg-amber-50 dark:bg-[#17150f]'
                                   : isSecond
-                                    ? 'bg-[#12151a]'
-                                    : 'bg-slate-900'
+                                    ? 'bg-slate-100 dark:bg-[#12151a]'
+                                    : 'bg-white dark:bg-slate-900'
                               }
                             `}
                           >
@@ -673,7 +677,7 @@ export default function StandingsPage() {
                                         rounded-lg
                                         border
                                         border-amber-400/20
-                                        bg-slate-800/95
+                                        bg-slate-100 dark:bg-slate-800/95
                                         px-2.5
                                         py-1.5
                                         text-[10px]
@@ -705,7 +709,7 @@ export default function StandingsPage() {
                                           border-r
                                           border-b
                                           border-amber-400/20
-                                          bg-slate-800
+                                          bg-slate-100 dark:bg-slate-800
                                         "
                                       />
                                     </div>
@@ -730,12 +734,12 @@ export default function StandingsPage() {
                                       rounded-lg
                                       border
                                       border-slate-300/15
-                                      bg-slate-800/95
+                                      bg-slate-100 dark:bg-slate-800/95
                                       px-2.5
                                       py-1.5
                                       text-[10px]
                                       font-semibold
-                                      text-slate-200
+                                      text-slate-700 dark:text-slate-200
                                       shadow-xl
                                       shadow-black/40
                                       backdrop-blur-md
@@ -762,7 +766,7 @@ export default function StandingsPage() {
                                         border-r
                                         border-b
                                         border-slate-300/15
-                                        bg-slate-800
+                                        bg-slate-100 dark:bg-slate-800
                                       "
                                     />
                                   </div>
@@ -778,10 +782,10 @@ export default function StandingsPage() {
                                   font-semibold
                                   ${
                                     isLeader
-                                      ? 'text-amber-100'
+                                      ? 'text-amber-800 dark:text-amber-100'
                                       : isSecond
-                                        ? 'text-slate-200'
-                                        : 'text-slate-300 group-hover:text-white'
+                                        ? 'text-slate-700 dark:text-slate-200'
+                                        : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 group-hover:dark:text-white'
                                   }
                                 `}
                                 title={row.team.name}
@@ -802,21 +806,21 @@ export default function StandingsPage() {
                               w-[56px]
                               min-w-[56px]
                               border-l
-                              border-slate-800
+                              border-slate-200 dark:border-slate-800
                               px-2
                               py-3
                               text-center
                               ${
                                 isLeader
-                                  ? 'bg-[#17150f]'
+                                  ? 'bg-amber-50 dark:bg-[#17150f]'
                                   : isSecond
-                                    ? 'bg-[#12151a]'
-                                    : 'bg-slate-900'
+                                    ? 'bg-slate-100 dark:bg-[#12151a]'
+                                    : 'bg-white dark:bg-slate-900'
                               }
                               ${
                                 isLeader
-                                  ? 'font-black text-amber-300'
-                                  : 'font-bold text-emerald-300'
+                                  ? 'font-black text-amber-700 dark:text-amber-300'
+                                  : 'font-bold text-emerald-700 dark:text-emerald-300'
                               }
                             `}
                           >
@@ -833,21 +837,21 @@ export default function StandingsPage() {
                                 key === 'goalDifference';
 
                               let valueClass =
-                                'text-slate-400';
+                                'text-slate-500 dark:text-slate-400';
 
                               if (
                                 isGoalDifference &&
                                 row[key] > 0
                               ) {
                                 valueClass = isLeader
-                                  ? 'font-semibold text-amber-300'
-                                  : 'font-semibold text-emerald-400';
+                                  ? 'font-semibold text-amber-700 dark:text-amber-300'
+                                  : 'font-semibold text-emerald-600 dark:text-emerald-400';
                               } else if (
                                 isGoalDifference &&
                                 row[key] < 0
                               ) {
                                 valueClass =
-                                  'font-semibold text-rose-400';
+                                  'font-semibold text-rose-600 dark:text-rose-400';
                               }
 
                               return (
@@ -890,12 +894,12 @@ export default function StandingsPage() {
                                     row.position === 1
                                       ? `
                                         bg-amber-400
-                                        text-slate-950
+                                        text-slate-950 dark:text-slate-950
                                         shadow-[0_0_16px_rgba(251,191,36,0.35)]
                                       `
                                       : row.position === 2
                                         ? 'bg-slate-300 text-slate-900'
-                                        : 'bg-orange-400 text-slate-950'
+                                        : 'bg-orange-400 text-slate-950 dark:text-slate-950'
                                   }
                                 `}
                               >
@@ -927,7 +931,7 @@ export default function StandingsPage() {
                   sm:table
                 "
               >
-                <thead className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950">
+                <thead className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
                   <tr
                     className="
                       text-[10px]
@@ -990,7 +994,7 @@ export default function StandingsPage() {
                         className={`
                           group
                           relative
-                          ${index === 0 ? 'sticky top-[54px] z-10 bg-slate-900' : ''}
+                          ${index === 0 ? 'sticky top-[54px] z-10 bg-white dark:bg-slate-900' : ''}
                           transition-colors
                           duration-150
                           ${
@@ -1019,7 +1023,7 @@ export default function StandingsPage() {
                                   to-transparent
                                   hover:from-slate-300/[0.11]
                                 `
-                                : 'hover:bg-slate-800/40'
+                                : 'hover:bg-slate-100 hover:dark:bg-slate-800/40'
                           }
                         `}
                       >
@@ -1031,10 +1035,10 @@ export default function StandingsPage() {
                             text-center
                             ${
                               isLeader
-                                ? 'bg-[#17150f]'
+                                ? 'bg-amber-50 dark:bg-[#17150f]'
                                 : isSecond
-                                  ? 'bg-[#12151a]'
-                                  : 'bg-slate-900'
+                                  ? 'bg-slate-100 dark:bg-[#12151a]'
+                                  : 'bg-white dark:bg-slate-900'
                             }
                             sm:bg-transparent
                           `}
@@ -1055,12 +1059,12 @@ export default function StandingsPage() {
                                   row.position === 1
                                     ? `
                                       bg-amber-400
-                                      text-slate-950
+                                      text-slate-950 dark:text-slate-950
                                       shadow-[0_0_16px_rgba(251,191,36,0.35)]
                                     `
                                     : row.position === 2
                                       ? 'bg-slate-300 text-slate-900'
-                                      : 'bg-orange-400 text-slate-950'
+                                      : 'bg-orange-400 text-slate-950 dark:text-slate-950'
                                 }
                               `}
                             >
@@ -1080,10 +1084,10 @@ export default function StandingsPage() {
                             py-3.5
                             ${
                               isLeader
-                                ? 'bg-[#17150f]'
+                                ? 'bg-amber-50 dark:bg-[#17150f]'
                                 : isSecond
-                                  ? 'bg-[#12151a]'
-                                  : 'bg-slate-900'
+                                  ? 'bg-slate-100 dark:bg-[#12151a]'
+                                  : 'bg-white dark:bg-slate-900'
                             }
                             sm:bg-transparent
                           `}
@@ -1142,7 +1146,7 @@ export default function StandingsPage() {
                                       rounded-xl
                                       border
                                       border-amber-400/20
-                                      bg-slate-800
+                                      bg-slate-100 dark:bg-slate-800
                                       px-3
                                       py-2
                                       text-xs
@@ -1172,7 +1176,7 @@ export default function StandingsPage() {
                                         border-r
                                         border-b
                                         border-amber-400/20
-                                        bg-slate-800
+                                        bg-slate-100 dark:bg-slate-800
                                       "
                                     />
                                   </div>
@@ -1188,10 +1192,10 @@ export default function StandingsPage() {
                                 font-semibold
                                 ${
                                   isLeader
-                                    ? 'text-amber-100'
+                                    ? 'text-amber-800 dark:text-amber-100'
                                     : isSecond
-                                      ? 'text-slate-200'
-                                      : 'text-slate-300 group-hover:text-white'
+                                      ? 'text-slate-700 dark:text-slate-200'
+                                      : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 group-hover:dark:text-white'
                                 }
                               `}
                               title={row.team.name}
@@ -1207,25 +1211,25 @@ export default function StandingsPage() {
                           const isGoalDifference =
                             key === 'goalDifference';
 
-                          let valueClass = 'text-slate-400';
+                          let valueClass = 'text-slate-500 dark:text-slate-400';
 
                           if (isPoints) {
                             valueClass = isLeader
-                              ? 'font-black text-amber-300'
-                              : 'font-bold text-emerald-300';
+                              ? 'font-black text-amber-700 dark:text-amber-300'
+                              : 'font-bold text-emerald-700 dark:text-emerald-300';
                           } else if (
                             isGoalDifference &&
                             row[key] > 0
                           ) {
                             valueClass = isLeader
-                              ? 'font-semibold text-amber-300'
-                              : 'font-semibold text-emerald-400';
+                              ? 'font-semibold text-amber-700 dark:text-amber-300'
+                              : 'font-semibold text-emerald-600 dark:text-emerald-400';
                           } else if (
                             isGoalDifference &&
                             row[key] < 0
                           ) {
                             valueClass =
-                              'font-semibold text-rose-400';
+                              'font-semibold text-rose-600 dark:text-rose-400';
                           }
 
                           return (
@@ -1316,7 +1320,7 @@ export default function StandingsPage() {
             </span>
 
             <span>
-              <strong className="text-emerald-400">PTS</strong>{' '}
+              <strong className="text-emerald-600 dark:text-emerald-400">PTS</strong>{' '}
               Puntos
             </span>
           </div>

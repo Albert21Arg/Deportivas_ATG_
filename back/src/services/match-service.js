@@ -228,9 +228,11 @@ export async function updateLiveScore(id, { homeScore, awayScore }) {
   return updated;
 }
 
+const EVENT_EDITABLE_STATUSES = new Set(['STARTED', 'FINISHED']);
+
 export async function addEvent(id, data) {
   const match = await getMatch(id);
-  if (match.status !== 'STARTED') throw new HttpError(409, 'Solo puedes registrar eventos en un partido iniciado');
+  if (!EVENT_EDITABLE_STATUSES.has(match.status)) throw new HttpError(409, 'Solo puedes registrar eventos en un partido iniciado o finalizado');
   if (![match.homeTeamId, match.awayTeamId].includes(data.teamId)) throw new HttpError(422, 'El equipo no participa en este partido');
   if (data.type === 'BLUE_CARD') {
     const settings = await matchRepository.findTournamentSettings(match.tournamentId);
@@ -247,8 +249,20 @@ export async function addEvent(id, data) {
   if (data.playerId && !['GOAL', 'OWN_GOAL'].includes(data.type) && await matchRepository.hasRedCard(match.id, data.playerId)) {
     throw new HttpError(409, 'Este jugador ya fue expulsado y no puede recibir más tarjetas');
   }
-  const updated = await matchRepository.createEvent(match.id, data);
+  // En un partido ya finalizado el marcador quedó fijo (registrado vía
+  // /result), así que aquí solo se guarda el evento para las estadísticas
+  // de goleadores/tarjetas, sin volver a sumar/restar el marcador.
+  const adjustScore = match.status === 'STARTED';
+  const updated = await matchRepository.createEvent(match.id, data, adjustScore);
   publish(updated.tournamentId, updated);
   return updated;
 }
-export async function deleteEvent(id, eventId) { const match = await getMatch(id); if (match.status !== 'STARTED') throw new HttpError(409, 'Solo puedes corregir eventos en un partido iniciado'); const updated = await matchRepository.removeEvent(Number(eventId), match.id); if (!updated) throw new HttpError(404, 'Evento no encontrado'); publish(updated.tournamentId, updated); return updated; }
+export async function deleteEvent(id, eventId) {
+  const match = await getMatch(id);
+  if (!EVENT_EDITABLE_STATUSES.has(match.status)) throw new HttpError(409, 'Solo puedes corregir eventos en un partido iniciado o finalizado');
+  const adjustScore = match.status === 'STARTED';
+  const updated = await matchRepository.removeEvent(Number(eventId), match.id, adjustScore);
+  if (!updated) throw new HttpError(404, 'Evento no encontrado');
+  publish(updated.tournamentId, updated);
+  return updated;
+}

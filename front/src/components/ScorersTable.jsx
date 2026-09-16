@@ -43,7 +43,7 @@ export default function ScorersTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900 shadow-lg shadow-black/10">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-black/5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/10">
       <div className="overflow-x-auto">
         {/*
           table-fixed + anchos fijos en Pos/valor: así el jugador es la
@@ -52,7 +52,7 @@ export default function ScorersTable({
           horizontal para ver la columna de la derecha (Goles/Tarjetas).
         */}
         <table className="w-full table-fixed text-left text-sm">
-          <thead className="border-b border-slate-800 bg-slate-950">
+          <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
             <tr className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
               <th className="w-10 px-1.5 py-3 text-center sm:w-16 sm:px-3">Pos</th>
               <th className="px-2 py-3 text-left sm:px-3">Jugador</th>
@@ -62,7 +62,7 @@ export default function ScorersTable({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-slate-800/70">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
             {scorers.map((row) => {
               const isLeader = row.position === 1;
               const isSecond = row.position === 2;
@@ -81,7 +81,7 @@ export default function ScorersTable({
                       ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.12] via-amber-400/[0.045] to-transparent'
                       : isSecond
                         ? 'border-l-2 border-slate-300/40 bg-gradient-to-r from-slate-300/[0.07] via-slate-300/[0.025] to-transparent'
-                        : 'hover:bg-slate-800/40'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/40'
                   }`}
                 >
                   {/* POSICIÓN */}
@@ -125,7 +125,7 @@ export default function ScorersTable({
                           />
                         ) : (
                           <div
-                            className={`flex h-7 w-7 items-center justify-center rounded-lg bg-slate-800 text-[10px] font-semibold sm:h-8 sm:w-8 ${
+                            className={`flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-[10px] font-semibold dark:bg-slate-800 sm:h-8 sm:w-8 ${
                               expired ? PLAYER_EXPIRED_CLASS : ''
                             } ${
                               isLeader
@@ -158,10 +158,10 @@ export default function ScorersTable({
                             onClick={() => setSelectedRow(row)}
                             className={`max-w-full truncate text-left text-xs font-semibold underline decoration-transparent underline-offset-2 transition hover:decoration-current sm:text-sm ${
                               isLeader
-                                ? 'text-amber-100'
+                                ? 'text-amber-600 dark:text-amber-100'
                                 : isSecond
-                                  ? 'text-slate-200'
-                                  : 'text-slate-300'
+                                  ? 'text-slate-700 dark:text-slate-200'
+                                  : 'text-slate-700 dark:text-slate-300'
                             }`}
                             title={row.player.name}
                           >
@@ -171,10 +171,10 @@ export default function ScorersTable({
                           <span
                             className={`block max-w-full truncate text-xs font-semibold sm:text-sm ${
                               isLeader
-                                ? 'text-amber-100'
+                                ? 'text-amber-600 dark:text-amber-100'
                                 : isSecond
-                                  ? 'text-slate-200'
-                                  : 'text-slate-300'
+                                  ? 'text-slate-700 dark:text-slate-200'
+                                  : 'text-slate-700 dark:text-slate-300'
                             }`}
                             title={row.player.name}
                           >
@@ -195,8 +195,8 @@ export default function ScorersTable({
                   <td
                     className={`px-1.5 py-3 text-center text-sm sm:px-3 ${
                       isLeader
-                        ? 'font-black text-amber-300'
-                        : 'font-bold text-emerald-300'
+                        ? 'font-black text-amber-600 dark:text-amber-300'
+                        : 'font-bold text-emerald-600 dark:text-emerald-300'
                     }`}
                   >
                     {row[valueKey]}

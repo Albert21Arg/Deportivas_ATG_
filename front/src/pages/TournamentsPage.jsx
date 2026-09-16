@@ -267,7 +267,7 @@ export default function TournamentsPage() {
   ).length;
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
+    <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
 
       {/* =========================================================
           BACKGROUND
@@ -298,7 +298,7 @@ export default function TournamentsPage() {
 
         {/* BACK */}
         <Link
-          className="group inline-flex min-h-10 items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-400"
+          className="group inline-flex min-h-10 items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600 hover:dark:text-emerald-400"
           to="/dashboard"
         >
           <span className="text-base transition-transform duration-200 group-hover:-translate-x-1">
@@ -311,7 +311,7 @@ export default function TournamentsPage() {
         {/* =======================================================
             HERO
         ======================================================= */}
-        <div className="relative mt-4 overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-white/[0.055] via-white/[0.02] to-transparent shadow-xl shadow-black/20 sm:mt-6 sm:rounded-3xl sm:shadow-2xl">
+        <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.07] bg-gradient-to-br from-white/[0.055] via-white/[0.02] to-transparent shadow-xl shadow-black/20 sm:mt-6 sm:rounded-3xl sm:shadow-2xl">
 
           {/* Decorative glow only from tablet upward */}
           <div className="pointer-events-none absolute -right-24 -top-32 hidden h-[340px] w-[340px] rounded-full bg-emerald-400/[0.08] blur-3xl sm:block" />
@@ -326,12 +326,12 @@ export default function TournamentsPage() {
                 <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2.5 py-1 sm:px-3 sm:py-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.7)]" />
 
-                  <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-400 sm:text-[10px] sm:tracking-[0.2em]">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400 sm:text-[10px] sm:tracking-[0.2em]">
                     Gestión deportiva
                   </span>
                 </div>
 
-                <h1 className="mt-4 text-2xl font-black tracking-tight text-white sm:mt-5 sm:text-4xl md:text-5xl">
+                <h1 className="mt-4 text-2xl font-black tracking-tight text-slate-900 dark:text-white sm:mt-5 sm:text-4xl md:text-5xl">
                   Tus{' '}
                   <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-cyan-400 bg-clip-text text-transparent">
                     torneos
@@ -339,7 +339,7 @@ export default function TournamentsPage() {
                   , bajo control.
                 </h1>
 
-                <p className="mt-3 max-w-xl text-[13px] leading-6 text-slate-400 sm:mt-4 sm:text-base sm:leading-7">
+                <p className="mt-3 max-w-xl text-[13px] leading-6 text-slate-500 dark:text-slate-400 sm:mt-4 sm:text-base sm:leading-7">
                   Organiza tus competencias, supervisa su actividad y
                   accede rápidamente a toda la información de cada torneo
                   desde un solo lugar.
@@ -351,7 +351,7 @@ export default function TournamentsPage() {
               {/* Hero stats */}
               <div className="grid w-full grid-cols-2 gap-2 sm:gap-3 lg:w-auto lg:min-w-[310px]">
 
-                <div className="rounded-xl border border-white/[0.06] bg-black/20 p-3 sm:rounded-2xl sm:p-5">
+                <div className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/20 p-3 sm:rounded-2xl sm:p-5">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-medium text-slate-500 sm:text-xs">
                       Total
@@ -362,7 +362,7 @@ export default function TournamentsPage() {
                     </span>
                   </div>
 
-                  <p className="mt-2 text-2xl font-black text-white sm:mt-3 sm:text-3xl">
+                  <p className="mt-2 text-2xl font-black text-slate-900 dark:text-white sm:mt-3 sm:text-3xl">
                     {tournaments.length}
                   </p>
 
@@ -380,7 +380,7 @@ export default function TournamentsPage() {
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.7)] sm:h-2 sm:w-2" />
                   </div>
 
-                  <p className="mt-2 text-2xl font-black text-emerald-400 sm:mt-3 sm:text-3xl">
+                  <p className="mt-2 text-2xl font-black text-emerald-600 dark:text-emerald-400 sm:mt-3 sm:text-3xl">
                     {activeTournaments}
                   </p>
 
@@ -394,13 +394,13 @@ export default function TournamentsPage() {
 
             {/* CTA */}
             {isSuperAdmin && (
-              <div className="relative mt-6 border-t border-white/[0.06] pt-5 sm:mt-8 sm:pt-6">
+              <div className="relative mt-6 border-t border-slate-200 dark:border-white/[0.06] pt-5 sm:mt-8 sm:pt-6">
                 <button
-                  className="group flex min-h-11 w-full items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 sm:inline-flex sm:w-auto sm:px-5"
+                  className="group flex min-h-11 w-full items-center justify-center gap-2.5 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-slate-950 dark:text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 sm:inline-flex sm:w-auto sm:px-5"
                   onClick={openCreateModal}
                   type="button"
                 >
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-950/10 text-lg leading-none">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-white dark:bg-slate-950/10 text-lg leading-none">
                     +
                   </span>
 
@@ -425,11 +425,11 @@ export default function TournamentsPage() {
           <div className="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
 
             <div>
-              <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-400 sm:text-[10px] sm:tracking-[0.2em]">
+              <p className="mb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-600 dark:text-emerald-400 sm:text-[10px] sm:tracking-[0.2em]">
                 Administración
               </p>
 
-              <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 Tus torneos
               </h2>
 
@@ -454,7 +454,7 @@ export default function TournamentsPage() {
             <div className="grid gap-3 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3].map((item) => (
                 <div
-                  className="h-[320px] animate-pulse rounded-xl border border-white/[0.05] bg-white/[0.025] sm:h-[370px] sm:rounded-2xl"
+                  className="h-[320px] animate-pulse rounded-xl border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-white/[0.025] sm:h-[370px] sm:rounded-2xl"
                   key={item}
                 />
               ))}
@@ -465,7 +465,7 @@ export default function TournamentsPage() {
               EMPTY
           ===================================================== */}
           {!isLoading && tournaments.length === 0 && (
-            <div className="relative overflow-hidden rounded-2xl border border-dashed border-white/[0.09] bg-white/[0.02] px-5 py-12 text-center sm:rounded-3xl sm:px-6 sm:py-16">
+            <div className="relative overflow-hidden rounded-2xl border border-dashed border-slate-200 dark:border-white/[0.09] bg-slate-50 dark:bg-white/[0.02] px-5 py-12 text-center sm:rounded-3xl sm:px-6 sm:py-16">
 
               <div className="absolute left-1/2 top-0 hidden h-40 w-40 -translate-x-1/2 rounded-full bg-emerald-400/[0.05] blur-3xl sm:block" />
 
@@ -473,7 +473,7 @@ export default function TournamentsPage() {
                 🏆
               </div>
 
-              <h3 className="relative mt-5 text-lg font-bold text-white sm:mt-6 sm:text-xl">
+              <h3 className="relative mt-5 text-lg font-bold text-slate-900 dark:text-white sm:mt-6 sm:text-xl">
                 Tu próximo torneo empieza aquí
               </h3>
 
@@ -484,7 +484,7 @@ export default function TournamentsPage() {
 
               {isSuperAdmin && (
                 <button
-                  className="relative mt-6 min-h-11 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 sm:mt-7 sm:px-6"
+                  className="relative mt-6 min-h-11 rounded-xl bg-emerald-500 px-5 py-3 text-sm font-bold text-slate-950 dark:text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 sm:mt-7 sm:px-6"
                   onClick={openCreateModal}
                   type="button"
                 >
@@ -505,10 +505,10 @@ export default function TournamentsPage() {
 
                 return (
                   <article
-                    className={`group relative flex h-full flex-col overflow-hidden rounded-xl border bg-[#0b1119]/95 shadow-lg transition-all duration-200 sm:rounded-2xl sm:shadow-xl sm:hover:-translate-y-1 ${
+                    className={`group relative flex h-full flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#0b1119]/95 shadow-lg transition-all duration-200 sm:rounded-2xl sm:shadow-xl sm:hover:-translate-y-1 ${
                       isActive
                         ? 'border-emerald-400/[0.11] sm:hover:border-emerald-400/25'
-                        : 'border-white/[0.06] sm:hover:border-white/[0.12]'
+                        : 'border-slate-200 dark:border-white/[0.06] sm:hover:border-slate-300 sm:hover:dark:border-white/[0.12]'
                     }`}
                     key={tournament.id}
                   >
@@ -518,7 +518,7 @@ export default function TournamentsPage() {
                       className={`h-[2px] w-full ${
                         isActive
                           ? 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-cyan-400'
-                          : 'bg-slate-700'
+                          : 'bg-slate-200 dark:bg-slate-700'
                       }`}
                     />
 
@@ -538,7 +538,7 @@ export default function TournamentsPage() {
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl ${
                               isActive
                                 ? 'border-emerald-400/15 bg-emerald-400/[0.07]'
-                                : 'border-white/[0.06] bg-white/[0.035] grayscale'
+                                : 'border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] grayscale'
                             }`}
                           >
                             🏆
@@ -550,7 +550,7 @@ export default function TournamentsPage() {
                             </p>
 
                             <h3
-                              className="truncate text-sm font-bold text-white sm:text-base"
+                              className="truncate text-sm font-bold text-slate-900 dark:text-white sm:text-base"
                               title={tournament.name}
                             >
                               {tournament.name}
@@ -562,8 +562,8 @@ export default function TournamentsPage() {
                         <span
                           className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-bold sm:gap-1.5 sm:px-2.5 sm:text-[10px] ${
                             isActive
-                              ? 'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-300'
-                              : 'border-white/[0.07] bg-white/[0.035] text-slate-500'
+                              ? 'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-700 dark:text-emerald-300'
+                              : 'border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.035] text-slate-500'
                           }`}
                         >
                           <span
@@ -585,12 +585,12 @@ export default function TournamentsPage() {
                       </p>
 
                       {/* STATS */}
-                      <div className="mt-4 overflow-hidden rounded-xl border border-white/[0.05] bg-black/20 sm:mt-6 sm:rounded-2xl">
+                      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-black/20 sm:mt-6 sm:rounded-2xl">
 
                         <div className="grid grid-cols-3">
 
                           <div className="px-2 py-3 text-center sm:px-3 sm:py-4">
-                            <span className="block text-lg font-black text-white sm:text-xl">
+                            <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
                               {tournament._count.teams}
                             </span>
 
@@ -599,8 +599,8 @@ export default function TournamentsPage() {
                             </span>
                           </div>
 
-                          <div className="border-x border-white/[0.05] px-2 py-3 text-center sm:px-3 sm:py-4">
-                            <span className="block text-lg font-black text-white sm:text-xl">
+                          <div className="border-x border-slate-200 dark:border-white/[0.05] px-2 py-3 text-center sm:px-3 sm:py-4">
+                            <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
                               {tournament._count.matches}
                             </span>
 
@@ -610,7 +610,7 @@ export default function TournamentsPage() {
                           </div>
 
                           <div className="px-2 py-3 text-center sm:px-3 sm:py-4">
-                            <span className="block text-lg font-black text-white sm:text-xl">
+                            <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
                               {tournament._count.admins}
                             </span>
 
@@ -637,7 +637,7 @@ export default function TournamentsPage() {
                         <div
                           className={`mt-1.5 flex items-center gap-1.5 text-[10px] sm:gap-2 sm:text-[11px] ${
                             new Date(tournament.expiresAt).getTime() < Date.now()
-                              ? 'text-red-400'
+                              ? 'text-red-600 dark:text-red-400'
                               : 'text-slate-600'
                           }`}
                         >
@@ -657,8 +657,8 @@ export default function TournamentsPage() {
                         <Link
                           className={`group/cta flex min-h-11 w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-xs font-bold transition-all duration-200 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm ${
                             isActive
-                              ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/5 hover:bg-emerald-400'
-                              : 'border border-white/[0.07] bg-white/[0.035] text-slate-300 hover:bg-white/[0.06] hover:text-white'
+                              ? 'bg-emerald-500 text-slate-950 dark:text-slate-950 shadow-md shadow-emerald-500/5 hover:bg-emerald-400'
+                              : 'border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.035] text-slate-700 dark:text-slate-300 hover:bg-slate-200 hover:dark:bg-white/[0.06] hover:text-slate-900 hover:dark:text-white'
                           }`}
                           to={`/dashboard/tournaments/${tournament.id}`}
                         >
@@ -676,7 +676,7 @@ export default function TournamentsPage() {
                           <div className="mt-2 grid grid-cols-2 gap-2">
 
                             <button
-                              className="min-h-10 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
                               onClick={() => startEditing(tournament)}
                               type="button"
                             >
@@ -687,7 +687,7 @@ export default function TournamentsPage() {
                               className={`min-h-10 rounded-lg border px-2 py-2 text-[11px] font-semibold transition sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs ${
                                 isActive
                                   ? 'border-amber-400/10 bg-amber-400/[0.025] text-amber-400/80 hover:border-amber-400/25 hover:bg-amber-400/[0.06]'
-                                  : 'border-emerald-400/10 bg-emerald-400/[0.025] text-emerald-400/80 hover:border-emerald-400/25 hover:bg-emerald-400/[0.06]'
+                                  : 'border-emerald-400/10 bg-emerald-400/[0.025] text-emerald-600 dark:text-emerald-400/80 hover:border-emerald-400/25 hover:bg-emerald-400/[0.06]'
                               }`}
                               onClick={() => changeStatus(tournament)}
                               type="button"
@@ -696,7 +696,7 @@ export default function TournamentsPage() {
                             </button>
 
                             <button
-                              className="min-h-10 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
                               onClick={() => moveTournament(tournament, 'up')}
                               disabled={index === 0}
                               type="button"
@@ -706,7 +706,7 @@ export default function TournamentsPage() {
                             </button>
 
                             <button
-                              className="min-h-10 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
                               onClick={() => moveTournament(tournament, 'down')}
                               disabled={index === tournaments.length - 1}
                               type="button"
@@ -721,7 +721,7 @@ export default function TournamentsPage() {
                         {!isSuperAdmin && (
                           <div className="mt-2">
                             <button
-                              className="min-h-10 w-full rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-white/[0.12] hover:bg-white/[0.05] hover:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              className="min-h-10 w-full rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
                               onClick={() => openModeModal(tournament)}
                               type="button"
                             >
@@ -752,21 +752,21 @@ export default function TournamentsPage() {
           }}
         >
           <div
-            className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/[0.09] bg-[#0b1119] shadow-2xl shadow-black/70 sm:max-h-[90vh] sm:rounded-3xl"
+            className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#0b1119] shadow-2xl shadow-black/70 sm:max-h-[90vh] sm:rounded-3xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tournament-modal-title"
           >
 
             {/* MODAL HEADER */}
-            <div className="relative overflow-hidden border-b border-white/[0.06] px-4 py-5 sm:px-6 sm:py-6">
+            <div className="relative overflow-hidden border-b border-slate-200 dark:border-white/[0.06] px-4 py-5 sm:px-6 sm:py-6">
 
               <div className="absolute -right-12 -top-16 hidden h-40 w-40 rounded-full bg-emerald-400/[0.07] blur-3xl sm:block" />
 
               <div className="relative flex items-start justify-between gap-3">
 
                 <div className="min-w-0">
-                  <div className="mb-2 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
+                  <div className="mb-2 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
 
                     {editingId
@@ -776,7 +776,7 @@ export default function TournamentsPage() {
 
                   <h2
                     id="tournament-modal-title"
-                    className="text-xl font-black tracking-tight text-white sm:text-2xl"
+                    className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl"
                   >
                     {editingId ? 'Editar torneo' : 'Crear torneo'}
                   </h2>
@@ -789,7 +789,7 @@ export default function TournamentsPage() {
                 </div>
 
                 <button
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] text-sm text-slate-500 transition hover:bg-white/[0.07] hover:text-white"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.03] text-sm text-slate-500 transition hover:bg-slate-200 hover:dark:bg-white/[0.07] hover:text-slate-900 hover:dark:text-white"
                   onClick={cancelEditing}
                   type="button"
                   aria-label="Cerrar modal"
@@ -806,11 +806,11 @@ export default function TournamentsPage() {
 
               <div className="space-y-4 px-4 py-5 sm:space-y-5 sm:px-6 sm:py-6">
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Nombre del torneo
 
                   <input
-                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
                     name="name"
                     maxLength="120"
                     value={form.name}
@@ -821,11 +821,11 @@ export default function TournamentsPage() {
                   />
                 </label>
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Descripción
 
                   <textarea
-                    className="mt-2 min-h-28 w-full resize-none rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:min-h-32 sm:px-4"
+                    className="mt-2 min-h-28 w-full resize-none rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm leading-6 text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:min-h-32 sm:px-4"
                     name="description"
                     maxLength="2000"
                     value={form.description}
@@ -834,11 +834,11 @@ export default function TournamentsPage() {
                   />
                 </label>
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Logo o banner (URL)
 
                   <input
-                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
                     name="logo"
                     value={form.logo}
                     onChange={updateField}
@@ -850,11 +850,11 @@ export default function TournamentsPage() {
                   </span>
                 </label>
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Fecha de caducidad
 
                   <input
-                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
                     name="expiresAt"
                     type="date"
                     value={form.expiresAt}
@@ -866,11 +866,11 @@ export default function TournamentsPage() {
                   </span>
                 </label>
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Texto del campeón
 
                   <input
-                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
                     name="championLabel"
                     maxLength="60"
                     value={form.championLabel}
@@ -883,11 +883,11 @@ export default function TournamentsPage() {
                   </span>
                 </label>
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Modo de torneo
 
                   <select
-                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
                     name="mode"
                     value={form.mode}
                     onChange={updateField}
@@ -907,38 +907,38 @@ export default function TournamentsPage() {
                 </label>
 
                 {(form.mode === 'KNOCKOUT_SINGLE' || form.mode === 'KNOCKOUT_TWO_LEG') && (
-                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-200">
+                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                     <input
                       type="checkbox"
                       name="hasThirdPlace"
                       checked={form.hasThirdPlace}
                       onChange={updateField}
-                      className="h-4 w-4 rounded border-white/20 bg-black/30 accent-emerald-500"
+                      className="h-4 w-4 rounded border-white/20 bg-slate-200 dark:bg-black/30 accent-emerald-500"
                     />
                     Jugar partido por el 3.º y 4.º puesto
                   </label>
                 )}
 
                 {form.mode === 'KNOCKOUT_TWO_LEG' && (
-                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-200">
+                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                     <input
                       type="checkbox"
                       name="awayGoalsRule"
                       checked={form.awayGoalsRule}
                       onChange={updateField}
-                      className="h-4 w-4 rounded border-white/20 bg-black/30 accent-emerald-500"
+                      className="h-4 w-4 rounded border-white/20 bg-slate-200 dark:bg-black/30 accent-emerald-500"
                     />
                     Usar regla de gol de visitante en caso de empate global
                   </label>
                 )}
 
-                <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-200">
+                <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                   <input
                     type="checkbox"
                     name="blueCardEnabled"
                     checked={form.blueCardEnabled}
                     onChange={updateField}
-                    className="h-4 w-4 rounded border-white/20 bg-black/30 accent-blue-500"
+                    className="h-4 w-4 rounded border-white/20 bg-slate-200 dark:bg-black/30 accent-blue-500"
                   />
                   Habilitar tarjeta azul
                 </label>
@@ -946,10 +946,10 @@ export default function TournamentsPage() {
               </div>
 
               {/* FOOTER */}
-              <div className="flex flex-col-reverse gap-2 border-t border-white/[0.06] bg-black/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
 
                 <button
-                  className="min-h-11 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 text-sm font-semibold text-slate-400 transition hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                  className="min-h-11 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.025] px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 hover:dark:bg-white/[0.06] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
                   onClick={cancelEditing}
                   type="button"
                   disabled={isSaving}
@@ -958,7 +958,7 @@ export default function TournamentsPage() {
                 </button>
 
                 <button
-                  className="min-h-11 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="min-h-11 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={isSaving}
                   type="submit"
                 >
@@ -988,28 +988,28 @@ export default function TournamentsPage() {
           }}
         >
           <div
-            className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/[0.09] bg-[#0b1119] shadow-2xl shadow-black/70 sm:max-h-[90vh] sm:rounded-3xl"
+            className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#0b1119] shadow-2xl shadow-black/70 sm:max-h-[90vh] sm:rounded-3xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="tournament-mode-modal-title"
           >
 
             {/* MODAL HEADER */}
-            <div className="relative overflow-hidden border-b border-white/[0.06] px-4 py-5 sm:px-6 sm:py-6">
+            <div className="relative overflow-hidden border-b border-slate-200 dark:border-white/[0.06] px-4 py-5 sm:px-6 sm:py-6">
 
               <div className="absolute -right-12 -top-16 hidden h-40 w-40 rounded-full bg-emerald-400/[0.07] blur-3xl sm:block" />
 
               <div className="relative flex items-start justify-between gap-3">
 
                 <div className="min-w-0">
-                  <div className="mb-2 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
+                  <div className="mb-2 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                     Modo de torneo
                   </div>
 
                   <h2
                     id="tournament-mode-modal-title"
-                    className="text-xl font-black tracking-tight text-white sm:text-2xl"
+                    className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl"
                   >
                     Cambiar modo
                   </h2>
@@ -1020,7 +1020,7 @@ export default function TournamentsPage() {
                 </div>
 
                 <button
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] text-sm text-slate-500 transition hover:bg-white/[0.07] hover:text-white"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.03] text-sm text-slate-500 transition hover:bg-slate-200 hover:dark:bg-white/[0.07] hover:text-slate-900 hover:dark:text-white"
                   onClick={cancelEditingMode}
                   type="button"
                   aria-label="Cerrar modal"
@@ -1037,11 +1037,11 @@ export default function TournamentsPage() {
 
               <div className="space-y-4 px-4 py-5 sm:space-y-5 sm:px-6 sm:py-6">
 
-                <label className="block text-sm font-semibold text-slate-200">
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
                   Modo de torneo
 
                   <select
-                    className="mt-2 min-h-11 w-full rounded-xl border border-white/[0.07] bg-black/30 px-3.5 py-3 text-sm text-white outline-none transition focus:border-emerald-400/50 focus:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
                     name="mode"
                     value={modeForm.mode}
                     onChange={updateModeField}
@@ -1059,26 +1059,26 @@ export default function TournamentsPage() {
                 </label>
 
                 {(modeForm.mode === 'KNOCKOUT_SINGLE' || modeForm.mode === 'KNOCKOUT_TWO_LEG') && (
-                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-200">
+                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                     <input
                       type="checkbox"
                       name="hasThirdPlace"
                       checked={modeForm.hasThirdPlace}
                       onChange={updateModeField}
-                      className="h-4 w-4 rounded border-white/20 bg-black/30 accent-emerald-500"
+                      className="h-4 w-4 rounded border-white/20 bg-slate-200 dark:bg-black/30 accent-emerald-500"
                     />
                     Jugar partido por el 3.º y 4.º puesto
                   </label>
                 )}
 
                 {modeForm.mode === 'KNOCKOUT_TWO_LEG' && (
-                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-200">
+                  <label className="flex items-center gap-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200">
                     <input
                       type="checkbox"
                       name="awayGoalsRule"
                       checked={modeForm.awayGoalsRule}
                       onChange={updateModeField}
-                      className="h-4 w-4 rounded border-white/20 bg-black/30 accent-emerald-500"
+                      className="h-4 w-4 rounded border-white/20 bg-slate-200 dark:bg-black/30 accent-emerald-500"
                     />
                     Usar regla de gol de visitante en caso de empate global
                   </label>
@@ -1087,10 +1087,10 @@ export default function TournamentsPage() {
               </div>
 
               {/* FOOTER */}
-              <div className="flex flex-col-reverse gap-2 border-t border-white/[0.06] bg-black/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
 
                 <button
-                  className="min-h-11 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-2.5 text-sm font-semibold text-slate-400 transition hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                  className="min-h-11 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.025] px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 hover:dark:bg-white/[0.06] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
                   onClick={cancelEditingMode}
                   type="button"
                   disabled={isSavingMode}
@@ -1099,7 +1099,7 @@ export default function TournamentsPage() {
                 </button>
 
                 <button
-                  className="min-h-11 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="min-h-11 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={isSavingMode}
                   type="submit"
                 >

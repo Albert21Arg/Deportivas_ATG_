@@ -330,7 +330,7 @@ function LiveMatchCard({
               sm:text-[9px]
               ${
                 isCyan
-                  ? 'text-cyan-500/70'
+                  ? 'text-slate-900 dark:text-cyan-500/70'
                   : 'text-slate-600'
               }
             `}
@@ -416,7 +416,7 @@ function LiveMatchCard({
               sm:text-[9px]
               ${
                 isCyan
-                  ? 'text-cyan-300'
+                  ? 'text-slate-900 dark:text-cyan-300'
                   : 'text-red-300'
               }
             `}
@@ -431,7 +431,7 @@ function LiveMatchCard({
               text-[9px] font-bold
               ${
                 isCyan
-                  ? 'text-cyan-300'
+                  ? 'text-slate-900 dark:text-cyan-300'
                   : 'text-red-300'
               }
             `}
@@ -739,7 +739,7 @@ function TournamentCard({
         line:
           'via-cyan-400/80',
         badge:
-          'border-cyan-400/25 bg-cyan-400/[0.10] text-cyan-600 dark:text-cyan-300',
+          'border-cyan-400/25 bg-cyan-400/[0.10] text-slate-900 dark:text-cyan-300',
         pulse:
           'bg-cyan-400 shadow-[0_0_8px_#22d3ee]',
         logoGlow:
@@ -751,9 +751,9 @@ function TournamentCard({
         topStatusDot:
           'bg-white dark:bg-slate-950',
         section:
-          'text-cyan-600 dark:text-cyan-400',
+          'text-slate-900 dark:text-cyan-400',
         button:
-          'border-cyan-400/30 bg-cyan-400/[0.10] text-cyan-600 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18] dark:text-cyan-300',
+          'border-cyan-400/30 bg-cyan-400/[0.10] text-slate-900 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18] dark:text-cyan-300',
         closedButton:
           'from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400',
       }
@@ -1123,7 +1123,7 @@ function TournamentCard({
                             sm:w-auto sm:px-3 sm:py-3.5
                             ${
                               isCyan
-                                ? 'text-cyan-400'
+                                ? 'text-slate-900 dark:text-cyan-400'
                                 : 'text-emerald-400'
                             }
                           `}
@@ -1311,7 +1311,7 @@ function TournamentCard({
                                   isLeader
                                     ? 'font-black text-amber-300'
                                     : isCyan
-                                      ? 'font-black text-cyan-300'
+                                      ? 'font-black text-slate-900 dark:text-cyan-300'
                                       : 'font-black text-emerald-300'
                                 }
                                 ${
@@ -1563,7 +1563,7 @@ export default function HomePage() {
     );
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
+    <main className="lm-ready min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
       <PublicNavbar />
 
       <AnnouncementModal />

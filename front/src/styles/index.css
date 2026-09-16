@@ -46,6 +46,31 @@ body {
 }
 
 /*
+  Salida de emergencia por PÁGINA COMPLETA: una página que ya recibió el
+  arreglo real de modo diurno (HomePage, PublicTournamentPage...) usa a
+  propósito texto "text-slate-500" sin par "dark:text-..." en muchos
+  sitios, porque ese gris ya se ve bien en los dos temas y no hace falta
+  un valor distinto por tema. El parche de arriba no puede saberlo y de
+  todos modos lo repinta cian. En vez de perseguir cada caso agregando un
+  "dark:text-slate-500" redundante, la página completa se envuelve una
+  sola vez en la clase "lm-ready" y aquí se le devuelve su color real de
+  Tailwind. Misma especificidad + !important que el parche de arriba, pero
+  declarado después, así que gana dentro de .lm-ready.
+*/
+:root:not(.dark) .lm-ready [class~="text-white"] { color: #fff !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-50"] { color: #f8fafc !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-100"] { color: #f1f5f9 !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-200"] { color: #e2e8f0 !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-300"] { color: #cbd5e1 !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-400"] { color: #94a3b8 !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-500"] { color: #64748b !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-600"] { color: #475569 !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-700"] { color: #334155 !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-800"] { color: #1e293b !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-900"] { color: #0f172a !important; }
+:root:not(.dark) .lm-ready [class~="text-slate-950"] { color: #020617 !important; }
+
+/*
   Modo diurno (mismo parche de transición): los botones con fondo
   oscuro/neutro de páginas que todavía no tienen su propio par pasan a
   fondo blanco. bg-emerald-500 se sacó de esta lista: es un color de
@@ -64,3 +89,14 @@ body {
 :root:not(.dark) button[class~="bg-black/75"]:not([class*="dark:bg-"]) {
   background-color: #fff !important;
 }
+
+/* Misma salida de emergencia por página completa, para el parche de botones. */
+:root:not(.dark) .lm-ready button[class~="bg-slate-600"] { background-color: #475569 !important; }
+:root:not(.dark) .lm-ready button[class~="bg-slate-700"] { background-color: #334155 !important; }
+:root:not(.dark) .lm-ready button[class~="bg-slate-800"] { background-color: #1e293b !important; }
+:root:not(.dark) .lm-ready button[class~="bg-slate-900"] { background-color: #0f172a !important; }
+:root:not(.dark) .lm-ready button[class~="bg-slate-950"] { background-color: #020617 !important; }
+:root:not(.dark) .lm-ready button[class~="bg-black/20"] { background-color: rgba(0, 0, 0, 0.2) !important; }
+:root:not(.dark) .lm-ready button[class~="bg-black/30"] { background-color: rgba(0, 0, 0, 0.3) !important; }
+:root:not(.dark) .lm-ready button[class~="bg-black/40"] { background-color: rgba(0, 0, 0, 0.4) !important; }
+:root:not(.dark) .lm-ready button[class~="bg-black/75"] { background-color: rgba(0, 0, 0, 0.75) !important; }
