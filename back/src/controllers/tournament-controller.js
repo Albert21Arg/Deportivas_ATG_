@@ -7,6 +7,7 @@ import {
   updateTournament,
   updateTournamentStatus,
 } from '../services/tournament-service.js';
+import { HttpError } from '../utils/http-error.js';
 
 export async function listController(request, response, next) {
   try {
@@ -74,6 +75,9 @@ export async function moveController(request, response, next) {
 
 export async function championController(request, response, next) {
   try {
+    if (request.user.role !== 'SUPERADMIN') {
+      throw new HttpError(403, 'Solo el superadmin puede declarar el campeón');
+    }
     const tournament = await setChampion(request.tournamentId, request.validatedBody);
     return response.json({ success: true, data: { tournament } });
   } catch (error) {

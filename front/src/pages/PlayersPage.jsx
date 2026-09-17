@@ -48,6 +48,7 @@ export default function PlayersPage() {
   const [playerToDisable, setPlayerToDisable] = useState(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
   const [isTogglingGoalkeeper, setIsTogglingGoalkeeper] = useState(null);
+  const [isTogglingShowName, setIsTogglingShowName] = useState(null);
 
   /*
   |--------------------------------------------------------------------------
@@ -114,7 +115,7 @@ export default function PlayersPage() {
 
     setForm({
       name: player.name,
-      birthDate: player.birthDate.slice(0, 10),
+      birthDate: toDateInputValue(player.birthDate),
       documentNumber: player.documentNumber ?? '',
       jerseyNumber: player.jerseyNumber ?? '',
       paidUntil: toDateInputValue(player.paidUntil),
@@ -234,6 +235,37 @@ export default function PlayersPage() {
       notify(getApiErrorDetails(error));
     } finally {
       setIsTogglingGoalkeeper(null);
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Mostrar/ocultar nombre (borroso en todos los sitios públicos)
+  |--------------------------------------------------------------------------
+  */
+
+  async function toggleShowName(player) {
+    setIsTogglingShowName(player.id);
+
+    try {
+      await api.patch(
+        `/tournaments/${tournamentId}/teams/${teamId}/players/${player.id}/show-name`,
+        { showName: !(player.showName ?? true) }
+      );
+
+      notify({
+        type: 'success',
+        title: player.showName === false ? 'Nombre visible' : 'Nombre oculto',
+        message: player.showName === false
+          ? `El nombre de ${player.name} vuelve a verse en claro.`
+          : `El nombre de ${player.name} se verá borroso en todo el sitio.`,
+      });
+
+      loadPlayers();
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsTogglingShowName(null);
     }
   }
 
@@ -451,10 +483,8 @@ export default function PlayersPage() {
                   {/* Fecha */}
                   <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                     Fecha de nacimiento
-                    <span className="ml-1 text-emerald-600 dark:text-emerald-400">*</span>
 
                     <input
-                      required
                       name="birthDate"
                       type="date"
                       max={new Date().toISOString().slice(0, 10)}
@@ -685,7 +715,7 @@ export default function PlayersPage() {
                               </h3>
 
                               <p className="mt-1 text-xs text-slate-500">
-                                {player.age} años
+                                {player.age != null ? `${player.age} años` : 'Edad no registrada'}
                               </p>
                             </div>
 
@@ -734,6 +764,15 @@ export default function PlayersPage() {
                                 title="Arquero del equipo"
                               >
                                 🧤 Arquero
+                              </span>
+                            )}
+
+                            {player.showName === false && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/[0.08] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-fuchsia-700 dark:text-fuchsia-300"
+                                title="Su nombre se ve borroso en todo el sitio"
+                              >
+                                Nombre oculto
                               </span>
                             )}
                           </div>
@@ -802,6 +841,25 @@ export default function PlayersPage() {
                             ? '🧤 Quitar arquero'
                             : '🧤 Marcar como arquero'}
                       </button>
+
+                      {isSuperAdmin && (
+                        <button
+                          className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                            player.showName === false
+                              ? 'border-fuchsia-400/30 bg-fuchsia-400/[0.08] text-fuchsia-700 dark:text-fuchsia-300 hover:border-fuchsia-400/50 hover:bg-fuchsia-400/[0.14]'
+                              : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-fuchsia-400/30 hover:bg-fuchsia-400/[0.04] hover:text-fuchsia-700 hover:dark:text-fuchsia-300'
+                          }`}
+                          type="button"
+                          disabled={isTogglingShowName === player.id}
+                          onClick={() => toggleShowName(player)}
+                        >
+                          {isTogglingShowName === player.id
+                            ? 'Guardando…'
+                            : player.showName === false
+                              ? 'Mostrar nombre'
+                              : 'Ocultar nombre'}
+                        </button>
+                      )}
                     </div>
                   </article>
                 );

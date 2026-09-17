@@ -62,6 +62,8 @@ export async function getPublicTournament(id) {
   // tabla, conserva su posición (para que la tarjeta abierta desde la
   // lista del equipo se vea igual que abierta desde Goleadores).
   const positionByPlayer = new Map(scorers.map((row) => [row.player.id, row.position]));
+  const goalkeeperPositionByPlayer = new Map(goalkeepers.map((row) => [row.player.id, row.position]));
+  const standingsByTeam = new Map(standings.map((row) => [row.team.id, row]));
 
   // Cada jugador del roster lleva las mismas cifras que usa la tarjeta de
   // goleador (goles, tarjetas, partidos, posición), así la tarjeta se puede
@@ -69,13 +71,24 @@ export async function getPublicTournament(id) {
   const playersByTeam = new Map(
     tournamentPlayers.map(({ team }) => [
       team.id,
-      team.players.map(({ player }) => {
+      team.players.map(({ player, isGoalkeeper }) => {
         const cards = cardsByPlayer.get(player.id) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
+
+        // Igual que en Goleadores/Tarjetas: el arquero usa las cifras de
+        // su equipo (partidos jugados y goles recibidos), no las de sus
+        // propios eventos, para que el OVR de su tarjeta no cambie según
+        // desde dónde se abra.
+        const standingRow = isGoalkeeper ? standingsByTeam.get(team.id) : null;
+
         return withPlayerExpiryFlags({
           ...player,
+          isGoalkeeper,
           goals: goalsByPlayer.get(player.id) ?? 0,
-          matchesPlayed: matchesPlayedByPlayer.get(player.id) ?? 0,
-          position: positionByPlayer.get(player.id) ?? null,
+          matchesPlayed: standingRow ? standingRow.played : (matchesPlayedByPlayer.get(player.id) ?? 0),
+          goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
+          // Igual que goles/partidos: si es arquero, la posición "dorada"
+          // es siempre la de valla menos vencida, no la de goleadores.
+          position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(player.id) ?? null) : (positionByPlayer.get(player.id) ?? null),
           ...cards,
         });
       }),

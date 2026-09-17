@@ -496,6 +496,28 @@ function LiveMatchCard({
           </div>
         </div>
       </div>
+
+      {match.streamUrl && (
+        <a
+          href={match.streamUrl}
+          target="_blank"
+          rel="noreferrer"
+          className={`
+            mt-2.5 flex items-center justify-center gap-1.5
+            rounded-lg py-1.5
+            text-[9px] font-black uppercase tracking-wider
+            transition
+            sm:text-[10px]
+            ${
+              isCyan
+                ? 'bg-cyan-400/15 text-slate-900 hover:bg-cyan-400/25 dark:text-cyan-300'
+                : 'bg-red-400/15 text-red-700 hover:bg-red-400/25 dark:text-red-300'
+            }
+          `}
+        >
+          ▶ Ver en vivo
+        </a>
+      )}
     </div>
   );
 }
@@ -686,27 +708,6 @@ function TournamentCard({
     tournament.teamCount ??
     standings.length ??
     0;
-
-  const matches = getMatchesFromTournament(
-    tournament
-  );
-
-  // La API pública no trae un conteo total de partidos: upcomingMatches
-  // solo cubre los pendientes (programados/en vivo/aplazados). Los ya
-  // finalizados se reconstruyen sumando "jugados" de cada equipo en la
-  // tabla de posiciones (cada partido cuenta para los dos equipos, por
-  // eso se divide entre 2).
-  const finishedMatchesCount = Math.round(
-    standings.reduce(
-      (sum, row) => sum + (row.played ?? 0),
-      0
-    ) / 2
-  );
-
-  const totalMatches =
-    tournament.tournament.matchCount ??
-    tournament.matchCount ??
-    matches.length + finishedMatchesCount;
 
   const modeLabels = {
     ROUND_ROBIN: 'Liga',
@@ -1011,14 +1012,24 @@ function TournamentCard({
               </p>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
-              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
-                Partidos
-              </p>
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
+              {tournament.tournament.championTeam && (
+                <TeamLogo
+                  team={tournament.tournament.championTeam}
+                  size="h-6 w-6 sm:h-7 sm:w-7"
+                  className="shrink-0"
+                />
+              )}
 
-              <p className="mt-0.5 text-sm font-black text-slate-900 dark:text-white sm:text-base">
-                {totalMatches}
-              </p>
+              <div className="min-w-0">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
+                  Último campeón
+                </p>
+
+                <p className="mt-0.5 truncate text-sm font-black text-slate-900 dark:text-white sm:text-base">
+                  {tournament.tournament.championTeam?.name ?? '—'}
+                </p>
+              </div>
             </div>
 
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
@@ -1238,13 +1249,7 @@ function TournamentCard({
                               </button>
                             </td>
 
-                            <td
-                              className={`hidden px-2 py-3.5 text-center text-slate-500 sm:table-cell ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
-                              }`}
-                            >
+                            <td className="hidden px-2 py-3.5 text-center text-slate-500 sm:table-cell">
                               {row.played}
                             </td>
 
@@ -1313,11 +1318,6 @@ function TournamentCard({
                                     : isCyan
                                       ? 'font-black text-slate-900 dark:text-cyan-300'
                                       : 'font-black text-emerald-300'
-                                }
-                                ${
-                                  expired
-                                    ? EXPIRED_CLASS
-                                    : ''
                                 }
                               `}
                             >

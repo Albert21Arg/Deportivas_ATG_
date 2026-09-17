@@ -21,6 +21,14 @@ function parseTime(value) {
   return value;
 }
 
+function parseStreamUrl(value) {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value !== 'string' || value.length > 500 || !/^https?:\/\//i.test(value)) {
+    throw new HttpError(422, 'El enlace de transmisión debe ser una URL http o https');
+  }
+  return value.trim();
+}
+
 function parseTeamId(value, field) {
   const id = Number(value);
   if (!Number.isInteger(id) || id <= 0) throw new HttpError(422, `${field} debe ser un entero positivo`);
@@ -53,6 +61,7 @@ export function validateCreateMatch(request, _response, next) {
       awayTeamId,
       date: parseDate(body.date),
       time: parseTime(body.time),
+      streamUrl: parseStreamUrl(body.streamUrl),
     };
     return next();
   } catch (error) {
@@ -69,6 +78,7 @@ export function validateUpdateMatch(request, _response, next) {
     if (data.homeTeamId !== undefined && data.awayTeamId !== undefined && data.homeTeamId === data.awayTeamId) {
       throw new HttpError(422, 'Un equipo no puede jugar contra sí mismo');
     }
+    if (body.streamUrl !== undefined) data.streamUrl = parseStreamUrl(body.streamUrl);
     if (body.date !== undefined) data.date = parseDate(body.date);
     if (body.time !== undefined) data.time = parseTime(body.time);
     if (body.status !== undefined && !VALID_STATUSES.has(body.status)) throw new HttpError(422, 'Estado de partido no válido');

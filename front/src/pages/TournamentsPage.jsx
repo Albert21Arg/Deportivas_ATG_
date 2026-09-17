@@ -58,6 +58,13 @@ export default function TournamentsPage() {
   const [isSavingMode, setIsSavingMode] = useState(false);
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
 
+  const [championForm, setChampionForm] = useState({ teamId: '' });
+  const [championEditingId, setChampionEditingId] = useState(null);
+  const [championTeams, setChampionTeams] = useState([]);
+  const [isLoadingChampionTeams, setIsLoadingChampionTeams] = useState(false);
+  const [isSavingChampion, setIsSavingChampion] = useState(false);
+  const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
+
   useEffect(() => {
     async function loadTournaments() {
       try {
@@ -172,6 +179,79 @@ export default function TournamentsPage() {
       notify(details);
     } finally {
       setIsSavingMode(false);
+    }
+  }
+
+  async function openChampionModal(tournament) {
+    setChampionEditingId(tournament.id);
+    setChampionForm({
+      teamId: tournament.championTeamId ? String(tournament.championTeamId) : '',
+    });
+    setIsChampionModalOpen(true);
+    setIsLoadingChampionTeams(true);
+
+    try {
+      const { data } = await api.get(`/tournaments/${tournament.id}/teams`);
+      setChampionTeams(data.data.teams.map((item) => item.team));
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsLoadingChampionTeams(false);
+    }
+  }
+
+  function cancelEditingChampion() {
+    if (isSavingChampion) return;
+
+    setIsChampionModalOpen(false);
+    setChampionEditingId(null);
+    setChampionForm({ teamId: '' });
+    setChampionTeams([]);
+  }
+
+  async function saveChampion(event) {
+    event.preventDefault();
+    setIsSavingChampion(true);
+
+    const tournament = tournaments.find(
+      (item) => item.id === championEditingId
+    );
+
+    try {
+      const { data } = await api.patch(
+        `/tournaments/${championEditingId}/champion`,
+        {
+          championTeamId: championForm.teamId || null,
+          runnerUpTeamId: tournament?.runnerUpTeamId ?? null,
+          thirdPlaceTeamId: tournament?.thirdPlaceTeamId ?? null,
+        }
+      );
+
+      const updatedTournament = data.data.tournament;
+
+      setTournaments((current) =>
+        current.map((item) =>
+          item.id === championEditingId ? updatedTournament : item
+        )
+      );
+
+      notify({
+        type: 'success',
+        title: 'Campeón actualizado',
+        message: updatedTournament.championTeam
+          ? `${updatedTournament.championTeam.name} ahora es el campeón de "${updatedTournament.name}".`
+          : `Se quitó el campeón de "${updatedTournament.name}".`,
+      });
+
+      setIsChampionModalOpen(false);
+      setChampionEditingId(null);
+      setChampionForm({ teamId: '' });
+      setChampionTeams([]);
+    } catch (error) {
+      const details = getApiErrorDetails(error);
+      notify(details);
+    } finally {
+      setIsSavingChampion(false);
     }
   }
 
@@ -715,6 +795,17 @@ export default function TournamentsPage() {
                               ↓ Bajar
                             </button>
 
+                            <button
+                              className="col-span-2 min-h-10 rounded-lg border border-amber-400/15 bg-amber-400/[0.03] px-2 py-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400/90 transition hover:border-amber-400/30 hover:bg-amber-400/[0.08] sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                              onClick={() => openChampionModal(tournament)}
+                              type="button"
+                            >
+                              🏆{' '}
+                              {tournament.championTeam
+                                ? `Campeón: ${tournament.championTeam.name}`
+                                : 'Declarar campeón'}
+                            </button>
+
                           </div>
                         )}
 
@@ -1104,6 +1195,118 @@ export default function TournamentsPage() {
                   type="submit"
                 >
                   {isSavingMode ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isChampionModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/75 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6 sm:backdrop-blur-md"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              cancelEditingChampion();
+            }
+          }}
+        >
+          <div
+            className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#0b1119] shadow-2xl shadow-black/70 sm:max-h-[90vh] sm:rounded-3xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tournament-champion-modal-title"
+          >
+
+            {/* MODAL HEADER */}
+            <div className="relative overflow-hidden border-b border-slate-200 dark:border-white/[0.06] px-4 py-5 sm:px-6 sm:py-6">
+
+              <div className="absolute -right-12 -top-16 hidden h-40 w-40 rounded-full bg-amber-400/[0.07] blur-3xl sm:block" />
+
+              <div className="relative flex items-start justify-between gap-3">
+
+                <div className="min-w-0">
+                  <div className="mb-2 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-amber-600 dark:text-amber-400 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    Campeón del torneo
+                  </div>
+
+                  <h2
+                    id="tournament-champion-modal-title"
+                    className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl"
+                  >
+                    Declarar campeón
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-500 sm:mt-1.5 sm:text-sm">
+                    Se muestra en la portada como el último campeón de este torneo.
+                  </p>
+                </div>
+
+                <button
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.03] text-sm text-slate-500 transition hover:bg-slate-200 hover:dark:bg-white/[0.07] hover:text-slate-900 hover:dark:text-white"
+                  onClick={cancelEditingChampion}
+                  type="button"
+                  aria-label="Cerrar modal"
+                  disabled={isSavingChampion}
+                >
+                  ✕
+                </button>
+
+              </div>
+            </div>
+
+            {/* FORM */}
+            <form onSubmit={saveChampion}>
+
+              <div className="space-y-4 px-4 py-5 sm:space-y-5 sm:px-6 sm:py-6">
+
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Equipo campeón
+
+                  <select
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition focus:border-amber-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-amber-400/10 sm:px-4"
+                    name="teamId"
+                    value={championForm.teamId}
+                    onChange={(event) => setChampionForm({ teamId: event.target.value })}
+                    disabled={isLoadingChampionTeams}
+                  >
+                    <option value="">Sin campeón</option>
+                    {championTeams.map((team) => (
+                      <option key={team.id} value={team.id}>
+                        {team.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <span className="mt-1.5 block text-[11px] font-normal text-slate-500">
+                    {isLoadingChampionTeams
+                      ? 'Cargando equipos del torneo...'
+                      : 'El nombre y escudo se toman del equipo que elijas. Al guardar, el torneo queda marcado como finalizado.'}
+                  </span>
+                </label>
+
+              </div>
+
+              {/* FOOTER */}
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
+
+                <button
+                  className="min-h-11 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.025] px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 hover:dark:bg-white/[0.06] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                  onClick={cancelEditingChampion}
+                  type="button"
+                  disabled={isSavingChampion}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  className="min-h-11 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-slate-950 shadow-md shadow-amber-500/10 transition hover:bg-amber-400 hover:shadow-amber-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSavingChampion || isLoadingChampionTeams}
+                  type="submit"
+                >
+                  {isSavingChampion ? 'Guardando...' : 'Guardar cambios'}
                 </button>
 
               </div>

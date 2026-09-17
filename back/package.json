@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "web:build": "npm --prefix ../frontend run build",
+    "web:build": "npm --prefix ../front run build",
     "serve:tunnel": "npm run web:build && node src/server.js",
     "lint": "eslint .",
     "db:validate": "prisma validate",

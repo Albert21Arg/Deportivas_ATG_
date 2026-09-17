@@ -6,6 +6,7 @@ import {
   isLogoHidden,
   isPlayerExpired,
   isTeamExpired,
+  PLAYER_EXPIRED_CLASS,
 } from '../utils/team-expiry.js';
 
 function mediaUrl(path) {
@@ -259,14 +260,14 @@ function calculateOverall({
 |
 | - 0 goles recibidos en promedio -> 99.
 | - 1 gol por partido (un promedio mediocre) -> ~70, no más.
-| - Un arquero realmente bueno (~0.3-0.5 goles por partido) sube hasta la
-|   franja de 80.
+| - Un promedio de ~0.33 goles por partido (1 cada 3 partidos) -> ~77,
+|   todavía lejos de la franja de 80.
 | - De ahí en adelante cuesta cada vez más: solo el que casi no recibe
 |   goles se acerca a 99.
 |
-| Es una raíz cuadrada invertida: al inicio (cerca de 0) cae rápido, así
-| que un arquero genuinamente bueno llega rápido a los 80, pero después se
-| aplana y hace falta un promedio casi perfecto para seguir subiendo.
+| Es una raíz cuarta invertida (más empinada que la raíz cuadrada): al
+| inicio (cerca de 0) cae rápido, pero se aplana antes, así que hace falta
+| un promedio bastante bajo (no solo "decente") para asomarse a los 80.
 |
 | El piso NO es 60: si fuera 60, cualquier promedio malo (por ejemplo 3 o 5
 | goles en un solo partido) quedaría recortado al mismo valor y dos arqueros
@@ -301,8 +302,9 @@ function calculateGoalkeeperOverall({
   const overall =
     99 -
     29 *
-      Math.sqrt(
-        concededPerMatch
+      Math.pow(
+        concededPerMatch,
+        0.25
       );
 
   return Math.min(
@@ -456,6 +458,10 @@ export default function PlayerCardModal({
     respectPaymentStatus &&
     isPlayerExpired(player);
 
+  const nameHidden =
+    respectPaymentStatus &&
+    player.showName === false;
+
   const photo =
     mediaUrl(player.photo);
 
@@ -523,6 +529,18 @@ export default function PlayerCardModal({
           value: goalsConceded ?? 0,
           type: 'conceded',
         },
+        // Un arquero normalmente no anota: solo se muestra esta columna
+        // extra si de verdad tiene goles a favor (para no ensuciar la
+        // tarjeta del resto de arqueros con un "0" irrelevante).
+        ...(goals > 0
+          ? [
+              {
+                label: 'Goles',
+                value: goals,
+                type: 'goals',
+              },
+            ]
+          : []),
       ]
     : [
         {
@@ -1575,6 +1593,7 @@ export default function PlayerCardModal({
                     leading-[.95]
                     tracking-[-.045em]
                     ${cardColors.text}
+                    ${nameHidden ? PLAYER_EXPIRED_CLASS : ''}
                   `}
                   title={player.name}
                 >
@@ -1634,9 +1653,11 @@ export default function PlayerCardModal({
                   ${
                     stats.length === 5
                       ? 'grid-cols-5'
-                      : stats.length === 2
-                        ? 'grid-cols-2'
-                        : 'grid-cols-4'
+                      : stats.length === 3
+                        ? 'grid-cols-3'
+                        : stats.length === 2
+                          ? 'grid-cols-2'
+                          : 'grid-cols-4'
                   }
                   gap-1.5
                   sm:gap-2

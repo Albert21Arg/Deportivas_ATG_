@@ -7,8 +7,8 @@ import { getApiErrorDetails } from '../utils/api-error.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
-  isPlayerExpired,
   isTeamExpired,
+  PLAYER_EXPIRED_CLASS,
 } from '../utils/team-expiry.js';
 
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
@@ -268,10 +268,18 @@ function MatchRow({ match, onClick }) {
 
 function LiveMatchCard({ match, onClick }) {
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onClick();
+        }
+      }}
       className="
+        cursor-pointer
         group relative w-full overflow-hidden
         rounded-2xl
         border border-emerald-400/30
@@ -364,8 +372,30 @@ function LiveMatchCard({ match, onClick }) {
           <span>·</span>
           <span>{formatTime(match.time)} · Colombia</span>
         </div>
+
+        {match.streamUrl && (
+          <a
+            href={match.streamUrl}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) => event.stopPropagation()}
+            className="
+              mt-4 flex items-center justify-center gap-2
+              rounded-xl border border-red-400/30
+              bg-red-500/10
+              py-2.5
+              text-[11px] font-black uppercase tracking-wider
+              text-red-600 dark:text-red-300
+              transition
+              hover:bg-red-500/20
+              sm:py-3 sm:text-xs
+            "
+          >
+            ▶ Ver transmisión en vivo
+          </a>
+        )}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -375,17 +405,20 @@ function LiveMatchCard({ match, onClick }) {
 |--------------------------------------------------------------------------
 */
 
-function HistoryMatchCard({ match }) {
+function HistoryMatchCard({ match, onClick }) {
   return (
-    <article
+    <button
+      type="button"
+      onClick={onClick}
       className="
-        rounded-2xl border border-slate-200
+        w-full rounded-2xl border border-slate-200
         bg-white
-        p-3 shadow-lg shadow-black/5
+        p-3 text-left shadow-lg shadow-black/5
         transition-all duration-200
         hover:-translate-y-0.5
         hover:border-slate-300
         hover:shadow-xl
+        active:scale-[0.98]
         dark:border-white/[0.06]
         dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-black
         dark:shadow-black/10
@@ -449,7 +482,7 @@ function HistoryMatchCard({ match }) {
           </span>
         </div>
       </div>
-    </article>
+    </button>
   );
 }
 
@@ -679,13 +712,32 @@ function MatchDetailModal({
           </div>
         </div>
 
-        {match.status === 'STARTED' && (
+        {match.status === 'STARTED' && match.streamUrl && (
+          <div className="px-3 pb-4 sm:px-6 sm:pb-6">
+            <a
+              href={match.streamUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-2 rounded-xl border border-red-400/30 bg-red-500/10 py-2.5 text-[11px] font-black uppercase tracking-wider text-red-600 transition hover:bg-red-500/20 dark:text-red-300 sm:py-3 sm:text-xs"
+            >
+              ▶ Ver transmisión en vivo
+            </a>
+          </div>
+        )}
+
+        {(match.status === 'STARTED' || match.status === 'FINISHED') && (
           <div className="border-t border-slate-200 px-3 py-3 dark:border-slate-800 sm:px-6 sm:py-4">
             <div className="mb-3 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 sm:gap-2 sm:text-xs">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
-                EN VIVO
-              </span>
+              {match.status === 'STARTED' ? (
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 sm:gap-2 sm:text-xs">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
+                  EN VIVO
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-500 sm:gap-2 sm:text-xs">
+                  Final del partido
+                </span>
+              )}
 
               <span className="text-base font-black text-slate-900 dark:text-white sm:text-lg">
                 {match.homeScore ?? 0} - {match.awayScore ?? 0}
@@ -702,6 +754,12 @@ function MatchDetailModal({
                 pr-1
               "
             >
+              {(match.events ?? []).length === 0 && (
+                <p className="py-2 text-center text-xs text-slate-500 dark:text-slate-500">
+                  Sin eventos registrados.
+                </p>
+              )}
+
               {(match.events ?? []).map((event) => {
                 const isHomeTeam =
                   String(event.team?.id) === String(match.homeTeam?.id);
@@ -737,11 +795,13 @@ function MatchDetailModal({
 
                         <span
                           className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${
-                            (event.player
-                              ? isPlayerExpired(event.player)
-                              : isTeamExpired(event.team))
-                              ? EXPIRED_CLASS
-                              : ''
+                            event.player
+                              ? event.player.showName === false
+                                ? PLAYER_EXPIRED_CLASS
+                                : ''
+                              : isTeamExpired(event.team)
+                                ? EXPIRED_CLASS
+                                : ''
                           }`}
                         >
                           {event.player?.name ?? event.team.name}
@@ -761,11 +821,13 @@ function MatchDetailModal({
 
                         <span
                           className={`max-w-[140px] truncate font-semibold sm:max-w-[220px] ${
-                            (event.player
-                              ? isPlayerExpired(event.player)
-                              : isTeamExpired(event.team))
-                              ? EXPIRED_CLASS
-                              : ''
+                            event.player
+                              ? event.player.showName === false
+                                ? PLAYER_EXPIRED_CLASS
+                                : ''
+                              : isTeamExpired(event.team)
+                                ? EXPIRED_CLASS
+                                : ''
                           }`}
                         >
                           {event.player?.name ?? event.team.name}
@@ -793,11 +855,13 @@ function MatchDetailModal({
 
                         <span
                           className={`truncate font-semibold ${
-                            (event.player
-                              ? isPlayerExpired(event.player)
-                              : isTeamExpired(event.team))
-                              ? EXPIRED_CLASS
-                              : ''
+                            event.player
+                              ? event.player.showName === false
+                                ? PLAYER_EXPIRED_CLASS
+                                : ''
+                              : isTeamExpired(event.team)
+                                ? EXPIRED_CLASS
+                                : ''
                           }`}
                         >
                           {event.player?.name ?? event.team.name}
@@ -1657,11 +1721,7 @@ export default function PublicTournamentPage() {
                             </div>
                           </td>
 
-                          <td
-                            className={`px-2 py-3.5 text-center text-slate-500 dark:text-slate-500 ${
-                              expired ? EXPIRED_CLASS : ''
-                            }`}
-                          >
+                          <td className="px-2 py-3.5 text-center text-slate-500 dark:text-slate-500">
                             {row.played}
                           </td>
 
@@ -1735,9 +1795,6 @@ export default function PublicTournamentPage() {
                                   : isSecond
                                     ? 'text-slate-800 dark:text-slate-100'
                                     : 'text-emerald-600 dark:text-emerald-300'
-                              }
-                              ${
-                                expired ? EXPIRED_CLASS : ''
                               }
                             `}
                           >
@@ -1900,11 +1957,7 @@ export default function PublicTournamentPage() {
                             </div>
                           </td>
 
-                          <td
-                            className={`px-0.5 py-3 text-center text-[10px] font-medium text-slate-500 dark:text-slate-500 ${
-                              expired ? EXPIRED_CLASS : ''
-                            }`}
-                          >
+                          <td className="px-0.5 py-3 text-center text-[10px] font-medium text-slate-500 dark:text-slate-500">
                             {row.played}
                           </td>
 
@@ -1945,9 +1998,6 @@ export default function PublicTournamentPage() {
                                   : isSecond
                                     ? 'text-slate-800 dark:text-slate-100'
                                     : 'text-emerald-600 dark:text-emerald-300'
-                              }
-                              ${
-                                expired ? EXPIRED_CLASS : ''
                               }
                             `}
                           >
@@ -2092,7 +2142,7 @@ export default function PublicTournamentPage() {
             className="w-full min-w-0 p-3 sm:p-5"
           >
             <p className="mb-2 text-[10px] text-slate-500 sm:mb-3 sm:text-xs">
-              Haz clic en un partido para ver sus detalles.
+              Toca un partido para ver sus detalles.
             </p>
 
             <div className="scroll-invisible max-h-[25rem] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 dark:border-white/[0.04] dark:bg-black/[0.12] sm:px-4">
@@ -2391,6 +2441,12 @@ export default function PublicTournamentPage() {
             id="history-content"
             className="min-w-0 p-3 sm:p-5"
           >
+            {history.length > 0 && (
+              <p className="mb-3 text-[10px] text-slate-500 sm:mb-4 sm:text-xs">
+                Toca un partido para ver sus goles y tarjetas.
+              </p>
+            )}
+
             <div className="scroll-invisible max-h-[1536px] w-full min-w-0 overflow-y-auto overflow-x-hidden pr-1 sm:max-h-[762px] lg:max-h-[504px]">
               {history.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500 dark:border-white/[0.07]">
@@ -2411,6 +2467,7 @@ export default function PublicTournamentPage() {
                             <HistoryMatchCard
                               key={match.id}
                               match={match}
+                              onClick={() => setSelectedMatch(match)}
                             />
                           ))}
                         </div>

@@ -17,6 +17,7 @@ const select = {
   jerseyNumber: true,
   photo: true,
   paidUntil: true,
+  showName: true,
   yellowCardFinePaidCount: true,
   redCardFinePaidCount: true,
   blueCardFinePaidCount: true,
@@ -54,6 +55,9 @@ export async function countCardEventsByType(playerId, tournamentId, type) {
 }
 export function setCardTypeFinePaidCount(id, type, count) {
   return prisma.player.update({ where: { id }, data: { [CARD_FINE_FIELD[type]]: count }, select });
+}
+export function setShowName(id, showName) {
+  return prisma.player.update({ where: { id }, data: { showName }, select });
 }
 export async function createAndAssign(data, teamId) {
   return prisma.$transaction(async (tx) => {

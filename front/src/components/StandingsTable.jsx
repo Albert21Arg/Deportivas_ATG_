@@ -156,8 +156,10 @@ export default function StandingsTable({ standings, emptyMessage = 'No hay datos
                   {COLUMNS.map(([key]) => {
                     const isPoints = key === 'points';
                     const isGoalDifference = key === 'goalDifference';
-                    // Los goles en contra siempre se ven, incluso con el pago vencido.
-                    const distortThisCell = expired && key !== 'goalsAgainst';
+                    // Goles en contra, partidos jugados y puntos siempre se ven,
+                    // incluso con el pago vencido.
+                    const distortThisCell =
+                      expired && !['goalsAgainst', 'played', 'points'].includes(key);
 
                     let valueClass = 'text-slate-500 dark:text-slate-400';
 

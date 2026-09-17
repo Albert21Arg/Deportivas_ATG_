@@ -21,7 +21,7 @@ import { HttpError } from './utils/http-error.js';
 
 const app = express();
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
-const frontendDistDirectory = path.resolve(backendDirectory, '../../frontend/dist');
+const frontendDistDirectory = path.resolve(backendDirectory, '../../front/dist');
 const allowedOrigins = new Set([
   process.env.CORS_ORIGIN ?? 'http://localhost:5173',
   'http://localhost:5173',

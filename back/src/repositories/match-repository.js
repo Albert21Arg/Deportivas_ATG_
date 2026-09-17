@@ -8,6 +8,7 @@ const matchSelect = {
   date: true,
   time: true,
   status: true,
+  streamUrl: true,
   homeScore: true,
   awayScore: true,
   homePenaltyScore: true,

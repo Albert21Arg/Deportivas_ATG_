@@ -157,18 +157,32 @@ export async function getPlayerStatMaps(tournamentId) {
 // del jugador y su equipo (goleadores y tarjetas comparten esta base, cada
 // uno arma su propio ranking a partir de ella).
 async function buildPlayerStatRows(tournamentId) {
-  const { goalsByPlayer, cardsByPlayer, matchesPlayedByPlayer } = await getPlayerStatMaps(tournamentId);
+  const [{ goalsByPlayer, cardsByPlayer, matchesPlayedByPlayer }, standings, goalkeepers] = await Promise.all([
+    getPlayerStatMaps(tournamentId),
+    getStandings(tournamentId),
+    getGoalkeepers(tournamentId),
+  ]);
 
   const playerIds = [...new Set([...goalsByPlayer.keys(), ...cardsByPlayer.keys()])];
   if (!playerIds.length) return [];
 
   const players = await standingsRepository.findPlayersWithTeams(playerIds);
   const playersById = new Map(players.map((player) => [player.id, player]));
+  const standingsByTeam = new Map(standings.map((row) => [row.team.id, row]));
+  const goalkeeperPositionByPlayer = new Map(goalkeepers.map((row) => [row.player.id, row.position]));
 
   return playerIds.map((playerId) => {
     const player = playersById.get(playerId);
     const team = withExpiryFlags(player?.teams[0]?.team) ?? null;
+    const isGoalkeeper = player?.teams[0]?.isGoalkeeper ?? false;
     const cards = cardsByPlayer.get(playerId) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
+
+    // Un arquero usa las mismas cifras de partidos jugados y goles
+    // recibidos que "valla menos vencida" (las de su equipo), no las de
+    // sus propios eventos, para que el OVR de su tarjeta sea igual sin
+    // importar desde qué vista se abra.
+    const standingRow = isGoalkeeper ? standingsByTeam.get(team?.id) : null;
+
     return {
       player: withPlayerExpiryFlags(
         {
@@ -177,11 +191,18 @@ async function buildPlayerStatRows(tournamentId) {
           photo: player?.photo ?? null,
           jerseyNumber: player?.jerseyNumber ?? null,
           paidUntil: player?.paidUntil,
+          showName: player?.showName ?? true,
+          isGoalkeeper,
         }
       ),
       team,
       goals: goalsByPlayer.get(playerId) ?? 0,
-      matchesPlayed: matchesPlayedByPlayer.get(playerId) ?? 0,
+      matchesPlayed: standingRow ? standingRow.played : (matchesPlayedByPlayer.get(playerId) ?? 0),
+      goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
+      // Igual que el OVR: si es arquero, la posición "dorada" que se ve en
+      // su tarjeta es siempre la de valla menos vencida, sin importar que
+      // esta tabla la esté rankeando por goles o por tarjetas.
+      position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(playerId) ?? null) : undefined,
       ...cards,
     };
   });
@@ -191,7 +212,10 @@ function rankBy(rows, key) {
   return rows
     .filter((row) => row[key] > 0)
     .sort((left, right) => right[key] - left[key] || left.player.name.localeCompare(right.player.name))
-    .map((row, index) => ({ ...row, position: index + 1 }));
+    .map((row, index) => ({
+      ...row,
+      position: row.player.isGoalkeeper ? (row.position ?? null) : index + 1,
+    }));
 }
 
 // Tabla de goleadores: goles (no autogoles), amarillas y rojas por jugador
@@ -219,9 +243,10 @@ export async function getTopCards(tournamentId) {
 // completo (viene ya calculado en la tabla de posiciones). Solo entran
 // equipos con al menos un partido jugado.
 export async function getGoalkeepers(tournamentId) {
-  const [assignments, standings] = await Promise.all([
+  const [assignments, standings, { goalsByPlayer }] = await Promise.all([
     standingsRepository.findGoalkeeperAssignments(tournamentId),
     getStandings(tournamentId),
+    getPlayerStatMaps(tournamentId),
   ]);
   if (!assignments.length) return [];
 
@@ -236,6 +261,9 @@ export async function getGoalkeepers(tournamentId) {
         team: standingRow.team,
         matchesPlayed: standingRow.played,
         goalsConceded: standingRow.goalsAgainst,
+        // Un arquero puede anotar (penal, tiro libre): se calcula aparte
+        // porque findGoalkeeperAssignments no trae goles anotados.
+        goals: goalsByPlayer.get(player.id) ?? 0,
       };
     })
     .filter(Boolean);

@@ -14,6 +14,7 @@ const emptyForm = {
   awayTeamId: "",
   date: "",
   time: "",
+  streamUrl: "",
 };
 
 const emptyScoreForm = {
@@ -988,12 +989,19 @@ function MatchCard({
   startEditing,
   registerResult,
   changeStatus,
+  updateStreamUrl,
   tournament,
 }) {
   const [localScore, setLocalScore] = useState({
     homeScore: "",
     awayScore: "",
   });
+
+  const [isEditingStream, setIsEditingStream] =
+    useState(false);
+  const [streamDraft, setStreamDraft] = useState(
+    match.streamUrl ?? "",
+  );
 
   const [showFinishedEvents, setShowFinishedEvents] =
     useState(false);
@@ -1389,6 +1397,26 @@ function MatchCard({
               </button>
             )}
 
+            {match.status === "STARTED" && (
+              <button
+                className={`rounded-lg border px-3 py-2 text-[9px] font-semibold transition ${
+                  match.streamUrl
+                    ? "border-red-400/40 bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/20"
+                    : "border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:dark:border-slate-500 hover:text-slate-900 hover:dark:text-white"
+                }`}
+                onClick={() => {
+                  setStreamDraft(match.streamUrl ?? "");
+                  setIsEditingStream((current) => !current);
+                }}
+                type="button"
+              >
+                🔗{" "}
+                {match.streamUrl
+                  ? "Enlace en vivo"
+                  : "Agregar enlace"}
+              </button>
+            )}
+
             {match.status !== "STARTED" && (
               <>
                 <button
@@ -1445,6 +1473,47 @@ function MatchCard({
               ✕ Cancelar
             </button>
           </div>
+
+          {isEditingStream && (
+            <div className="mt-2 flex flex-col gap-1.5 sm:flex-row">
+              <input
+                className="h-9 w-full min-w-0 rounded-lg border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#080d14] px-2.5 text-[11px] text-slate-900 dark:text-white outline-none focus:border-emerald-400/50"
+                type="url"
+                value={streamDraft}
+                onChange={(event) =>
+                  setStreamDraft(event.target.value)
+                }
+                placeholder="https://youtube.com/..., https://facebook.com/..."
+                autoFocus
+              />
+
+              <div className="flex shrink-0 gap-1.5">
+                <button
+                  className="h-9 rounded-lg bg-emerald-500 px-3 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400"
+                  type="button"
+                  onClick={async () => {
+                    await updateStreamUrl(
+                      match,
+                      streamDraft.trim(),
+                    );
+                    setIsEditingStream(false);
+                  }}
+                >
+                  Guardar
+                </button>
+
+                <button
+                  className="h-9 rounded-lg border border-slate-200 dark:border-white/[0.08] px-3 text-[10px] font-semibold text-slate-500 dark:text-slate-400 transition hover:text-slate-900 hover:dark:text-white"
+                  type="button"
+                  onClick={() =>
+                    setIsEditingStream(false)
+                  }
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </article>
@@ -2140,6 +2209,7 @@ export default function MatchesPage() {
       awayTeamId: String(match.awayTeamId),
       date: dateValue(match.date),
       time: timeValue(match.time),
+      streamUrl: match.streamUrl ?? "",
     });
 
     setIsScheduleOpen(true);
@@ -2768,6 +2838,35 @@ export default function MatchesPage() {
     }
   }
 
+  async function updateStreamUrl(match, streamUrl) {
+    try {
+      const { data } = await api.put(
+        `/matches/${match.id}`,
+        { streamUrl },
+      );
+
+      setMatches((current) =>
+        sortMatches(
+          current.map((item) =>
+            item.id === match.id
+              ? data.data.match
+              : item,
+          ),
+        ),
+      );
+
+      notify({
+        type: "success",
+        title: "Enlace actualizado",
+        message: streamUrl
+          ? "El enlace de transmisión en vivo se guardó correctamente."
+          : "Se quitó el enlace de transmisión en vivo.",
+      });
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    }
+  }
+
   /* ==============================================================
      PERMISSIONS
   ============================================================== */
@@ -3174,6 +3273,23 @@ export default function MatchesPage() {
                       value={form.time}
                       onChange={updateField}
                     />
+
+                    <label className="block min-w-0 text-xs font-semibold text-slate-500 dark:text-slate-400 md:col-span-2">
+                      <span>Enlace de transmisión en vivo (opcional)</span>
+
+                      <input
+                        className="mt-1.5 h-11 w-full min-w-0 rounded-xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-[#080d14] px-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-500 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/10"
+                        type="url"
+                        name="streamUrl"
+                        value={form.streamUrl}
+                        onChange={updateField}
+                        placeholder="https://youtube.com/..., https://facebook.com/..."
+                      />
+
+                      <span className="mt-1.5 block text-[11px] font-normal text-slate-500">
+                        Se muestra como botón &quot;Ver en vivo&quot; mientras el partido está en curso.
+                      </span>
+                    </label>
                   </div>
 
                   <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -3325,6 +3441,9 @@ export default function MatchesPage() {
                           changeStatus={
                             changeStatus
                           }
+                          updateStreamUrl={
+                            updateStreamUrl
+                          }
                           tournament={
                             selectedTournament
                           }
@@ -3376,6 +3495,9 @@ export default function MatchesPage() {
                           }
                           changeStatus={
                             changeStatus
+                          }
+                          updateStreamUrl={
+                            updateStreamUrl
                           }
                           tournament={
                             selectedTournament
@@ -3429,6 +3551,9 @@ export default function MatchesPage() {
                           changeStatus={
                             changeStatus
                           }
+                          updateStreamUrl={
+                            updateStreamUrl
+                          }
                           tournament={
                             selectedTournament
                           }
@@ -3480,6 +3605,9 @@ export default function MatchesPage() {
                           }
                           changeStatus={
                             changeStatus
+                          }
+                          updateStreamUrl={
+                            updateStreamUrl
                           }
                           tournament={
                             selectedTournament

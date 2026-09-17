@@ -73,6 +73,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
         jerseyNumber: player.jerseyNumber,
         paidUntil: player.paidUntil,
         playerExpired: player.playerExpired,
+        showName: player.showName,
       },
       team: row.team,
       goals: player.goals,
@@ -80,7 +81,9 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
       redCards: player.redCards,
       blueCards: player.blueCards,
       matchesPlayed: player.matchesPlayed,
+      goalsConceded: player.goalsConceded,
       position: player.position,
+      isGoalkeeper: Boolean(player.isGoalkeeper),
     });
   }
 
@@ -133,50 +136,6 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
             Posición #{row.position} · {row.points} puntos
           </p>
 
-          <div className="mt-5 grid grid-cols-2 gap-2.5 sm:mt-6 sm:grid-cols-3 sm:gap-3">
-            <div className="rounded-xl border border-cyan-400/10 bg-cyan-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-cyan-600 dark:text-cyan-300 sm:text-2xl">{row.played}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Partidos</p>
-            </div>
-
-            <div className="rounded-xl border border-emerald-400/10 bg-emerald-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-emerald-600 dark:text-emerald-300 sm:text-2xl">{row.wins}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Ganados</p>
-            </div>
-
-            <div className="rounded-xl border border-emerald-400/10 bg-emerald-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-emerald-600 dark:text-emerald-300 sm:text-2xl">{row.goalsFor}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Goles marcados</p>
-            </div>
-
-            <div className="rounded-xl border border-red-400/10 bg-red-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-red-600 dark:text-red-300 sm:text-2xl">{row.goalsAgainst}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Goles recibidos</p>
-            </div>
-          </div>
-
-          <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-            <div className="rounded-xl border border-amber-400/10 bg-amber-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-amber-600 dark:text-amber-300 sm:text-2xl">{row.yellowCards}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Amarillas</p>
-            </div>
-
-            <div className="rounded-xl border border-red-400/10 bg-red-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-red-600 dark:text-red-300 sm:text-2xl">{row.redCards}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Rojas</p>
-            </div>
-
-            <div className="rounded-xl border border-blue-400/10 bg-blue-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-blue-600 dark:text-blue-300 sm:text-2xl">{row.blueCards}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Azules</p>
-            </div>
-
-            <div className="rounded-xl border border-fuchsia-400/10 bg-fuchsia-500/10 p-3 sm:rounded-2xl sm:p-4">
-              <p className="text-xl font-black text-fuchsia-600 dark:text-fuchsia-300 sm:text-2xl">{row.goalsFor}</p>
-              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">Goles</p>
-            </div>
-          </div>
-
           <div className="mt-5 sm:mt-6">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">
               Últimos 3 resultados
@@ -226,7 +185,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
                     )}
 
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{player.name}</p>
+                      <p className={`truncate text-sm font-semibold text-slate-700 dark:text-slate-200 ${player.showName === false ? PLAYER_EXPIRED_CLASS : ''}`}>{player.name}</p>
                       <p className="text-[11px] text-slate-500">
                         {player.jerseyNumber ? `Dorsal ${player.jerseyNumber}` : 'Jugador'}
                       </p>
@@ -245,6 +204,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
         row={selectedPlayer}
         respectPaymentStatus
         blueCardEnabled={blueCardEnabled}
+        isGoalkeeper={Boolean(selectedPlayer?.isGoalkeeper)}
         onClose={() => setSelectedPlayer(null)}
       />
     </div>

@@ -25,6 +25,7 @@ const tieSelect = {
       id: true,
       leg: true,
       status: true,
+      streamUrl: true,
       homeScore: true,
       awayScore: true,
       homePenaltyScore: true,
@@ -41,7 +42,7 @@ const tieSelect = {
           minute: true,
           createdAt: true,
           team: { select: teamSelect },
-          player: { select: { id: true, name: true, paidUntil: true } },
+          player: { select: { id: true, name: true, paidUntil: true, showName: true } },
         },
         orderBy: { createdAt: 'asc' },
       },
@@ -54,11 +55,12 @@ const matchSelect = {
   date: true,
   time: true,
   status: true,
+  streamUrl: true,
   homeScore: true,
   awayScore: true,
   homeTeam: { select: teamSelect },
   awayTeam: { select: teamSelect },
-  events: { select: { id: true, teamId: true, type: true, minute: true, createdAt: true, team: { select: teamSelect }, player: { select: { id: true, name: true, paidUntil: true } } }, orderBy: { createdAt: 'asc' } },
+  events: { select: { id: true, teamId: true, type: true, minute: true, createdAt: true, team: { select: teamSelect }, player: { select: { id: true, name: true, paidUntil: true, showName: true } } }, orderBy: { createdAt: 'asc' } },
 };
 
 export function findActiveTournaments() {
@@ -72,7 +74,16 @@ export function findActiveTournaments() {
 export function findActiveTournament(id) {
   return prisma.tournament.findFirst({
     where: { id, status: 'ACTIVE' },
-    select: { id: true, name: true, description: true, logo: true, mode: true, blueCardEnabled: true, championLabel: true },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      logo: true,
+      mode: true,
+      blueCardEnabled: true,
+      championLabel: true,
+      championTeam: { select: { name: true, logo: true } },
+    },
   });
 }
 
@@ -95,8 +106,9 @@ export function findTournamentPlayers(tournamentId) {
           players: {
             where: { player: { status: 'ACTIVE' } },
             select: {
+              isGoalkeeper: true,
               player: {
-                select: { id: true, name: true, jerseyNumber: true, photo: true, paidUntil: true },
+                select: { id: true, name: true, jerseyNumber: true, photo: true, paidUntil: true, showName: true },
               },
             },
             orderBy: { player: { name: 'asc' } },

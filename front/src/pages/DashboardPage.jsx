@@ -110,13 +110,13 @@ function ToolCard({
     <Link
       to={to}
       className="
-        group relative overflow-hidden
+        group relative block overflow-hidden
         rounded-2xl
         border border-slate-200
         bg-white
-        p-4
         shadow-[0_8px_30px_rgba(15,23,42,0.04)]
         transition-all duration-300
+        active:scale-[0.98]
         hover:-translate-y-1
         hover:border-cyan-400/40
         hover:shadow-[0_16px_40px_rgba(15,23,42,0.08)]
@@ -124,14 +124,27 @@ function ToolCard({
         dark:bg-white/[0.035]
         dark:shadow-black/10
         dark:hover:bg-white/[0.055]
-        sm:p-5
       "
     >
       <div
         className={`pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full blur-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${glow}`}
       />
 
-      <div className="relative">
+      {/* Mobile: mosaico tipo app (ícono arriba, etiqueta abajo), sin descripción ni pie "Gestionar". */}
+      <div className="relative flex flex-col items-start gap-2 p-3 sm:hidden">
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${background} ${color}`}
+        >
+          <Icon size={17} strokeWidth={2} aria-hidden="true" />
+        </span>
+
+        <h3 className="break-words text-left text-xs font-black leading-tight tracking-tight text-slate-900 dark:text-white">
+          {label}
+        </h3>
+      </div>
+
+      {/* Desktop/tablet: card completa con descripción. */}
+      <div className="relative hidden p-5 sm:block">
         <div className="flex items-start justify-between">
           <span
             className={`flex h-11 w-11 items-center justify-center rounded-xl ${background} ${color}`}
@@ -155,7 +168,7 @@ function ToolCard({
           {label}
         </h3>
 
-        <p className="mt-2 min-h-[40px] text-[11px] leading-5 text-slate-500 dark:text-slate-400 sm:text-xs">
+        <p className="mt-2 min-h-[40px] text-xs leading-5 text-slate-500 dark:text-slate-400">
           {description}
         </p>
 
@@ -473,7 +486,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5">
               {SUPERADMIN_TOOLS.map((tool) => (
                 <ToolCard key={tool.to} {...tool} />
               ))}

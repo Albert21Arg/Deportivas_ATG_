@@ -81,11 +81,12 @@ model Team {
 model Player {
   id                      Int          @id @default(autoincrement())
   name                    String
-  birthDate               DateTime
+  birthDate               DateTime?
   documentNumber          String?      @unique
   jerseyNumber            String?
   photo                   String?
   paidUntil               DateTime?
+  showName                Boolean      @default(true)
   yellowCardFinePaidCount Int          @default(0)
   redCardFinePaidCount    Int          @default(0)
   blueCardFinePaidCount   Int          @default(0)
@@ -138,6 +139,7 @@ model Match {
   date             DateTime
   time             String
   status           String       @default("SCHEDULED")
+  streamUrl        String?
   homeScore        Int?
   awayScore        Int?
   homePenaltyScore Int?
