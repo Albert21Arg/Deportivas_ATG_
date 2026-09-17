@@ -13,11 +13,13 @@ async function assertTournamentExists(tournamentId) {
   if (!tournament) throw new HttpError(422, 'El torneo seleccionado no existe');
 }
 
-export function listAnnouncements() {
+export async function listAnnouncements() {
+  await repository.expireOverdue();
   return repository.findAll();
 }
 
-export function getActiveAnnouncement(tournamentId) {
+export async function getActiveAnnouncement(tournamentId) {
+  await repository.expireOverdue();
   return repository.findActive(tournamentId);
 }
 

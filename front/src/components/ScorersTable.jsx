@@ -161,7 +161,8 @@ export default function ScorersTable({
                 respectPaymentStatus && isPlayerExpired(row.player);
 
               const nameHidden =
-                respectPaymentStatus && row.player.showName === false;
+                respectPaymentStatus &&
+                (row.player.showName === false || expired);
 
               const photo = mediaUrl(row.player.photo);
 

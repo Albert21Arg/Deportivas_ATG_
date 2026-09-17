@@ -8,11 +8,22 @@ const select = {
   delaySeconds: true,
   durationSeconds: true,
   status: true,
+  expiresAt: true,
   tournamentId: true,
   createdAt: true,
   updatedAt: true,
   tournament: { select: { id: true, name: true } },
 };
+
+// Inhabilita (status → INACTIVE) cualquier anuncio activo cuya fecha de
+// caducidad ya pasó. Se corre al inicio de las consultas de listado (admin
+// y público), igual que expireOverdue() en tournament-repository.js.
+export async function expireOverdue() {
+  await prisma.announcement.updateMany({
+    where: { status: 'ACTIVE', expiresAt: { lt: new Date() } },
+    data: { status: 'INACTIVE' },
+  });
+}
 
 export function findAll() {
   return prisma.announcement.findMany({ select, orderBy: { createdAt: 'desc' } });

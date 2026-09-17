@@ -14,8 +14,13 @@ const emptyForm = {
   durationSeconds: 8,
   status: 'ACTIVE',
   tournamentId: '',
+  expiresAt: '',
   image: null,
 };
+
+function toDateInputValue(value) {
+  return value ? String(value).slice(0, 10) : '';
+}
 
 const mediaUrl = (path) =>
   path?.startsWith('http')
@@ -154,6 +159,7 @@ export default function AnnouncementsPage() {
       durationSeconds: item.durationSeconds,
       status: item.status,
       tournamentId: item.tournamentId ? String(item.tournamentId) : '',
+      expiresAt: toDateInputValue(item.expiresAt),
       image: null,
     });
 
@@ -178,6 +184,7 @@ export default function AnnouncementsPage() {
       'durationSeconds',
       'status',
       'tournamentId',
+      'expiresAt',
     ].forEach((key) => {
       payload.append(key, form[key]);
     });
@@ -494,6 +501,26 @@ export default function AnnouncementsPage() {
                     </p>
                   </label>
 
+                  {/* Fecha de caducidad */}
+                  <label className="block">
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                      Fecha de caducidad (opcional)
+                    </span>
+
+                    <input
+                      className="mt-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                      name="expiresAt"
+                      type="date"
+                      value={form.expiresAt}
+                      onChange={updateField}
+                    />
+
+                    <p className="mt-1.5 text-[11px] text-slate-500">
+                      Al llegar esta fecha el anuncio se desactiva
+                      automáticamente. Déjalo vacío para que no caduque.
+                    </p>
+                  </label>
+
                   {/* Delay */}
                   <label className="block">
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -676,9 +703,15 @@ export default function AnnouncementsPage() {
                             Activo hasta
                           </p>
 
-                          <p className="mt-1 text-[11px] font-medium text-slate-700 dark:text-slate-300">
-                            {endDate
-                              ? formatDate(endDate)
+                          <p
+                            className={`mt-1 text-[11px] font-medium ${
+                              item.expiresAt && new Date(item.expiresAt).getTime() < Date.now()
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            {item.expiresAt
+                              ? formatDate(item.expiresAt)
                               : 'Sin fecha'}
                           </p>
                         </div>

@@ -71,3 +71,10 @@ export function createAssignment(tournamentId, teamId) {
 export function deleteAssignment(tournamentId, teamId) {
   return prisma.tournamentTeam.delete({ where: { tournamentId_teamId: { tournamentId, teamId } } });
 }
+
+export function updatePlayersPaidUntil(teamId, paidUntil) {
+  return prisma.player.updateMany({
+    where: { teams: { some: { teamId } } },
+    data: { paidUntil },
+  });
+}

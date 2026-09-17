@@ -11,7 +11,7 @@ function withPublicMatch(match) {
     awayTeam: withExpiryFlags(match.awayTeam),
     events: match.events?.map((event) => {
       const team = withExpiryFlags(event.team);
-      return { ...event, team, player: withPlayerExpiryFlags(event.player) };
+      return { ...event, team, player: withPlayerExpiryFlags(event.player, team?.teamExpired) };
     }),
   };
 }
@@ -78,19 +78,23 @@ export async function getPublicTournament(id) {
         // su equipo (partidos jugados y goles recibidos), no las de sus
         // propios eventos, para que el OVR de su tarjeta no cambie según
         // desde dónde se abra.
-        const standingRow = isGoalkeeper ? standingsByTeam.get(team.id) : null;
+        const teamStandingRow = standingsByTeam.get(team.id);
+        const standingRow = isGoalkeeper ? teamStandingRow : null;
 
-        return withPlayerExpiryFlags({
-          ...player,
-          isGoalkeeper,
-          goals: goalsByPlayer.get(player.id) ?? 0,
-          matchesPlayed: standingRow ? standingRow.played : (matchesPlayedByPlayer.get(player.id) ?? 0),
-          goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
-          // Igual que goles/partidos: si es arquero, la posición "dorada"
-          // es siempre la de valla menos vencida, no la de goleadores.
-          position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(player.id) ?? null) : (positionByPlayer.get(player.id) ?? null),
-          ...cards,
-        });
+        return withPlayerExpiryFlags(
+          {
+            ...player,
+            isGoalkeeper,
+            goals: goalsByPlayer.get(player.id) ?? 0,
+            matchesPlayed: standingRow ? standingRow.played : (matchesPlayedByPlayer.get(player.id) ?? 0),
+            goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
+            // Igual que goles/partidos: si es arquero, la posición "dorada"
+            // es siempre la de valla menos vencida, no la de goleadores.
+            position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(player.id) ?? null) : (positionByPlayer.get(player.id) ?? null),
+            ...cards,
+          },
+          teamStandingRow?.team?.teamExpired
+        );
       }),
     ])
   );

@@ -185,7 +185,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
                     )}
 
                     <div className="min-w-0">
-                      <p className={`truncate text-sm font-semibold text-slate-700 dark:text-slate-200 ${player.showName === false ? PLAYER_EXPIRED_CLASS : ''}`}>{player.name}</p>
+                      <p className={`truncate text-sm font-semibold text-slate-700 dark:text-slate-200 ${player.showName === false || player.playerExpired ? PLAYER_EXPIRED_CLASS : ''}`}>{player.name}</p>
                       <p className="text-[11px] text-slate-500">
                         {player.jerseyNumber ? `Dorsal ${player.jerseyNumber}` : 'Jugador'}
                       </p>

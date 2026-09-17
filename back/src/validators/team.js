@@ -48,6 +48,9 @@ export function validateUpdateTeam(request, _response, next) {
       throw new HttpError(422, 'El estado debe ser ACTIVE o INACTIVE');
     }
     if (body.status !== undefined) validatedBody.status = body.status;
+    if (body.applyPaidUntilToPlayers !== undefined) {
+      validatedBody.applyPaidUntilToPlayers = Boolean(body.applyPaidUntilToPlayers);
+    }
     if (!Object.keys(validatedBody).length) throw new HttpError(422, 'Debes enviar al menos un campo para actualizar');
     request.validatedBody = validatedBody;
     return next();

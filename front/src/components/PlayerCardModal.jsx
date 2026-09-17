@@ -273,6 +273,13 @@ function calculateOverall({
 | se alcanza con promedios catastróficos, así que los malos siguen
 | diferenciándose entre sí. Los 0 partidos jugados son un caso aparte: ahí
 | no hay datos, así que se usa 60 como valor neutral.
+|
+| Valla invicta (0 goles recibidos) es un caso especial aparte de la fórmula:
+| no basta con no haber recibido goles, también hace falta muestra suficiente.
+| - Menos de 5 partidos sin recibir gol -> 83 (buen arranque, pero todavía
+|   poca muestra para el 99).
+| - Desde el partido 5 en adelante, +1 por cada partido extra sin recibir gol
+|   (83, 84, 85...) hasta llegar al techo de 99 (partido 21 en adelante).
 |--------------------------------------------------------------------------
 */
 
@@ -292,6 +299,17 @@ function calculateGoalkeeperOverall({
 
   if (matchesValue === 0) {
     return 60;
+  }
+
+  if (concededValue === 0) {
+    if (matchesValue < 5) {
+      return 83;
+    }
+
+    return Math.min(
+      83 + (matchesValue - 5),
+      99
+    );
   }
 
   const concededPerMatch =
@@ -457,7 +475,7 @@ export default function PlayerCardModal({
 
   const nameHidden =
     respectPaymentStatus &&
-    player.showName === false;
+    (player.showName === false || expired);
 
   const photo =
     mediaUrl(player.photo);

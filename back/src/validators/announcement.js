@@ -17,6 +17,15 @@ function parseTournamentId(value) {
   return parsed;
 }
 
+function parseExpiresAt(value) {
+  if (value === undefined || value === null || value === '') return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new HttpError(422, 'expiresAt no es una fecha válida');
+  }
+  return parsed;
+}
+
 export function validateAnnouncement(request, _response, next) {
   try {
     const body = request.body ?? {};
@@ -31,6 +40,7 @@ export function validateAnnouncement(request, _response, next) {
       durationSeconds: seconds(body.durationSeconds ?? 8, 'durationSeconds', { min: 1, max: 86400 }),
       status: body.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
       tournamentId: parseTournamentId(body.tournamentId),
+      expiresAt: parseExpiresAt(body.expiresAt),
     };
     return next();
   } catch (error) {
@@ -49,6 +59,7 @@ export function validateAnnouncementUpdate(request, _response, next) {
     if (body.delaySeconds !== undefined) data.delaySeconds = seconds(body.delaySeconds, 'delaySeconds', { min: 0, max: 86400 });
     if (body.durationSeconds !== undefined) data.durationSeconds = seconds(body.durationSeconds, 'durationSeconds', { min: 1, max: 86400 });
     if (body.tournamentId !== undefined) data.tournamentId = parseTournamentId(body.tournamentId);
+    if (body.expiresAt !== undefined) data.expiresAt = parseExpiresAt(body.expiresAt);
     if (request.file) data.imageUrl = `/uploads/announcements/${request.file.filename}`;
     if (!Object.keys(data).length) throw new HttpError(422, 'No hay cambios para guardar');
     request.validatedBody = data;

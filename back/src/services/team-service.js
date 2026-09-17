@@ -19,7 +19,11 @@ export async function createTeam(data, role) {
 
 export async function updateTeam(id, data) {
   await getTeam(id);
-  const updated = await teamRepository.update(id, data);
+  const { applyPaidUntilToPlayers, ...teamData } = data;
+  const updated = await teamRepository.update(id, teamData);
+  if (applyPaidUntilToPlayers) {
+    await teamRepository.updatePlayersPaidUntil(id, updated.paidUntil);
+  }
   const assignment = await teamRepository.findAnyAssignment(id);
   if (assignment) publish(assignment.tournamentId, { type: 'team.updated' });
   return updated;

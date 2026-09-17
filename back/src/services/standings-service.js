@@ -193,7 +193,8 @@ async function buildPlayerStatRows(tournamentId) {
           paidUntil: player?.paidUntil,
           showName: player?.showName ?? true,
           isGoalkeeper,
-        }
+        },
+        team?.teamExpired
       ),
       team,
       goals: goalsByPlayer.get(playerId) ?? 0,
@@ -257,7 +258,7 @@ export async function getGoalkeepers(tournamentId) {
       const standingRow = standingsByTeam.get(teamId);
       if (!standingRow || standingRow.played <= 0) return null;
       return {
-        player: withPlayerExpiryFlags(player),
+        player: withPlayerExpiryFlags(player, standingRow.team?.teamExpired),
         team: standingRow.team,
         matchesPlayed: standingRow.played,
         goalsConceded: standingRow.goalsAgainst,

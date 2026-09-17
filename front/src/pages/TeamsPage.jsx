@@ -8,7 +8,7 @@ import { getApiErrorDetails } from '../utils/api-error.js';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
 import ConfirmActionModal from '../components/ConfirmActionModal.jsx';
 
-const emptyForm = { name: '', logo: '', paidUntil: '', logoExpiresAt: '' };
+const emptyForm = { name: '', logo: '', paidUntil: '', logoExpiresAt: '', applyPaidUntilToPlayers: false };
 
 function toDateInputValue(value) {
   return value ? String(value).slice(0, 10) : '';
@@ -108,9 +108,10 @@ export default function TeamsPage() {
   }, [notify, selectedTournamentId]);
 
   function updateField(event) {
+    const { name, type, value, checked } = event.target;
     setForm((current) => ({
       ...current,
-      [event.target.name]: event.target.value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   }
 
@@ -122,6 +123,7 @@ export default function TeamsPage() {
       logo: team.logo ?? '',
       paidUntil: toDateInputValue(team.paidUntil),
       logoExpiresAt: toDateInputValue(team.logoExpiresAt),
+      applyPaidUntilToPlayers: false,
     });
 
     setIsCreateOpen(true);
@@ -556,6 +558,19 @@ export default function TeamsPage() {
                       )}
 
                     </div>
+
+                    {isSuperAdmin && editingId && (
+                      <label className="mt-3 flex items-start gap-2.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+                        <input
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-emerald-500 focus:ring-emerald-400/40 dark:border-white/20 dark:bg-black/30"
+                          name="applyPaidUntilToPlayers"
+                          type="checkbox"
+                          checked={form.applyPaidUntilToPlayers}
+                          onChange={updateField}
+                        />
+                        Aplicar esta fecha de pago también a todos los jugadores de este equipo
+                      </label>
+                    )}
 
                     {!isSuperAdmin && (
                       <p className="mt-2 text-[11px] text-slate-500">
