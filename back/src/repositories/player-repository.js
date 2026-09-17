@@ -42,6 +42,18 @@ export function findById(id) { return prisma.player.findUnique({ where: { id }, 
 export function update(id, data) { return prisma.player.update({ where: { id }, data, select }); }
 export function findByDocument(documentNumber) { return prisma.player.findUnique({ where: { documentNumber }, select }); }
 export function findPlayerTeamAssignment(playerId) { return prisma.playerTeam.findFirst({ where: { playerId }, select: { teamId: true } }); }
+// Dorsal único por equipo: no importa el nombre, dos jugadores del mismo
+// equipo no pueden compartir número de camiseta.
+export function findJerseyNumberConflict(teamId, jerseyNumber, excludePlayerId) {
+  return prisma.playerTeam.findFirst({
+    where: {
+      teamId,
+      player: { jerseyNumber },
+      ...(excludePlayerId ? { playerId: { not: excludePlayerId } } : {}),
+    },
+    select: { player: { select: { name: true } } },
+  });
+}
 // Cuenta tarjetas cobrables, no eventos crudos: si en un mismo partido una
 // tarjeta quedó reemplazada por otra más grave (dos amarillas -> roja,
 // amarilla y azul -> azul, azul y roja -> roja), solo la definitiva cuenta.
@@ -59,12 +71,32 @@ export function setCardTypeFinePaidCount(id, type, count) {
 export function setShowName(id, showName) {
   return prisma.player.update({ where: { id }, data: { showName }, select });
 }
+// "Ha jugado" = tiene al menos un evento (gol, autogol, tarjeta) registrado
+// en algún partido; no hay alineación por partido en este sistema, así que
+// este es el único rastro real de participación para un jugador de campo.
+export function countMatchEvents(playerId) {
+  return prisma.matchEvent.count({ where: { playerId } });
+}
+export function deletePlayer(playerId, teamId) {
+  return prisma.$transaction(async (tx) => {
+    await tx.playerTeam.delete({ where: { playerId_teamId: { playerId, teamId } } });
+    const remaining = await tx.playerTeam.count({ where: { playerId } });
+    if (remaining === 0) await tx.player.delete({ where: { id: playerId } });
+  });
+}
 export async function createAndAssign(data, teamId) {
   return prisma.$transaction(async (tx) => {
     const existing = data.documentNumber ? await tx.player.findUnique({ where: { documentNumber: data.documentNumber } }) : null;
     const player = existing ?? await tx.player.create({ data });
     const conflict = await tx.playerTeam.findFirst({ where: { playerId: player.id }, select: { team: { select: { name: true } } } });
     if (conflict) return { conflict: conflict.team.name };
+    if (player.jerseyNumber) {
+      const jerseyConflict = await tx.playerTeam.findFirst({
+        where: { teamId, player: { jerseyNumber: player.jerseyNumber } },
+        select: { player: { select: { name: true } } },
+      });
+      if (jerseyConflict) return { jerseyConflict: jerseyConflict.player.name };
+    }
     await tx.playerTeam.create({ data: { playerId: player.id, teamId } });
     return { player: await tx.player.findUnique({ where: { id: player.id }, select }) };
   });

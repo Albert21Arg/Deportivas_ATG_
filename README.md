@@ -130,6 +130,8 @@ En desarrollo, Vite corre en el puerto `5173` y redirige (`proxy`) las peticione
 | `JWT_EXPIRES_IN` | Vigencia del token de acceso (p. ej. `1d`) |
 | `PORT` | Puerto donde escucha el servidor Express (por defecto `3000`) |
 | `CORS_ORIGIN` | Origen adicional permitido por CORS (además de `localhost:5173`, útil para túneles/dominios de despliegue) |
+| `FRONTEND_URL` | URL pública del frontend, usada para armar el enlace del correo de "recuperar contraseña" (p. ej. `https://miapp.com`) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASSWORD` / `SMTP_FROM` | Credenciales SMTP para enviar el correo de recuperación de contraseña. Si se dejan vacías, el enlace no se envía por correo: queda impreso en la consola del backend (útil en desarrollo). |
 
 ### `front/.env` (opcional)
 
@@ -174,7 +176,7 @@ Las rutas públicas (portada y página de un torneo) no requieren sesión. Las r
 
 Entidades principales (ver `back/prisma/schema.prisma` para el detalle completo):
 
-- **User**: cuentas de administración (`role`: `SUPERADMIN`/`ADMIN`).
+- **User**: cuentas de administración (`role`: `SUPERADMIN`/`ADMIN`). Incluye el token (hasheado) y la fecha de vencimiento usados para la recuperación de contraseña por correo.
 - **Tournament**: torneo — modo de competencia, estado, campeón/subcampeón/tercer puesto, fecha de caducidad.
 - **Team** / **Player** / **PlayerTeam**: equipos, jugadores y su relación (incluye si es el arquero titular).
 - **UserTournament** / **TournamentTeam**: asignación de administradores y equipos a un torneo.
@@ -192,7 +194,7 @@ Todas las rutas cuelgan del prefijo `/api`. Los grupos principales son:
 
 | Prefijo | Contenido |
 |---|---|
-| `/api/auth` | Login y sesión |
+| `/api/auth` | Login, sesión (`/me`) y recuperación de contraseña (`/forgot-password`, `/reset-password`) |
 | `/api/public` | Endpoints públicos (sin autenticación): torneos activos, detalle de un torneo, historial, configuración del sitio |
 | `/api/tournaments` | CRUD de torneos, equipos/jugadores/grupos/llaves anidados por torneo, campeón |
 | `/api/teams` | CRUD de equipos |

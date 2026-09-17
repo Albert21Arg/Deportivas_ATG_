@@ -3,13 +3,13 @@ import { Router } from 'express';
 import { assignTeamController, createController, deleteController, drawController, listController, removeTeamController, resetController } from '../controllers/group-controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorize } from '../middlewares/authorize.js';
-import { requireTournamentAccess } from '../middlewares/tournament-access.js';
+import { requireActiveTournament, requireTournamentAccess } from '../middlewares/tournament-access.js';
 import { parseAssignmentParams } from '../validators/assignment.js';
 import { parseGroupId, validateAssignTeam, validateCreateGroup, validateDraw } from '../validators/group.js';
 import { parseTeamId } from '../validators/team.js';
 
 const router = Router({ mergeParams: true });
-router.use(authenticate, parseAssignmentParams, requireTournamentAccess);
+router.use(authenticate, parseAssignmentParams, requireTournamentAccess, requireActiveTournament);
 
 router.get('/', listController);
 router.post('/', authorize('SUPERADMIN', 'ADMIN'), validateCreateGroup, createController);

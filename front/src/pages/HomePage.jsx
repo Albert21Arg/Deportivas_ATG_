@@ -689,6 +689,10 @@ function TournamentCard({
 }) {
   const standings = tournament.standings ?? [];
 
+  // En el home solo se muestra un adelanto: los 4 primeros de la tabla, no
+  // la clasificación completa (esa se ve en la página del torneo).
+  const topStandings = standings.slice(0, 4);
+
   const mode =
     tournament.tournament.mode ??
     'ROUND_ROBIN';
@@ -1145,7 +1149,7 @@ function TournamentCard({
                     </thead>
 
                     <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                      {standings.map((row) => {
+                      {topStandings.map((row) => {
                         const isLeader =
                           row.position === 1;
 
@@ -1155,8 +1159,35 @@ function TournamentCard({
                         return (
                           <tr
                             key={row.team.id}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() =>
+                              onSelectTeam(
+                                row,
+                                tournament
+                                  .recentFormByTeam?.[
+                                  row.team.id
+                                ] ?? []
+                              )
+                            }
+                            onKeyDown={(event) => {
+                              if (
+                                event.key === 'Enter' ||
+                                event.key === ' '
+                              ) {
+                                event.preventDefault();
+
+                                onSelectTeam(
+                                  row,
+                                  tournament
+                                    .recentFormByTeam?.[
+                                    row.team.id
+                                  ] ?? []
+                                );
+                              }
+                            }}
                             className={`
-                              group/row transition-all duration-200
+                              group/row cursor-pointer transition-all duration-200
                               ${
                                 isLeader
                                   ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.09] via-amber-400/[0.025] to-transparent'
@@ -1190,19 +1221,7 @@ function TournamentCard({
                             </td>
 
                             <td className="min-w-0 px-1.5 py-3 sm:px-3 sm:py-3.5">
-                              <button
-                                className="flex min-w-0 w-full items-center gap-2.5 text-left sm:gap-3"
-                                type="button"
-                                onClick={() =>
-                                  onSelectTeam(
-                                    row,
-                                    tournament
-                                      .recentFormByTeam?.[
-                                      row.team.id
-                                    ] ?? []
-                                  )
-                                }
-                              >
+                              <div className="flex min-w-0 w-full items-center gap-2.5 text-left sm:gap-3">
                                 <div className="relative shrink-0">
                                   <div
                                     className={`
@@ -1246,7 +1265,7 @@ function TournamentCard({
                                 >
                                   {row.team.name}
                                 </span>
-                              </button>
+                              </div>
                             </td>
 
                             <td className="hidden px-2 py-3.5 text-center text-slate-500 sm:table-cell">
@@ -1368,7 +1387,7 @@ function TournamentCard({
 
                           <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.05]">
                             <StandingsTable
-                              standings={potStandings}
+                              standings={potStandings.slice(0, 4)}
                               respectPaymentStatus
                             />
                           </div>

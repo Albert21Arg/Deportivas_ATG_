@@ -12,6 +12,7 @@ const emptyForm = {
   description: '',
   logo: '',
   expiresAt: '',
+  pricePerTeam: '',
   championLabel: '',
   mode: 'ROUND_ROBIN',
   hasThirdPlace: false,
@@ -42,6 +43,14 @@ function toDateInputValue(value) {
   return value ? String(value).slice(0, 10) : '';
 }
 
+function formatMoney(value) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 export default function TournamentsPage() {
   const { user } = useAuth();
   const { notify } = useNotifications();
@@ -63,6 +72,36 @@ export default function TournamentsPage() {
   const [championTeams, setChampionTeams] = useState([]);
   const [isLoadingChampionTeams, setIsLoadingChampionTeams] = useState(false);
   const [isSavingChampion, setIsSavingChampion] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [expandedActionIds, setExpandedActionIds] = useState(() => new Set());
+  const [showMobileFab, setShowMobileFab] = useState(false);
+
+  // El botón flotante para crear torneo solo tiene sentido cuando el usuario
+  // ya bajó lo suficiente como para perder de vista el CTA del encabezado;
+  // si no, quedaría flotando encima del buscador/filtros sin aportar nada.
+  useEffect(() => {
+    function handleScroll() {
+      setShowMobileFab(window.scrollY > 420);
+    }
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  function toggleActions(tournamentId) {
+    setExpandedActionIds((current) => {
+      const next = new Set(current);
+      if (next.has(tournamentId)) {
+        next.delete(tournamentId);
+      } else {
+        next.add(tournamentId);
+      }
+      return next;
+    });
+  }
   const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
 
   useEffect(() => {
@@ -102,6 +141,7 @@ export default function TournamentsPage() {
       description: tournament.description ?? '',
       logo: tournament.logo ?? '',
       expiresAt: toDateInputValue(tournament.expiresAt),
+      pricePerTeam: tournament.pricePerTeam ?? '',
       championLabel: tournament.championLabel ?? '',
       mode: tournament.mode ?? 'ROUND_ROBIN',
       hasThirdPlace: Boolean(tournament.hasThirdPlace),
@@ -346,6 +386,19 @@ export default function TournamentsPage() {
     (tournament) => tournament.status === 'ACTIVE'
   ).length;
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const filteredTournaments = tournaments.filter((tournament) => {
+    const matchesStatus =
+      statusFilter === 'ALL' || tournament.status === statusFilter;
+
+    const matchesSearch =
+      !normalizedSearch ||
+      tournament.name.toLowerCase().includes(normalizedSearch);
+
+    return matchesStatus && matchesSearch;
+  });
+
   return (
     <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
 
@@ -374,7 +427,7 @@ export default function TournamentsPage() {
       {/* =========================================================
           CONTENT
       ========================================================= */}
-      <section className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-8">
+      <section className="relative mx-auto w-full max-w-7xl px-4 pb-20 pt-24 sm:px-6 sm:pb-16 sm:pt-28 lg:px-8">
 
         {/* BACK */}
         <Link
@@ -520,12 +573,55 @@ export default function TournamentsPage() {
 
             {!isLoading && tournaments.length > 0 && (
               <div className="text-[11px] text-slate-600 sm:text-xs">
-                {tournaments.length}{' '}
-                {tournaments.length === 1 ? 'resultado' : 'resultados'}
+                {filteredTournaments.length}{' '}
+                {filteredTournaments.length === 1 ? 'resultado' : 'resultados'}
               </div>
             )}
 
           </div>
+
+          {/* =====================================================
+              SEARCH + FILTERS
+          ===================================================== */}
+          {!isLoading && tournaments.length > 0 && (
+            <div className="sticky top-[64px] z-30 -mx-4 mb-4 flex flex-col gap-2.5 bg-slate-50/95 px-4 py-2.5 backdrop-blur dark:bg-[#05090e]/95 sm:static sm:mx-0 sm:mb-6 sm:flex-row sm:items-center sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none sm:dark:bg-transparent">
+              <div className="relative flex-1">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                  🔎
+                </span>
+
+                <input
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white sm:rounded-2xl"
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Buscar torneo por nombre..."
+                  aria-label="Buscar torneo por nombre"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-1.5 sm:flex sm:shrink-0 sm:gap-2">
+                {[
+                  { value: 'ALL', label: 'Todos' },
+                  { value: 'ACTIVE', label: 'Activos' },
+                  { value: 'INACTIVE', label: 'Inactivos' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setStatusFilter(option.value)}
+                    className={`min-h-10 rounded-xl border px-3 py-2 text-[11px] font-bold transition sm:rounded-2xl sm:px-4 sm:text-xs ${
+                      statusFilter === option.value
+                        ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-700 dark:text-emerald-300'
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:hover:border-slate-600 dark:hover:text-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* =====================================================
               LOADING
@@ -575,13 +671,38 @@ export default function TournamentsPage() {
           )}
 
           {/* =====================================================
+              NO MATCHES (hay torneos, pero el filtro no encontró nada)
+          ===================================================== */}
+          {!isLoading && tournaments.length > 0 && filteredTournaments.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/[0.09] bg-slate-50 dark:bg-white/[0.02] px-5 py-10 text-center sm:rounded-3xl sm:py-12">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Ningún torneo coincide con tu búsqueda.
+              </p>
+
+              <button
+                className="mt-3 text-xs font-bold text-emerald-600 hover:underline dark:text-emerald-400"
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('ALL');
+                }}
+              >
+                Quitar filtros
+              </button>
+            </div>
+          )}
+
+          {/* =====================================================
               TOURNAMENT CARDS
           ===================================================== */}
-          {!isLoading && tournaments.length > 0 && (
+          {!isLoading && filteredTournaments.length > 0 && (
             <div className="grid gap-3 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
 
-              {tournaments.map((tournament, index) => {
+              {filteredTournaments.map((tournament) => {
                 const isActive = tournament.status === 'ACTIVE';
+                // Subir/Bajar reordena la posición real en la portada, así que
+                // se calcula sobre la lista completa, no sobre la filtrada.
+                const index = tournaments.findIndex((item) => item.id === tournament.id);
 
                 return (
                   <article
@@ -630,7 +751,7 @@ export default function TournamentsPage() {
                             </p>
 
                             <h3
-                              className="truncate text-sm font-bold text-slate-900 dark:text-white sm:text-base"
+                              className="line-clamp-2 break-words text-sm font-bold leading-tight text-slate-900 dark:text-white sm:text-base"
                               title={tournament.name}
                             >
                               {tournament.name}
@@ -731,6 +852,24 @@ export default function TournamentsPage() {
                         </div>
                       )}
 
+                      {tournament.pricePerTeam != null && (
+                        <div
+                          className={`mt-2 flex items-center justify-between gap-2 rounded-lg border px-2.5 py-2 text-[10px] sm:text-[11px] ${
+                            !isActive
+                              ? 'border-red-400/20 bg-red-400/[0.06] text-red-700 dark:text-red-300'
+                              : 'border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] text-slate-500'
+                          }`}
+                        >
+                          <span className="font-semibold">
+                            {!isActive ? 'Total a pagar para reactivar' : 'Total a pagar'}
+                          </span>
+
+                          <span className="font-black">
+                            {formatMoney(tournament.pricePerTeam * tournament._count.teams)}
+                          </span>
+                        </div>
+                      )}
+
                       {/* CTA */}
                       <div className="mt-auto pt-4 sm:pt-5">
 
@@ -753,59 +892,82 @@ export default function TournamentsPage() {
 
                         {/* ADMIN ACTIONS */}
                         {isSuperAdmin && (
-                          <div className="mt-2 grid grid-cols-2 gap-2">
-
+                          <div className="mt-2">
                             <button
-                              className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
-                              onClick={() => startEditing(tournament)}
+                              className="flex min-h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-transparent px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:text-slate-900 hover:dark:text-white sm:rounded-xl sm:text-xs"
+                              onClick={() => toggleActions(tournament.id)}
                               type="button"
+                              aria-expanded={expandedActionIds.has(tournament.id)}
                             >
-                              Editar
+                              {expandedActionIds.has(tournament.id)
+                                ? 'Ocultar opciones'
+                                : 'Más opciones'}
+
+                              <span
+                                className={`transition-transform duration-200 ${
+                                  expandedActionIds.has(tournament.id) ? 'rotate-180' : ''
+                                }`}
+                              >
+                                ▾
+                              </span>
                             </button>
 
-                            <button
-                              className={`min-h-10 rounded-lg border px-2 py-2 text-[11px] font-semibold transition sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs ${
-                                isActive
-                                  ? 'border-amber-400/10 bg-amber-400/[0.025] text-amber-400/80 hover:border-amber-400/25 hover:bg-amber-400/[0.06]'
-                                  : 'border-emerald-400/10 bg-emerald-400/[0.025] text-emerald-600 dark:text-emerald-400/80 hover:border-emerald-400/25 hover:bg-emerald-400/[0.06]'
-                              }`}
-                              onClick={() => changeStatus(tournament)}
-                              type="button"
-                            >
-                              {isActive ? 'Desactivar' : 'Activar'}
-                            </button>
+                            {expandedActionIds.has(tournament.id) && (
+                              <div className="mt-2 grid grid-cols-2 gap-2">
 
-                            <button
-                              className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
-                              onClick={() => moveTournament(tournament, 'up')}
-                              disabled={index === 0}
-                              type="button"
-                              title="Subir en la portada"
-                            >
-                              ↑ Subir
-                            </button>
+                                <button
+                                  className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                                  onClick={() => startEditing(tournament)}
+                                  type="button"
+                                >
+                                  Editar
+                                </button>
 
-                            <button
-                              className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
-                              onClick={() => moveTournament(tournament, 'down')}
-                              disabled={index === tournaments.length - 1}
-                              type="button"
-                              title="Bajar en la portada"
-                            >
-                              ↓ Bajar
-                            </button>
+                                <button
+                                  className={`min-h-10 rounded-lg border px-2 py-2 text-[11px] font-semibold transition sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs ${
+                                    isActive
+                                      ? 'border-amber-400/10 bg-amber-400/[0.025] text-amber-400/80 hover:border-amber-400/25 hover:bg-amber-400/[0.06]'
+                                      : 'border-emerald-400/10 bg-emerald-400/[0.025] text-emerald-600 dark:text-emerald-400/80 hover:border-emerald-400/25 hover:bg-emerald-400/[0.06]'
+                                  }`}
+                                  onClick={() => changeStatus(tournament)}
+                                  type="button"
+                                >
+                                  {isActive ? 'Desactivar' : 'Activar'}
+                                </button>
 
-                            <button
-                              className="col-span-2 min-h-10 rounded-lg border border-amber-400/15 bg-amber-400/[0.03] px-2 py-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400/90 transition hover:border-amber-400/30 hover:bg-amber-400/[0.08] sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
-                              onClick={() => openChampionModal(tournament)}
-                              type="button"
-                            >
-                              🏆{' '}
-                              {tournament.championTeam
-                                ? `Campeón: ${tournament.championTeam.name}`
-                                : 'Declarar campeón'}
-                            </button>
+                                <button
+                                  className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                                  onClick={() => moveTournament(tournament, 'up')}
+                                  disabled={index === 0}
+                                  type="button"
+                                  title="Subir en la portada"
+                                >
+                                  ↑ Subir
+                                </button>
 
+                                <button
+                                  className="min-h-10 rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-30 sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                                  onClick={() => moveTournament(tournament, 'down')}
+                                  disabled={index === tournaments.length - 1}
+                                  type="button"
+                                  title="Bajar en la portada"
+                                >
+                                  ↓ Bajar
+                                </button>
+
+                                <button
+                                  className="col-span-2 min-h-10 rounded-lg border border-amber-400/15 bg-amber-400/[0.03] px-2 py-2 text-[11px] font-semibold text-amber-600 dark:text-amber-400/90 transition hover:border-amber-400/30 hover:bg-amber-400/[0.08] sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                                  onClick={() => openChampionModal(tournament)}
+                                  type="button"
+                                >
+                                  🏆{' '}
+                                  {tournament.championTeam
+                                    ? `Campeón: ${tournament.championTeam.name}`
+                                    : 'Declarar campeón'}
+                                </button>
+
+                              </div>
+                            )}
                           </div>
                         )}
 
@@ -954,6 +1116,34 @@ export default function TournamentsPage() {
 
                   <span className="mt-1.5 block text-xs font-normal text-slate-500">
                     Al llegar esta fecha el torneo se inhabilita automáticamente. Déjalo vacío para que no caduque.
+                  </span>
+                </label>
+
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Precio por equipo
+
+                  <input
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    name="pricePerTeam"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={form.pricePerTeam}
+                    onChange={updateField}
+                    placeholder="Ej. 150000"
+                  />
+
+                  <span className="mt-1.5 block text-xs font-normal text-slate-500">
+                    Lo que cobras a cada equipo por participar. El total a pagar se calcula
+                    multiplicando esto por los equipos inscritos
+                    {editingId
+                      ? ` (actualmente ${
+                          tournaments.find((item) => item.id === editingId)?._count.teams ?? 0
+                        }).`
+                      : '.'}
+                    {' '}
+                    Se muestra al admin del torneo cuando este quede inactivo por vencimiento,
+                    como el total que debe pagar para reactivarlo. Déjalo vacío si no aplica.
                   </span>
                 </label>
 
@@ -1313,6 +1503,21 @@ export default function TournamentsPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* =========================================================
+          MOBILE FAB (acceso rápido para crear torneo sin volver arriba)
+      ========================================================= */}
+      {isSuperAdmin && !isLoading && tournaments.length > 0 && showMobileFab && (
+        <button
+          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-2xl font-black text-slate-950 shadow-xl shadow-emerald-500/25 transition hover:bg-emerald-400 active:scale-95 sm:hidden"
+          onClick={openCreateModal}
+          type="button"
+          aria-label="Crear nuevo torneo"
+          title="Crear nuevo torneo"
+        >
+          +
+        </button>
       )}
     </main>
   );

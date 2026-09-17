@@ -1,9 +1,18 @@
 import * as tournamentRepository from '../repositories/tournament-repository.js';
 import { HttpError } from '../utils/http-error.js';
 
+// Total a cobrar = precio por equipo × equipos inscritos. Si el superadmin no
+// definió un precio, no hay nada que mostrar (no se asume $0 a cobrar).
+function withPaymentInfo(tournament) {
+  const teamsCount = tournament._count?.teams ?? 0;
+  const totalToPay = tournament.pricePerTeam != null ? tournament.pricePerTeam * teamsCount : null;
+  return { ...tournament, teamsCount, totalToPay };
+}
+
 export async function listTournaments(user) {
   await tournamentRepository.expireOverdue();
-  return tournamentRepository.findAllForUser(user);
+  const tournaments = await tournamentRepository.findAllForUser(user);
+  return tournaments.map(withPaymentInfo);
 }
 
 export async function getTournament(id) {
@@ -14,12 +23,12 @@ export async function getTournament(id) {
     throw new HttpError(404, 'Torneo no encontrado');
   }
 
-  return tournament;
+  return withPaymentInfo(tournament);
 }
 
 export async function createTournament(data) {
   const position = await tournamentRepository.getNextPosition();
-  return tournamentRepository.create({ ...data, position });
+  return withPaymentInfo(await tournamentRepository.create({ ...data, position }));
 }
 
 export async function updateTournament(id, data) {
@@ -36,7 +45,7 @@ export async function updateTournament(id, data) {
       throw new HttpError(409, 'Finaliza (o cancela) todos los partidos antes de cambiar el formato del torneo');
     }
   }
-  return tournamentRepository.update(id, data);
+  return withPaymentInfo(await tournamentRepository.update(id, data));
 }
 
 export async function setChampion(id, { championTeamId, runnerUpTeamId, thirdPlaceTeamId }) {
@@ -45,17 +54,17 @@ export async function setChampion(id, { championTeamId, runnerUpTeamId, thirdPla
   if (!await tournamentRepository.teamsBelongToTournament(id, teamIds)) {
     throw new HttpError(422, 'Los equipos seleccionados deben pertenecer a este torneo');
   }
-  return tournamentRepository.update(id, {
+  return withPaymentInfo(await tournamentRepository.update(id, {
     championTeamId: championTeamId ?? null,
     runnerUpTeamId: runnerUpTeamId ?? null,
     thirdPlaceTeamId: thirdPlaceTeamId ?? null,
     finishedAt: new Date(),
-  });
+  }));
 }
 
 export async function updateTournamentStatus(id, status) {
   await getTournament(id);
-  return tournamentRepository.update(id, { status });
+  return withPaymentInfo(await tournamentRepository.update(id, { status }));
 }
 
 // Sube o baja un torneo un puesto en el orden de la portada, intercambiando

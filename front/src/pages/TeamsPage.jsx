@@ -41,6 +41,22 @@ export default function TeamsPage() {
   const [teamToRemove, setTeamToRemove] = useState(null);
   const [isRemovingTeam, setIsRemovingTeam] = useState(false);
 
+  const [participantSearch, setParticipantSearch] = useState('');
+  const [showMobileFab, setShowMobileFab] = useState(false);
+
+  // El botón flotante para crear/asociar equipo solo aparece cuando el
+  // usuario ya bajó lo suficiente como para perder de vista esas acciones
+  // arriba; si no, quedaría flotando sin aportar nada.
+  useEffect(() => {
+    function handleScroll() {
+      setShowMobileFab(window.scrollY > 420);
+    }
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -286,6 +302,18 @@ export default function TeamsPage() {
     );
   }, [availableTeams, teamSearch]);
 
+  const filteredAssignedTeams = useMemo(() => {
+    const query = participantSearch.trim().toLowerCase();
+
+    if (!query) {
+      return assignedTeams;
+    }
+
+    return assignedTeams.filter(({ team }) =>
+      team.name.toLowerCase().includes(query)
+    );
+  }, [assignedTeams, participantSearch]);
+
   return (
     <main className="lm-ready min-h-screen overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#05090e] dark:text-slate-100">
 
@@ -312,7 +340,19 @@ export default function TeamsPage() {
       {/* =========================================================
           CONTENT
       ========================================================= */}
-      <section className="relative mx-auto w-full max-w-7xl px-3 pb-10 pt-24 sm:px-5 sm:pb-14 sm:pt-28 lg:px-8 lg:pb-20">
+      <section className="relative mx-auto w-full max-w-7xl px-3 pb-20 pt-24 sm:px-5 sm:pb-14 sm:pt-28 lg:px-8 lg:pb-20">
+
+        {/* BACK */}
+        <Link
+          className="group inline-flex min-h-10 items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600 hover:dark:text-emerald-400"
+          to={selectedTournamentId ? `/dashboard/tournaments/${selectedTournamentId}` : '/dashboard/tournaments'}
+        >
+          <span className="text-base transition-transform duration-200 group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Volver al torneo
+        </Link>
 
         {/* =======================================================
             HEADER
@@ -809,10 +849,47 @@ export default function TeamsPage() {
             </div>
 
             <div className="flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 text-[11px] font-black text-slate-700 dark:text-slate-300 sm:h-8 sm:min-w-8 sm:px-2.5 sm:text-xs">
-              {assignedTeams.length}
+              {filteredAssignedTeams.length}
             </div>
 
           </div>
+
+          {/* SEARCH */}
+          {!isLoading && assignedTeams.length > 0 && (
+            <div className="sticky top-[64px] z-30 -mx-3 mb-3 bg-slate-50/95 px-3 py-2 backdrop-blur dark:bg-[#05090e]/95 sm:static sm:mx-0 sm:mb-4 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none sm:dark:bg-transparent">
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                  🔎
+                </span>
+
+                <input
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white sm:rounded-2xl"
+                  type="search"
+                  value={participantSearch}
+                  onChange={(event) => setParticipantSearch(event.target.value)}
+                  placeholder="Buscar equipo por nombre..."
+                  aria-label="Buscar equipo por nombre"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* No matches */}
+          {!isLoading && assignedTeams.length > 0 && filteredAssignedTeams.length === 0 && (
+            <div className="rounded-xl border border-dashed border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-white/[0.012] px-4 py-8 text-center sm:rounded-2xl">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Ningún equipo coincide con tu búsqueda.
+              </p>
+
+              <button
+                className="mt-2 text-xs font-bold text-emerald-600 hover:underline dark:text-emerald-400"
+                type="button"
+                onClick={() => setParticipantSearch('')}
+              >
+                Quitar búsqueda
+              </button>
+            </div>
+          )}
 
           {/* Loading */}
           {isLoading && (
@@ -859,10 +936,13 @@ export default function TeamsPage() {
           )}
 
           {/* Participants */}
-          {!isLoading && assignedTeams.length > 0 && (
+          {!isLoading && filteredAssignedTeams.length > 0 && (
             <div className="grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
 
-              {assignedTeams.map(({ team }, index) => (
+              {filteredAssignedTeams.map(({ team }) => {
+                const index = assignedTeams.findIndex((entry) => entry.team.id === team.id);
+
+                return (
                 <article
                   className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3 shadow-md shadow-black/5 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-400/20 hover:bg-white hover:dark:bg-[#0c131d] sm:rounded-2xl sm:p-4 sm:shadow-lg sm:shadow-black/10"
                   key={team.id}
@@ -955,7 +1035,8 @@ export default function TeamsPage() {
                   </div>
 
                 </article>
-              ))}
+                );
+              })}
 
             </div>
           )}
@@ -973,6 +1054,24 @@ export default function TeamsPage() {
         onCancel={() => setTeamToRemove(null)}
         onConfirm={() => removeTeam(teamToRemove.id)}
       />
+
+      {/* =========================================================
+          MOBILE FAB (acceso rápido para crear equipo sin volver arriba)
+      ========================================================= */}
+      {canCreateTeams && showMobileFab && (
+        <button
+          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-2xl font-black text-slate-950 shadow-xl shadow-emerald-500/25 transition hover:bg-emerald-400 active:scale-95 sm:hidden"
+          onClick={() => {
+            setIsCreateOpen(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          type="button"
+          aria-label="Crear equipo"
+          title="Crear equipo"
+        >
+          +
+        </button>
+      )}
     </main>
   );
 }

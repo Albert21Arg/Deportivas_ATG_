@@ -6,6 +6,8 @@ import { ThemeProvider } from '../context/ThemeContext.jsx';
 import DashboardPage from '../pages/DashboardPage.jsx';
 import AdminsPage from '../pages/AdminsPage.jsx';
 import LoginPage from '../pages/LoginPage.jsx';
+import ForgotPasswordPage from '../pages/ForgotPasswordPage.jsx';
+import ResetPasswordPage from '../pages/ResetPasswordPage.jsx';
 import TournamentsPage from '../pages/TournamentsPage.jsx';
 import TeamsPage from '../pages/TeamsPage.jsx';
 import MatchesPage from '../pages/MatchesPage.jsx';
@@ -35,6 +37,8 @@ export default function AppRoutes() {
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/tournaments/:id" element={<PublicTournamentPage />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<DashboardPage />} />

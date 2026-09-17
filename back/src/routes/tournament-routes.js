@@ -17,7 +17,7 @@ import {
 } from '../controllers/tournament-controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorize } from '../middlewares/authorize.js';
-import { requireTournamentAccess } from '../middlewares/tournament-access.js';
+import { requireActiveTournament, requireTournamentAccess } from '../middlewares/tournament-access.js';
 import {
   parseTournamentId,
   validateChampion,
@@ -40,9 +40,9 @@ router.use('/:id/groups', groupRoutes);
 router.use('/:id/bracket', bracketRoutes);
 router.get('/:id', parseTournamentId, requireTournamentAccess, getController);
 router.put('/:id', authorize('SUPERADMIN'), parseTournamentId, validateUpdateTournament, updateController);
-router.patch('/:id/mode', parseTournamentId, requireTournamentAccess, validateUpdateTournamentMode, updateModeController);
+router.patch('/:id/mode', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateUpdateTournamentMode, updateModeController);
 router.patch('/:id/status', authorize('SUPERADMIN'), parseTournamentId, validateStatus, statusController);
 router.patch('/:id/move', authorize('SUPERADMIN'), parseTournamentId, validateMove, moveController);
-router.patch('/:id/champion', parseTournamentId, requireTournamentAccess, validateChampion, championController);
+router.patch('/:id/champion', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateChampion, championController);
 
 export default router;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNotifications } from '../context/NotificationContext.jsx';
@@ -85,6 +85,13 @@ export default function LoginPage() {
               required
             />
           </label>
+
+          <Link
+            className="block text-right text-sm font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
+            to="/forgot-password"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
 
           {error && <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300">{error}</p>}
 

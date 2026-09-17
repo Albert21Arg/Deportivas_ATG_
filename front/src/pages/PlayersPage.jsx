@@ -47,8 +47,38 @@ export default function PlayersPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [playerToDisable, setPlayerToDisable] = useState(null);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const [playerToDelete, setPlayerToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isTogglingGoalkeeper, setIsTogglingGoalkeeper] = useState(null);
   const [isTogglingShowName, setIsTogglingShowName] = useState(null);
+
+  const [playerSearch, setPlayerSearch] = useState('');
+  const [expandedActionIds, setExpandedActionIds] = useState(() => new Set());
+  const [showMobileFab, setShowMobileFab] = useState(false);
+
+  function toggleActions(playerId) {
+    setExpandedActionIds((current) => {
+      const next = new Set(current);
+      if (next.has(playerId)) {
+        next.delete(playerId);
+      } else {
+        next.add(playerId);
+      }
+      return next;
+    });
+  }
+
+  // El botón flotante para crear jugador solo aparece cuando el usuario ya
+  // bajó lo suficiente como para perder de vista el CTA del encabezado.
+  useEffect(() => {
+    function handleScroll() {
+      setShowMobileFab(window.scrollY > 420);
+    }
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   /*
   |--------------------------------------------------------------------------
@@ -209,6 +239,35 @@ export default function PlayersPage() {
 
   /*
   |--------------------------------------------------------------------------
+  | Eliminar (solo si nunca ha jugado un partido)
+  |--------------------------------------------------------------------------
+  */
+
+  async function deletePlayer(player) {
+    setIsDeleting(true);
+
+    try {
+      await api.delete(
+        `/tournaments/${tournamentId}/teams/${teamId}/players/${player.id}`
+      );
+
+      notify({
+        type: 'success',
+        title: 'Jugador eliminado',
+        message: `${player.name} fue eliminado de la plantilla.`,
+      });
+
+      setPlayerToDelete(null);
+      loadPlayers();
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
   | Marcar/quitar arquero (uno solo por equipo)
   |--------------------------------------------------------------------------
   */
@@ -275,8 +334,15 @@ export default function PlayersPage() {
 
   const disabledPlayers = players.length - activePlayers;
 
+  const normalizedPlayerSearch = playerSearch.trim().toLowerCase();
+
+  const filteredPlayers = players.filter((player) =>
+    !normalizedPlayerSearch ||
+    player.name.toLowerCase().includes(normalizedPlayerSearch)
+  );
+
   return (
-    <main className="lm-ready min-h-screen bg-slate-50 px-4 pb-16 pt-24 text-slate-900 dark:bg-[#070b12] dark:text-slate-100 sm:px-6">
+    <main className="lm-ready min-h-screen bg-slate-50 px-4 pb-24 pt-24 text-slate-900 dark:bg-[#070b12] dark:text-slate-100 sm:px-6 sm:pb-16">
       <DashboardNavbar />
 
       <section className="mx-auto max-w-6xl">
@@ -631,10 +697,53 @@ export default function PlayersPage() {
             </div>
 
             <span className="rounded-full border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-bold text-slate-500">
-              {players.length}{' '}
-              {players.length === 1 ? 'jugador' : 'jugadores'}
+              {filteredPlayers.length}{' '}
+              {filteredPlayers.length === 1 ? 'jugador' : 'jugadores'}
             </span>
           </div>
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Buscador */}
+          {/* ---------------------------------------------------------------- */}
+
+          {players.length > 0 && (
+            <div className="sticky top-[64px] z-30 -mx-4 mb-4 bg-slate-50/95 px-4 py-2.5 backdrop-blur dark:bg-[#070b12]/95 sm:static sm:mx-0 sm:mb-5 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none sm:dark:bg-transparent">
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                  🔎
+                </span>
+
+                <input
+                  className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  type="search"
+                  value={playerSearch}
+                  onChange={(event) => setPlayerSearch(event.target.value)}
+                  placeholder="Buscar jugador por nombre..."
+                  aria-label="Buscar jugador por nombre"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* ---------------------------------------------------------------- */}
+          {/* Sin resultados de búsqueda */}
+          {/* ---------------------------------------------------------------- */}
+
+          {players.length > 0 && filteredPlayers.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50 px-5 py-9 text-center">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Ningún jugador coincide con tu búsqueda.
+              </p>
+
+              <button
+                className="mt-2 text-xs font-bold text-emerald-600 hover:underline dark:text-emerald-400"
+                type="button"
+                onClick={() => setPlayerSearch('')}
+              >
+                Quitar búsqueda
+              </button>
+            </div>
+          )}
 
           {/* ---------------------------------------------------------------- */}
           {/* Empty */}
@@ -673,7 +782,7 @@ export default function PlayersPage() {
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-              {players.map((player) => {
+              {filteredPlayers.map((player) => {
                 const isActive = player.status === 'ACTIVE';
 
                 return (
@@ -826,39 +935,70 @@ export default function PlayersPage() {
                       </button>
 
                       <button
-                        className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                          player.isGoalkeeper
-                            ? 'border-cyan-400/30 bg-cyan-400/[0.08] text-slate-900 dark:text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.14]'
-                            : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-cyan-400/30 hover:bg-cyan-400/[0.04] hover:text-slate-900 hover:dark:text-cyan-300'
-                        }`}
+                        className="col-span-2 flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-transparent py-2 text-[11px] font-semibold text-slate-500 transition hover:text-slate-900 hover:dark:text-white"
                         type="button"
-                        disabled={isTogglingGoalkeeper === player.id}
-                        onClick={() => toggleGoalkeeper(player)}
+                        onClick={() => toggleActions(player.id)}
+                        aria-expanded={expandedActionIds.has(player.id)}
                       >
-                        {isTogglingGoalkeeper === player.id
-                          ? 'Guardando…'
-                          : player.isGoalkeeper
-                            ? '🧤 Quitar arquero'
-                            : '🧤 Marcar como arquero'}
+                        {expandedActionIds.has(player.id)
+                          ? 'Ocultar opciones'
+                          : 'Más opciones'}
+
+                        <span
+                          className={`transition-transform duration-200 ${
+                            expandedActionIds.has(player.id) ? 'rotate-180' : ''
+                          }`}
+                        >
+                          ▾
+                        </span>
                       </button>
 
-                      {isSuperAdmin && (
-                        <button
-                          className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                            player.showName === false
-                              ? 'border-fuchsia-400/30 bg-fuchsia-400/[0.08] text-fuchsia-700 dark:text-fuchsia-300 hover:border-fuchsia-400/50 hover:bg-fuchsia-400/[0.14]'
-                              : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-fuchsia-400/30 hover:bg-fuchsia-400/[0.04] hover:text-fuchsia-700 hover:dark:text-fuchsia-300'
-                          }`}
-                          type="button"
-                          disabled={isTogglingShowName === player.id}
-                          onClick={() => toggleShowName(player)}
-                        >
-                          {isTogglingShowName === player.id
-                            ? 'Guardando…'
-                            : player.showName === false
-                              ? 'Mostrar nombre'
-                              : 'Ocultar nombre'}
-                        </button>
+                      {expandedActionIds.has(player.id) && (
+                        <>
+                          <button
+                            className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                              player.isGoalkeeper
+                                ? 'border-cyan-400/30 bg-cyan-400/[0.08] text-slate-900 dark:text-cyan-300 hover:border-cyan-400/50 hover:bg-cyan-400/[0.14]'
+                                : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-cyan-400/30 hover:bg-cyan-400/[0.04] hover:text-slate-900 hover:dark:text-cyan-300'
+                            }`}
+                            type="button"
+                            disabled={isTogglingGoalkeeper === player.id}
+                            onClick={() => toggleGoalkeeper(player)}
+                          >
+                            {isTogglingGoalkeeper === player.id
+                              ? 'Guardando…'
+                              : player.isGoalkeeper
+                                ? '🧤 Quitar arquero'
+                                : '🧤 Marcar como arquero'}
+                          </button>
+
+                          {isSuperAdmin && (
+                            <button
+                              className={`col-span-2 rounded-xl border py-2.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                                player.showName === false
+                                  ? 'border-fuchsia-400/30 bg-fuchsia-400/[0.08] text-fuchsia-700 dark:text-fuchsia-300 hover:border-fuchsia-400/50 hover:bg-fuchsia-400/[0.14]'
+                                  : 'border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950/40 text-slate-500 dark:text-slate-400 hover:border-fuchsia-400/30 hover:bg-fuchsia-400/[0.04] hover:text-fuchsia-700 hover:dark:text-fuchsia-300'
+                              }`}
+                              type="button"
+                              disabled={isTogglingShowName === player.id}
+                              onClick={() => toggleShowName(player)}
+                            >
+                              {isTogglingShowName === player.id
+                                ? 'Guardando…'
+                                : player.showName === false
+                                  ? 'Mostrar nombre'
+                                  : 'Ocultar nombre'}
+                            </button>
+                          )}
+
+                          <button
+                            className="col-span-2 rounded-xl border border-red-400/20 bg-red-400/[0.04] py-2.5 text-xs font-bold text-red-700 transition hover:border-red-400/40 hover:bg-red-400/[0.1] dark:text-red-300"
+                            type="button"
+                            onClick={() => setPlayerToDelete(player)}
+                          >
+                            Eliminar jugador
+                          </button>
+                        </>
                       )}
                     </div>
                   </article>
@@ -878,6 +1018,35 @@ export default function PlayersPage() {
         onCancel={() => setPlayerToDisable(null)}
         onConfirm={() => toggleStatus(playerToDisable)}
       />
+
+      <ConfirmActionModal
+        isOpen={Boolean(playerToDelete)}
+        title="¿Eliminar jugador?"
+        message={playerToDelete ? `El jugador "${playerToDelete.name}" se eliminará por completo de la plantilla. Solo es posible si nunca ha jugado un partido.` : ''}
+        confirmLabel="Sí, eliminar"
+        isLoading={isDeleting}
+        onCancel={() => setPlayerToDelete(null)}
+        onConfirm={() => deletePlayer(playerToDelete)}
+      />
+
+      {/* ---------------------------------------------------------------- */}
+      {/* FAB móvil (acceso rápido para crear jugador sin volver arriba) */}
+      {/* ---------------------------------------------------------------- */}
+
+      {showMobileFab && (
+        <button
+          className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-2xl font-black text-slate-950 shadow-xl shadow-emerald-500/25 transition hover:bg-emerald-400 active:scale-95 sm:hidden"
+          onClick={() => {
+            openCreateForm();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          type="button"
+          aria-label="Nuevo jugador"
+          title="Nuevo jugador"
+        >
+          +
+        </button>
+      )}
     </main>
   );
 }

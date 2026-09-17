@@ -107,6 +107,21 @@ function buildRoundRobinRounds(teamIds) {
   return rounds;
 }
 
+// Un mismo equipo juega una sola vez por fecha, pero varios partidos de la
+// misma fecha se reparten en el tiempo, no al mismo tiempo: cada uno arranca
+// 1 hora después del anterior, empezando en la hora indicada. Si eso empuja
+// la hora más allá de medianoche, el partido pasa al día siguiente en vez de
+// quedar con una hora inválida.
+function addHoursToSchedule(date, time, hoursToAdd) {
+  const [hours, minutes] = time.split(':').map(Number);
+  const totalMinutes = hours * 60 + minutes + hoursToAdd * 60;
+  const dayOffset = Math.floor(totalMinutes / (24 * 60));
+  const minutesOfDay = ((totalMinutes % (24 * 60)) + 24 * 60) % (24 * 60);
+  const resultTime = `${String(Math.floor(minutesOfDay / 60)).padStart(2, '0')}:${String(minutesOfDay % 60).padStart(2, '0')}`;
+  const resultDate = new Date(date.getTime() + dayOffset * 24 * 60 * 60 * 1000);
+  return { date: resultDate, time: resultTime };
+}
+
 export async function generateFixtures(tournamentId, options = {}) {
   const { groupId = null, startDate, time = '15:00', intervalDays = 7 } = options;
   if (!await matchRepository.findTournament(tournamentId)) throw new HttpError(404, 'Torneo no encontrado');
@@ -125,9 +140,10 @@ export async function generateFixtures(tournamentId, options = {}) {
   const base = startDate ? new Date(`${startDate}T00:00:00.000Z`) : new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z');
   const matchesData = [];
   rounds.forEach((pairs, roundIndex) => {
-    const date = new Date(base.getTime() + roundIndex * intervalDays * 24 * 60 * 60 * 1000);
-    pairs.forEach(([homeTeamId, awayTeamId]) => {
-      matchesData.push({ tournamentId, homeTeamId, awayTeamId, date, time, groupId, stage: groupId ? 'GROUP' : null });
+    const roundDate = new Date(base.getTime() + roundIndex * intervalDays * 24 * 60 * 60 * 1000);
+    pairs.forEach(([homeTeamId, awayTeamId], matchIndex) => {
+      const { date, time: matchTime } = addHoursToSchedule(roundDate, time, matchIndex);
+      matchesData.push({ tournamentId, homeTeamId, awayTeamId, date, time: matchTime, groupId, stage: groupId ? 'GROUP' : null });
     });
   });
   const { count } = await matchRepository.createMany(matchesData);

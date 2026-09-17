@@ -68,7 +68,13 @@ El ícono ☀️/🌙 en la esquina superior cambia el tema de toda la plataform
 
 El acceso al panel de administración está en `/login` (botón **"Iniciar sesión"** en la esquina superior de la portada). Necesitas un correo y una contraseña creados previamente por un superadministrador — no hay registro público de cuentas.
 
-Si olvidaste tu contraseña, pide a un **superadmin** que te cree una nueva o la restablezca desde la sección [Administradores](#412-administradores) (no existe recuperación automática por correo).
+Si olvidaste tu contraseña, en la pantalla de inicio de sesión toca **"¿Olvidaste tu contraseña?"**:
+
+1. Escribe tu correo y toca **"Enviar enlace"**. Por seguridad, el mensaje de confirmación se muestra siempre igual (exista o no esa cuenta).
+2. Si el correo está registrado, te llega un enlace para restablecer la contraseña, válido durante **1 hora** y de un solo uso.
+3. Abre el enlace, escribe la nueva contraseña (mínimo 8 caracteres) dos veces y guarda. Quedarás listo para iniciar sesión con la contraseña nueva.
+
+Si no te llega el correo (por ejemplo, porque el servidor no tiene el envío de correo configurado), un **superadmin** siempre puede crearte una cuenta nueva o cambiarte la contraseña manualmente desde la sección [Administradores](#412-administradores).
 
 ---
 
@@ -228,4 +234,4 @@ Esas acciones son exclusivas de SUPERADMIN. Si necesitas usarlas y tu cuenta es 
 Revisa el mensaje de la notificación que aparece en la esquina — casi siempre explica qué falta (por ejemplo, un campo obligatorio vacío). Si el error dice algo como "servidor" o "conexión", puede ser un problema temporal del servidor: espera un momento y vuelve a intentar; si persiste, contacta a quien administra el hosting de la plataforma.
 
 **¿Cómo recupero mi contraseña?**
-No hay recuperación automática por correo. Un superadmin debe crearte una cuenta nueva o cambiarte la contraseña desde [Administradores](#412-administradores).
+Desde `/login`, toca "¿Olvidaste tu contraseña?", escribe tu correo y sigue el enlace que te llega (válido 1 hora, un solo uso). Ver [2. Iniciar sesión](#2-iniciar-sesión). Si no te llega el correo, un superadmin puede crearte una cuenta nueva o cambiarte la contraseña desde [Administradores](#412-administradores).

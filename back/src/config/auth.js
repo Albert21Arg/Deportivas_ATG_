@@ -1,6 +1,7 @@
 export const AUTH = {
   accessTokenExpiresIn: process.env.JWT_EXPIRES_IN ?? '60m',
   bcryptRounds: 12,
+  passwordResetTokenTtlMinutes: 60,
   roles: {
     SUPERADMIN: 'SUPERADMIN',
     ADMIN: 'ADMIN',

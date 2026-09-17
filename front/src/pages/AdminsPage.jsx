@@ -28,6 +28,7 @@ export default function AdminsPage() {
   // Buscadores
   const [tournamentSearch, setTournamentSearch] = useState('');
   const [adminSearch, setAdminSearch] = useState('');
+  const [adminListSearch, setAdminListSearch] = useState('');
 
   const [showTournamentResults, setShowTournamentResults] =
     useState(false);
@@ -403,6 +404,16 @@ export default function AdminsPage() {
           .includes(search)
       );
     });
+
+  const filteredAdminList = admins.filter((admin) => {
+    const search = adminListSearch.trim().toLowerCase();
+    if (!search) return true;
+
+    return (
+      admin.name?.toLowerCase().includes(search) ||
+      admin.email?.toLowerCase().includes(search)
+    );
+  });
 
   const selectedAdmin = admins.find(
     (admin) =>
@@ -867,7 +878,7 @@ export default function AdminsPage() {
               'users' && (
               <section className="overflow-visible rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl">
 
-                <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-5">
+                <div className="border-b border-slate-200 dark:border-slate-800 px-5 py-5 sm:px-6">
                   <h2 className="text-xl font-bold">
                     Lista de usuarios
                   </h2>
@@ -876,6 +887,22 @@ export default function AdminsPage() {
                     Administra los datos y permisos
                     de cada administrador.
                   </p>
+
+                  {admins.length > 0 && (
+                    <div className="relative mt-4">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                        🔎
+                      </span>
+
+                      <input
+                        type="text"
+                        value={adminListSearch}
+                        onChange={(event) => setAdminListSearch(event.target.value)}
+                        placeholder="Buscar por nombre o email..."
+                        className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 py-3 pl-11 pr-4 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/10"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {isLoading ? (
@@ -891,7 +918,13 @@ export default function AdminsPage() {
                       </div>
                     )}
 
-                    {admins.map((admin) => (
+                    {admins.length > 0 && filteredAdminList.length === 0 && (
+                      <div className="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                        Ningún administrador coincide con tu búsqueda.
+                      </div>
+                    )}
+
+                    {filteredAdminList.map((admin) => (
                       <div
                         className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
                         key={admin.id}

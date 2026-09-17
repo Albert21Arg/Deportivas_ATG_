@@ -258,16 +258,14 @@ function calculateOverall({
 | backend). El OVR depende solo de esa razón (goles recibidos / partidos),
 | no de goles/tarjetas propias:
 |
-| - 0 goles recibidos en promedio -> 99.
-| - 1 gol por partido (un promedio mediocre) -> ~70, no más.
-| - Un promedio de ~0.33 goles por partido (1 cada 3 partidos) -> ~77,
-|   todavía lejos de la franja de 80.
-| - De ahí en adelante cuesta cada vez más: solo el que casi no recibe
-|   goles se acerca a 99.
+| Tabla de referencia (goles recibidos por partido -> OVR):
+|   0.00 -> 99   0.50 -> 77   1.50 -> 61
+|   0.25 -> 84   0.75 -> 73   2.00 -> 55
+|   0.33 -> 81   1.00 -> 68   3.00 -> 47
 |
-| Es una raíz cuarta invertida (más empinada que la raíz cuadrada): al
-| inicio (cerca de 0) cae rápido, pero se aplana antes, así que hace falta
-| un promedio bastante bajo (no solo "decente") para asomarse a los 80.
+| Es una raíz cuadrada invertida: al inicio (cerca de 0) cae rápido, y se
+| va aplanando después, pero nunca deja de bajar, así que ni un promedio
+| catastrófico deja de diferenciarse de otro peor.
 |
 | El piso NO es 60: si fuera 60, cualquier promedio malo (por ejemplo 3 o 5
 | goles en un solo partido) quedaría recortado al mismo valor y dos arqueros
@@ -301,10 +299,9 @@ function calculateGoalkeeperOverall({
 
   const overall =
     99 -
-    29 *
-      Math.pow(
-        concededPerMatch,
-        0.25
+    31 *
+      Math.sqrt(
+        concededPerMatch
       );
 
   return Math.min(
@@ -1795,17 +1792,27 @@ export default function PlayerCardModal({
                 />
 
                 <span
-                  className={`
+                  className="
                     whitespace-nowrap
-                    text-[7px]
-                    font-black
-                    uppercase
-                    tracking-[.35em]
-                    ${cardColors.text}
-                    opacity-45
-                  `}
+                    text-base
+                    leading-none
+                    opacity-70
+                  "
                 >
-                  SEASON
+                  {isGoalkeeper ? (
+                      <img
+                        src="https://img.icons8.com/?size=100&id=80IrfPbBUOYM&format=png&color=000000"
+                        alt="Arquero"
+                        style={{ width: 55, height: 55 }}
+                      />
+                    ) : (
+                      <img
+                        src="https://img.icons8.com/?size=100&id=erCS43MlrpQn&format=png&color=000000"
+                        alt="Jugador"
+                        style={{ width: 55, height: 55 }}
+                      />
+                    )}
+
                 </span>
 
                 <span

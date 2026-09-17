@@ -7,6 +7,7 @@ const tournamentSelect = {
   logo: true,
   status: true,
   expiresAt: true,
+  pricePerTeam: true,
   position: true,
   mode: true,
   hasThirdPlace: true,

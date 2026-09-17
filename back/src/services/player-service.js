@@ -1,13 +1,50 @@
 import * as repository from '../repositories/player-repository.js';
 import { HttpError } from '../utils/http-error.js';
 import { publish } from './realtime-service.js';
+import { getStandings } from './standings-service.js';
 
 function id(value) { const parsed = Number(value); if (!Number.isInteger(parsed) || parsed <= 0) throw new HttpError(400, 'Identificador no válido'); return parsed; }
 function withAge(player) { if (!player.birthDate) return { ...player, age: null }; const now = new Date(); const birth = new Date(player.birthDate); let age = now.getFullYear() - birth.getFullYear(); const beforeBirthday = now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate()); return { ...player, age: age - Number(beforeBirthday) }; }
 async function assertTeam(tournamentId, teamId) { if (!await repository.findTeamInTournament(id(teamId), id(tournamentId))) throw new HttpError(404, 'El equipo no pertenece a este torneo'); }
 export async function listPlayers(tournamentId, teamId) { await assertTeam(tournamentId, teamId); return (await repository.findForTeam(id(teamId))).map(({ player, isGoalkeeper }) => withAge({ ...player, isGoalkeeper })); }
-export async function createPlayer(tournamentId, teamId, data) { await assertTeam(tournamentId, teamId); const result = await repository.createAndAssign(data, id(teamId)); if (result.conflict) throw new HttpError(409, `El jugador ya pertenece al equipo ${result.conflict}`); publish(id(tournamentId), { type: 'player.created' }); return withAge(result.player); }
-export async function updatePlayer(tournamentId, teamId, playerId, data) { await assertTeam(tournamentId, teamId); const player = await repository.findById(id(playerId)); if (!player) throw new HttpError(404, 'Jugador no encontrado'); const updated = await repository.update(player.id, data); publish(id(tournamentId), { type: 'player.updated' }); return withAge(updated); }
+export async function createPlayer(tournamentId, teamId, data) { await assertTeam(tournamentId, teamId); const result = await repository.createAndAssign(data, id(teamId)); if (result.conflict) throw new HttpError(409, `El jugador ya pertenece al equipo ${result.conflict}`); if (result.jerseyConflict) throw new HttpError(409, `Ya existe un jugador con ese dorsal en este equipo (${result.jerseyConflict})`); publish(id(tournamentId), { type: 'player.created' }); return withAge(result.player); }
+export async function updatePlayer(tournamentId, teamId, playerId, data) {
+  await assertTeam(tournamentId, teamId);
+  const player = await repository.findById(id(playerId));
+  if (!player) throw new HttpError(404, 'Jugador no encontrado');
+  if (data.jerseyNumber) {
+    const jerseyConflict = await repository.findJerseyNumberConflict(id(teamId), data.jerseyNumber, player.id);
+    if (jerseyConflict) throw new HttpError(409, `Ya existe un jugador con ese dorsal en este equipo (${jerseyConflict.player.name})`);
+  }
+  const updated = await repository.update(player.id, data);
+  publish(id(tournamentId), { type: 'player.updated' });
+  return withAge(updated);
+}
+
+// Solo se puede borrar un jugador que nunca haya jugado: sin goles, autogoles
+// ni tarjetas registradas, y si era el arquero del equipo, que ese equipo
+// tampoco tenga partidos jugados (el arquero hereda los partidos del equipo).
+export async function deletePlayer(tournamentId, teamId, playerId) {
+  await assertTeam(tournamentId, teamId);
+  const player = await repository.findById(id(playerId));
+  if (!player) throw new HttpError(404, 'Jugador no encontrado');
+  const assignment = await repository.findPlayerTeam(id(playerId), id(teamId));
+  if (!assignment) throw new HttpError(404, 'El jugador no pertenece a este equipo');
+
+  const matchEvents = await repository.countMatchEvents(id(playerId));
+  if (matchEvents > 0) throw new HttpError(409, 'No se puede eliminar: el jugador ya registró goles, autogoles o tarjetas en un partido');
+
+  if (assignment.isGoalkeeper) {
+    const standings = await getStandings(id(tournamentId));
+    const teamStanding = standings.find((row) => row.team.id === id(teamId));
+    if (teamStanding && teamStanding.played > 0) {
+      throw new HttpError(409, 'No se puede eliminar: es el arquero del equipo y el equipo ya jugó partidos');
+    }
+  }
+
+  await repository.deletePlayer(id(playerId), id(teamId));
+  publish(id(tournamentId), { type: 'player.deleted' });
+}
 
 // Un jugador es "el arquero" de un equipo específico (vive en la relación
 // PlayerTeam, no en Player): un mismo jugador podría estar en más de un

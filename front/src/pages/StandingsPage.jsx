@@ -6,33 +6,29 @@ import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
 
-const columns = [
-  ['played', 'PJ'],
-  ['yellowCards', '🟨'],
-  ['redCards', '🟥'],
-  ['blueCards', '🟦'],
-  ['wins', 'PG'],
-  ['draws', 'PE'],
-  ['losses', 'PP'],
-  ['goalsFor', 'GF'],
-  ['goalsAgainst', 'GC'],
-  ['goalDifference', 'DG'],
-  ['points', 'PTS'],
-];
+// Mismo look que la tabla pública de "Tabla de posiciones" (torneos todos
+// contra todos): sin difuminar por pago vencido, el admin siempre ve los
+// datos reales.
+function TeamLogo({ team, size = 'h-9 w-9' }) {
+  if (!team?.logo) {
+    return (
+      <div
+        className={`flex ${size} shrink-0 items-center justify-center text-xs text-slate-400`}
+        aria-label={`Sin escudo para ${team?.name ?? 'equipo'}`}
+      >
+        ⚽
+      </div>
+    );
+  }
 
-const mobileColumns = [
-  ['points', 'PTS'],
-  ['played', 'PJ'],
-  ['yellowCards', '🟨'],
-  ['redCards', '🟥'],
-  ['blueCards', '🟦'],
-  ['wins', 'PG'],
-  ['draws', 'PE'],
-  ['losses', 'PP'],
-  ['goalsFor', 'GF'],
-  ['goalsAgainst', 'GC'],
-  ['goalDifference', 'DG'],
-];
+  return (
+    <img
+      className={`${size} shrink-0 object-contain`}
+      src={team.logo}
+      alt={`Escudo de ${team.name}`}
+    />
+  );
+}
 
 export default function StandingsPage() {
   const { notify } = useNotifications();
@@ -44,9 +40,6 @@ export default function StandingsPage() {
   );
   const [standings, setStandings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Fila cuyo tooltip está abierto en móvil.
-  const [expandedRow, setExpandedRow] = useState(null);
 
   const isTournamentLocked = Boolean(searchParams.get('tournamentId'));
 
@@ -104,17 +97,6 @@ export default function StandingsPage() {
   const tournamentName = selectedTournament?.name || 'Torneo';
   const teamCount = standings.length;
 
-  function handleRowClick(row) {
-    // Solo reaccionan al toque las dos primeras posiciones.
-    if (row.position !== 1 && row.position !== 2) {
-      return;
-    }
-
-    setExpandedRow((current) =>
-      current === row.team.id ? null : row.team.id
-    );
-  }
-
   return (
     <main
       className="
@@ -157,13 +139,13 @@ export default function StandingsPage() {
             hover:text-emerald-600 hover:dark:text-emerald-400
             sm:text-sm
           "
-          to="/dashboard"
+          to={selectedTournamentId ? `/dashboard/tournaments/${selectedTournamentId}` : '/dashboard/tournaments'}
         >
           <span className="text-base transition-transform duration-200 group-hover:-translate-x-1">
             ←
           </span>
 
-          Volver al dashboard
+          Volver al torneo
         </Link>
 
         {/* =====================================================
@@ -365,551 +347,148 @@ export default function StandingsPage() {
         {/* =====================================================
             TABLA
         ===================================================== */}
-        <div
-          className="
-            mt-5
-            overflow-hidden
-            rounded-xl
-            border
-            border-slate-200 dark:border-slate-800
-            bg-white dark:bg-slate-900
-            shadow-lg
-            shadow-black/10
-            sm:mt-6
-            sm:rounded-2xl
-          "
-        >
+        <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-black/5 dark:border-slate-800 dark:bg-slate-900 dark:shadow-black/10 sm:mt-6 sm:rounded-2xl">
           {isLoading ? (
-            <div
-              className="
-                flex
-                min-h-[220px]
-                flex-col
-                items-center
-                justify-center
-                p-8
-                text-center
-                sm:min-h-[280px]
-                sm:p-12
-              "
-            >
-              <div
-                className="
-                  h-7
-                  w-7
-                  animate-spin
-                  rounded-full
-                  border-2
-                  border-slate-300 dark:border-slate-700
-                  border-t-emerald-400
-                  sm:h-8
-                  sm:w-8
-                "
-              />
+            <div className="flex min-h-[220px] flex-col items-center justify-center p-8 text-center sm:min-h-[280px] sm:p-12">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-emerald-400 sm:h-8 sm:w-8" />
 
               <p className="mt-3 text-xs text-slate-500 sm:mt-4 sm:text-sm">
                 Calculando tabla...
               </p>
             </div>
           ) : standings.length === 0 ? (
-            <div
-              className="
-                flex
-                min-h-[220px]
-                flex-col
-                items-center
-                justify-center
-                p-8
-                text-center
-                sm:min-h-[280px]
-                sm:p-12
-              "
-            >
-              <div
-                className="
-                  mx-auto
-                  flex
-                  h-11
-                  w-11
-                  items-center
-                  justify-center
-                  rounded-xl
-                  bg-slate-100 dark:bg-slate-800
-                  text-lg
-                  sm:h-12
-                  sm:w-12
-                "
-              >
+            <div className="flex min-h-[220px] flex-col items-center justify-center p-8 text-center sm:min-h-[280px] sm:p-12">
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-lg sm:h-12 sm:w-12">
                 🏟️
               </div>
 
-              <p
-                className="
-                  mt-3
-                  text-xs
-                  font-medium
-                  text-slate-500 dark:text-slate-400
-                  sm:mt-4
-                  sm:text-sm
-                "
-              >
+              <p className="mt-3 text-xs font-medium text-slate-500 dark:text-slate-400 sm:mt-4 sm:text-sm">
                 No hay equipos asociados a este torneo.
               </p>
             </div>
           ) : (
-            <div className="scroll-invisible max-h-[31rem] overflow-auto">
-
+            <>
               {/* =================================================
-                  TABLA MÓVIL
-                  EQUIPO + PTS FIJOS
-                  RESTO CON SCROLL
+                  TABLA DESKTOP
               ================================================= */}
-              <div className="relative sm:hidden">
-                <table
-                  className="
-                    w-full
-                    min-w-[900px]
-                    text-left
-                    text-xs
-                  "
-                >
-                  <thead className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-                    <tr
-                      className="
-                        text-[9px]
-                        font-bold
-                        uppercase
-                        tracking-[0.14em]
-                        text-slate-500
-                      "
-                    >
-                      {/* EQUIPO FIJO */}
-                      <th
-                        className="
-                          sticky
-                          left-0
-                          z-30
-                          w-[170px]
-                          min-w-[170px]
-                          bg-white dark:bg-slate-950
-                          px-2
-                          py-3
-                          text-left
-                        "
-                      >
-                        Equipo
-                      </th>
-
-                      {/* PTS FIJO */}
-                      <th
-                        className="
-                          sticky
-                          left-[170px]
-                          z-30
-                          w-[56px]
-                          min-w-[56px]
-                          border-l
-                          border-slate-200 dark:border-slate-800
-                          bg-white dark:bg-slate-950
-                          px-2
-                          py-3
-                          text-center
-                          text-emerald-600 dark:text-emerald-400
-                        "
-                      >
-                        PTS
-                      </th>
-
-                      {/* RESTO */}
-                      {mobileColumns
-                        .filter(([key]) => key !== 'points')
-                        .map(([, label]) => (
-                          <th
-                            className="
-                              min-w-[56px]
-                              px-2
-                              py-3
-                              text-center
-                            "
-                            key={label}
-                          >
-                            {label}
-                          </th>
-                        ))}
-
-                      {/* POSICIÓN */}
-                      <th
-                        className="
-                          min-w-[56px]
-                          px-2
-                          py-3
-                          text-center
-                        "
-                      >
-                        Pos
-                      </th>
+              <div className="scroll-invisible hidden max-h-[31rem] w-full overflow-y-auto sm:block">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+                    <tr className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                      <th className="w-20 px-4 py-3.5 text-center">Pos</th>
+                      <th className="px-4 py-3.5 text-left">Equipo</th>
+                      <th className="px-2 py-3.5 text-center">PJ</th>
+                      <th className="px-2 py-3.5 text-center text-amber-400">🟨</th>
+                      <th className="px-2 py-3.5 text-center text-red-400">🟥</th>
+                      <th className="px-2 py-3.5 text-center text-blue-400">🟦</th>
+                      <th className="px-2 py-3.5 text-center">GF</th>
+                      <th className="px-2 py-3.5 text-center">GC</th>
+                      <th className="px-2 py-3.5 text-center">DG</th>
+                      <th className="px-3 py-3.5 text-center text-emerald-500">PTS</th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-slate-800/70">
-                    {standings.map((row, index) => {
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
+                    {standings.map((row) => {
                       const isLeader = row.position === 1;
                       const isSecond = row.position === 2;
-                      const isTopTwo = isLeader || isSecond;
-                      const isTopThree = row.position <= 3;
-                      const isExpanded = expandedRow === row.team.id;
+                      const isThird = row.position === 3;
 
                       return (
                         <tr
                           key={row.team.id}
-                          onClick={() => handleRowClick(row)}
-                          className={`
-                            group
-                            relative
-                            ${index === 0 ? 'sticky top-[42px] z-10 bg-white dark:bg-slate-900' : ''}
-                            transition-colors
-                            duration-150
-                            ${
-                              isTopTwo
-                                ? 'cursor-pointer'
-                                : ''
-                            }
-                            ${
-                              isLeader
-                                ? `
-                                  border-l-2
-                                  border-amber-400
-                                  bg-gradient-to-r
-                                  from-amber-400/[0.12]
-                                  via-amber-400/[0.045]
-                                  to-transparent
-                                  hover:from-amber-400/[0.17]
-                                `
-                                : isSecond
-                                  ? `
-                                    border-l-2
-                                    border-slate-300/40
-                                    bg-gradient-to-r
-                                    from-slate-300/[0.07]
-                                    via-slate-300/[0.025]
-                                    to-transparent
-                                    hover:from-slate-300/[0.11]
-                                  `
-                                  : 'hover:bg-slate-100 hover:dark:bg-slate-800/40'
-                            }
-                          `}
+                          className={`group transition-colors ${
+                            isLeader
+                              ? 'border-l-2 border-amber-400 bg-amber-400/[0.06]'
+                              : isSecond
+                                ? 'border-l-2 border-slate-400/40 bg-slate-900/[0.02] dark:bg-white/[0.015]'
+                                : 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
+                          }`}
                         >
-                          {/* =================================================
-                              EQUIPO FIJO
-                          ================================================= */}
-                          <td
-                            className={`
-                              sticky
-                              left-0
-                              z-40
-                              w-[170px]
-                              min-w-[170px]
-                              px-2
-                              py-3
-                              ${
-                                isLeader
-                                  ? 'bg-amber-50 dark:bg-[#17150f]'
-                                  : isSecond
-                                    ? 'bg-slate-100 dark:bg-[#12151a]'
-                                    : 'bg-white dark:bg-slate-900'
-                              }
-                            `}
-                          >
-                            <div className="flex items-center gap-2.5">
+                          <td className="px-4 py-3.5 text-center">
+                            {isLeader || isSecond || isThird ? (
+                              <span
+                                className={`mx-auto flex h-8 w-8 items-center justify-center rounded-lg text-[11px] font-black shadow-lg ${
+                                  isLeader
+                                    ? 'bg-amber-400 text-slate-950 shadow-amber-400/10'
+                                    : isSecond
+                                      ? 'bg-slate-300 text-slate-900'
+                                      : 'bg-orange-400 text-slate-950'
+                                }`}
+                              >
+                                {row.position}
+                              </span>
+                            ) : (
+                              <span className="text-sm font-bold text-slate-600">{row.position}</span>
+                            )}
+                          </td>
+
+                          <td className="relative px-4 py-3.5">
+                            <div className="flex min-w-0 items-center gap-3">
                               <div className="relative shrink-0">
-                                {row.team.logo ? (
-                                  <img
-                                    className="h-10 w-10 object-contain"
-                                    src={row.team.logo}
-                                    alt={`Logo de ${row.team.name}`}
-                                  />
-                                ) : (
-                                  <div
-                                    className="flex h-10 w-10 items-center justify-center text-[10px] font-semibold"
-                                    aria-hidden="true"
-                                  >
-                                    {row.team.name
-                                      ?.slice(0, 2)
-                                      .toUpperCase()}
-                                  </div>
-                                )}
+                                <TeamLogo team={row.team} size="h-11 w-11" />
 
-                                {/* =================================================
-                                    CORONA
-                                ================================================= */}
                                 {isLeader && (
-                                  <>
-                                    <span
-                                      className="
-                                        absolute
-                                        -right-2
-                                        -top-3
-                                        z-50
-                                        text-base
-                                        leading-none
-                                        drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]
-                                      "
-                                      title="Primer lugar"
-                                      aria-label="Primer lugar"
-                                    >
-                                      👑
-                                    </span>
-
-                                    {/* =================================================
-                                        TEXTO FLOTANTE MÓVIL
-                                    ================================================= */}
-                                    <div
-                                      className={`
-                                        pointer-events-none
-                                        absolute
-                                        bottom-full
-                                        left-0
-                                        z-[9999999]
-                                        mb-3
-                                        w-max
-                                        max-w-[190px]
-                                        translate-x-0
-                                        rounded-lg
-                                        border
-                                        border-amber-400/20
-                                        bg-slate-100 dark:bg-slate-800/95
-                                        px-2.5
-                                        py-1.5
-                                        text-[10px]
-                                        font-semibold
-                                        text-amber-100
-                                        shadow-xl
-                                        shadow-black/40
-                                        backdrop-blur-md
-                                        transition-all
-                                        duration-200
-                                        sm:hidden
-                                        ${
-                                          isExpanded
-                                            ? 'translate-y-0 opacity-100'
-                                            : 'translate-y-1 opacity-0'
-                                        }
-                                      `}
-                                    >
-                                      Hace frío aquí arriba ❄️
-
-                                      <span
-                                        className="
-                                          absolute
-                                          -bottom-1
-                                          left-5
-                                          h-2
-                                          w-2
-                                          rotate-45
-                                          border-r
-                                          border-b
-                                          border-amber-400/20
-                                          bg-slate-100 dark:bg-slate-800
-                                        "
-                                      />
-                                    </div>
-                                  </>
+                                  <span
+                                    className="absolute -right-2 -top-3 z-10 text-base leading-none drop-shadow-[0_0_7px_rgba(251,191,36,0.8)]"
+                                    aria-label="Primer lugar"
+                                  >
+                                    👑
+                                  </span>
                                 )}
 
-                                {/* =================================================
-                                    SEGUNDO PUESTO — TEXTO FLOTANTE MÓVIL
-                                ================================================= */}
                                 {isSecond && (
-                                  <div
-                                    className={`
-                                      pointer-events-none
-                                      absolute
-                                      bottom-full
-                                      left-0
-                                      z-[9999999]
-                                      mb-3
-                                      w-max
-                                      max-w-[180px]
-                                      translate-x-0
-                                      rounded-lg
-                                      border
-                                      border-slate-300/15
-                                      bg-slate-100 dark:bg-slate-800/95
-                                      px-2.5
-                                      py-1.5
-                                      text-[10px]
-                                      font-semibold
-                                      text-slate-700 dark:text-slate-200
-                                      shadow-xl
-                                      shadow-black/40
-                                      backdrop-blur-md
-                                      transition-all
-                                      duration-200
-                                      sm:hidden
-                                      ${
-                                        isExpanded
-                                          ? 'translate-y-0 opacity-100'
-                                          : 'translate-y-1 opacity-0'
-                                      }
-                                    `}
-                                  >
-                                    Segundo lugar
-
-                                    <span
-                                      className="
-                                        absolute
-                                        -bottom-1
-                                        left-5
-                                        h-2
-                                        w-2
-                                        rotate-45
-                                        border-r
-                                        border-b
-                                        border-slate-300/15
-                                        bg-slate-100 dark:bg-slate-800
-                                      "
-                                    />
-                                  </div>
+                                  <span className="absolute -right-2 -top-3 z-10 text-sm leading-none" aria-label="Segundo lugar">
+                                    🥈
+                                  </span>
                                 )}
                               </div>
 
-                              {/* NOMBRE DEL EQUIPO */}
                               <span
-                                className={`
-                                  min-w-0
-                                  truncate
-                                  text-xs
-                                  font-semibold
-                                  ${
-                                    isLeader
-                                      ? 'text-amber-800 dark:text-amber-100'
-                                      : isSecond
-                                        ? 'text-slate-700 dark:text-slate-200'
-                                        : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 group-hover:dark:text-white'
-                                  }
-                                `}
-                                title={row.team.name}
+                                className={`min-w-0 truncate font-semibold ${
+                                  isLeader
+                                    ? 'text-amber-600 dark:text-amber-100'
+                                    : isSecond
+                                      ? 'text-slate-700 dark:text-slate-200'
+                                      : 'text-slate-700 dark:text-slate-300'
+                                }`}
                               >
                                 {row.team.name}
                               </span>
                             </div>
                           </td>
 
-                          {/* =================================================
-                              PTS FIJO
-                          ================================================= */}
+                          <td className="px-2 py-3.5 text-center text-slate-500 dark:text-slate-500">{row.played}</td>
+                          <td className="px-2 py-3.5 text-center text-amber-600 dark:text-amber-300">{row.yellowCards}</td>
+                          <td className="px-2 py-3.5 text-center text-red-600 dark:text-red-300">{row.redCards}</td>
+                          <td className="px-2 py-3.5 text-center text-blue-600 dark:text-blue-300">{row.blueCards}</td>
+                          <td className="px-2 py-3.5 text-center text-slate-500 dark:text-slate-500">{row.goalsFor}</td>
+                          <td className="px-2 py-3.5 text-center text-slate-500 dark:text-slate-500">{row.goalsAgainst}</td>
+
                           <td
-                            className={`
-                              sticky
-                              left-[170px]
-                              z-30
-                              w-[56px]
-                              min-w-[56px]
-                              border-l
-                              border-slate-200 dark:border-slate-800
-                              px-2
-                              py-3
-                              text-center
-                              ${
-                                isLeader
-                                  ? 'bg-amber-50 dark:bg-[#17150f]'
-                                  : isSecond
-                                    ? 'bg-slate-100 dark:bg-[#12151a]'
-                                    : 'bg-white dark:bg-slate-900'
-                              }
-                              ${
-                                isLeader
-                                  ? 'font-black text-amber-700 dark:text-amber-300'
-                                  : 'font-bold text-emerald-700 dark:text-emerald-300'
-                              }
-                            `}
+                            className={`px-2 py-3.5 text-center font-semibold ${
+                              row.goalDifference > 0
+                                ? isLeader
+                                  ? 'text-amber-600 dark:text-amber-300'
+                                  : 'text-emerald-600 dark:text-emerald-400'
+                                : row.goalDifference < 0
+                                  ? 'text-rose-600 dark:text-rose-400'
+                                  : 'text-slate-500 dark:text-slate-500'
+                            }`}
                           >
-                            {row.points}
+                            {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
                           </td>
 
-                          {/* =================================================
-                              RESTO DE ESTADÍSTICAS
-                          ================================================= */}
-                          {mobileColumns
-                            .filter(([key]) => key !== 'points')
-                            .map(([key]) => {
-                              const isGoalDifference =
-                                key === 'goalDifference';
-
-                              let valueClass =
-                                'text-slate-500 dark:text-slate-400';
-
-                              if (
-                                isGoalDifference &&
-                                row[key] > 0
-                              ) {
-                                valueClass = isLeader
-                                  ? 'font-semibold text-amber-700 dark:text-amber-300'
-                                  : 'font-semibold text-emerald-600 dark:text-emerald-400';
-                              } else if (
-                                isGoalDifference &&
-                                row[key] < 0
-                              ) {
-                                valueClass =
-                                  'font-semibold text-rose-600 dark:text-rose-400';
-                              }
-
-                              return (
-                                <td
-                                  className={`
-                                    min-w-[56px]
-                                    whitespace-nowrap
-                                    px-2
-                                    py-3
-                                    text-center
-                                    ${valueClass}
-                                  `}
-                                  key={key}
-                                >
-                                  {isGoalDifference &&
-                                  row[key] > 0
-                                    ? `+${row[key]}`
-                                    : row[key]}
-                                </td>
-                              );
-                            })}
-
-                          {/* =================================================
-                              POSICIÓN
-                          ================================================= */}
-                          <td className="min-w-[56px] px-2 py-3 text-center">
-                            {isTopThree ? (
-                              <span
-                                className={`
-                                  mx-auto
-                                  flex
-                                  h-7
-                                  w-7
-                                  items-center
-                                  justify-center
-                                  rounded-lg
-                                  text-[11px]
-                                  font-bold
-                                  ${
-                                    row.position === 1
-                                      ? `
-                                        bg-amber-400
-                                        text-slate-950 dark:text-slate-950
-                                        shadow-[0_0_16px_rgba(251,191,36,0.35)]
-                                      `
-                                      : row.position === 2
-                                        ? 'bg-slate-300 text-slate-900'
-                                        : 'bg-orange-400 text-slate-950 dark:text-slate-950'
-                                  }
-                                `}
-                              >
-                                {row.position}
-                              </span>
-                            ) : (
-                              <span className="text-xs font-semibold text-slate-500">
-                                {row.position}
-                              </span>
-                            )}
+                          <td
+                            className={`px-3 py-3.5 text-center text-sm font-black ${
+                              isLeader
+                                ? 'text-amber-600 dark:text-amber-300'
+                                : isSecond
+                                  ? 'text-slate-800 dark:text-slate-100'
+                                  : 'text-emerald-600 dark:text-emerald-300'
+                            }`}
+                          >
+                            {row.points}
                           </td>
                         </tr>
                       );
@@ -919,412 +498,144 @@ export default function StandingsPage() {
               </div>
 
               {/* =================================================
-                  TABLA DESKTOP
+                  TABLA MÓVIL
               ================================================= */}
-              <table
-                className="
-                  hidden
-                  w-full
-                  min-w-[820px]
-                  text-left
-                  text-sm
-                  sm:table
-                "
-              >
-                <thead className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950">
-                  <tr
-                    className="
-                      text-[10px]
-                      font-bold
-                      uppercase
-                      tracking-[0.16em]
-                      text-slate-500
-                    "
-                  >
-                    <th
-                      className="
-                        w-20
-                        px-4
-                        py-4
-                        text-center
-                      "
-                    >
-                      Pos
-                    </th>
+              <div className="scroll-invisible max-h-[25rem] w-full overflow-y-auto sm:hidden">
+                <table className="w-full table-fixed text-xs">
+                  <thead className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+                    <tr className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-600">
+                      <th className="w-[38px] px-0.5 py-2.5 text-center">Pos</th>
+                      <th className="px-1 py-2.5 text-left">Equipo</th>
+                      <th className="w-[38px] px-0.5 py-2.5 text-center">PJ</th>
+                      <th className="w-[44px] px-0.5 py-2.5 text-center">DG</th>
+                      <th className="w-[44px] px-0.5 py-2.5 text-center text-emerald-500">PTS</th>
+                    </tr>
+                  </thead>
 
-                    <th
-                      className="
-                        w-auto
-                        min-w-0
-                        px-4
-                        py-4
-                        text-left
-                      "
-                    >
-                      Equipo
-                    </th>
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/[0.035]">
+                    {standings.map((row) => {
+                      const isLeader = row.position === 1;
+                      const isSecond = row.position === 2;
+                      const isThird = row.position === 3;
 
-                    {columns.map(([, label]) => (
-                      <th
-                        className="
-                          min-w-[56px]
-                          px-3
-                          py-4
-                          text-center
-                        "
-                        key={label}
-                      >
-                        {label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody className="divide-y divide-slate-800/70">
-                  {standings.map((row, index) => {
-                    const isLeader = row.position === 1;
-                    const isSecond = row.position === 2;
-                    const isTopTwo = isLeader || isSecond;
-                    const isTopThree = row.position <= 3;
-
-                    return (
-                      <tr
-                        key={row.team.id}
-                        onClick={() => handleRowClick(row)}
-                        className={`
-                          group
-                          relative
-                          ${index === 0 ? 'sticky top-[54px] z-10 bg-white dark:bg-slate-900' : ''}
-                          transition-colors
-                          duration-150
-                          ${
-                            isTopTwo
-                              ? 'cursor-pointer'
-                              : ''
-                          }
-                          ${
+                      return (
+                        <tr
+                          key={row.team.id}
+                          className={`group outline-none transition-colors ${
                             isLeader
-                              ? `
-                                border-l-2
-                                border-amber-400
-                                bg-gradient-to-r
-                                from-amber-400/[0.12]
-                                via-amber-400/[0.045]
-                                to-transparent
-                                hover:from-amber-400/[0.17]
-                              `
+                              ? 'border-l-2 border-amber-400 bg-amber-400/[0.045]'
                               : isSecond
-                                ? `
-                                  border-l-2
-                                  border-slate-300/40
-                                  bg-gradient-to-r
-                                  from-slate-300/[0.07]
-                                  via-slate-300/[0.025]
-                                  to-transparent
-                                  hover:from-slate-300/[0.11]
-                                `
-                                : 'hover:bg-slate-100 hover:dark:bg-slate-800/40'
-                          }
-                        `}
-                      >
-                        {/* POSICIÓN */}
-                        <td
-                          className={`
-                            px-4
-                            py-3.5
-                            text-center
-                            ${
-                              isLeader
-                                ? 'bg-amber-50 dark:bg-[#17150f]'
-                                : isSecond
-                                  ? 'bg-slate-100 dark:bg-[#12151a]'
-                                  : 'bg-white dark:bg-slate-900'
-                            }
-                            sm:bg-transparent
-                          `}
+                                ? 'border-l-2 border-slate-400/40 bg-slate-900/[0.02] dark:bg-white/[0.015]'
+                                : ''
+                          }`}
                         >
-                          {isTopThree ? (
-                            <span
-                              className={`
-                                mx-auto
-                                flex
-                                h-8
-                                w-8
-                                items-center
-                                justify-center
-                                rounded-lg
-                                text-xs
-                                font-bold
-                                ${
-                                  row.position === 1
-                                    ? `
-                                      bg-amber-400
-                                      text-slate-950 dark:text-slate-950
-                                      shadow-[0_0_16px_rgba(251,191,36,0.35)]
-                                    `
-                                    : row.position === 2
+                          <td className="px-0.5 py-3 text-center">
+                            {isLeader || isSecond || isThird ? (
+                              <span
+                                className={`mx-auto flex h-6 w-6 items-center justify-center rounded-md text-[9px] font-black ${
+                                  isLeader
+                                    ? 'bg-amber-400 text-slate-950'
+                                    : isSecond
                                       ? 'bg-slate-300 text-slate-900'
-                                      : 'bg-orange-400 text-slate-950 dark:text-slate-950'
-                                }
-                              `}
-                            >
-                              {row.position}
-                            </span>
-                          ) : (
-                            <span className="text-sm font-semibold text-slate-500">
-                              {row.position}
-                            </span>
-                          )}
-                        </td>
+                                      : 'bg-orange-400 text-slate-950'
+                                }`}
+                              >
+                                {row.position}
+                              </span>
+                            ) : (
+                              <span className="text-[11px] font-bold text-slate-600">{row.position}</span>
+                            )}
+                          </td>
 
-                        {/* EQUIPO */}
-                        <td
-                          className={`
-                            px-4
-                            py-3.5
-                            ${
-                              isLeader
-                                ? 'bg-amber-50 dark:bg-[#17150f]'
-                                : isSecond
-                                  ? 'bg-slate-100 dark:bg-[#12151a]'
-                                  : 'bg-white dark:bg-slate-900'
-                            }
-                            sm:bg-transparent
-                          `}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="relative shrink-0">
-                              {row.team.logo ? (
-                                <img
-                                  className="h-11 w-11 object-contain"
-                                  src={row.team.logo}
-                                  alt={`Logo de ${row.team.name}`}
-                                />
-                              ) : (
-                                <div
-                                  className="flex h-11 w-11 items-center justify-center text-xs font-semibold"
-                                  aria-hidden="true"
-                                >
-                                  {row.team.name
-                                    ?.slice(0, 2)
-                                    .toUpperCase()}
-                                </div>
-                              )}
+                          <td className="relative min-w-0 px-1 py-3">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <div className="relative shrink-0">
+                                <TeamLogo team={row.team} size="h-9 w-9" />
 
-                              {isLeader && (
-                                <>
-                                  <span
-                                    className="
-                                      absolute
-                                      -right-2
-                                      -top-3
-                                      z-30
-                                      text-base
-                                      leading-none
-                                      drop-shadow-[0_0_6px_rgba(251,191,36,0.75)]
-                                    "
-                                    title="Primer lugar"
-                                    aria-label="Primer lugar"
-                                  >
+                                {isLeader && (
+                                  <span className="absolute -right-2 -top-3 z-10 text-xs leading-none" aria-label="Primer lugar">
                                     👑
                                   </span>
+                                )}
 
-                                  {/* TOOLTIP DESKTOP */}
-                                  <div
-                                    className="
-                                      pointer-events-none
-                                      absolute
-                                      bottom-full
-                                      left-1/2
-                                      z-[9999999]
-                                      mb-3
-                                      hidden
-                                      w-max
-                                      max-w-[220px]
-                                      -translate-x-1/2
-                                      translate-y-1
-                                      rounded-xl
-                                      border
-                                      border-amber-400/20
-                                      bg-slate-100 dark:bg-slate-800
-                                      px-3
-                                      py-2
-                                      text-xs
-                                      font-semibold
-                                      text-amber-100
-                                      opacity-0
-                                      shadow-xl
-                                      shadow-black/30
-                                      transition-all
-                                      duration-200
-                                      group-hover:translate-y-0
-                                      group-hover:opacity-100
-                                      sm:block
-                                    "
-                                  >
-                                    Hace frío aquí arriba ❄️
+                                {isSecond && (
+                                  <span className="absolute -right-2 -top-3 z-10 text-xs leading-none" aria-label="Segundo lugar">
+                                    🥈
+                                  </span>
+                                )}
+                              </div>
 
-                                    <span
-                                      className="
-                                        absolute
-                                        -bottom-1
-                                        left-1/2
-                                        h-2
-                                        w-2
-                                        -translate-x-1/2
-                                        rotate-45
-                                        border-r
-                                        border-b
-                                        border-amber-400/20
-                                        bg-slate-100 dark:bg-slate-800
-                                      "
-                                    />
-                                  </div>
-                                </>
-                              )}
-                            </div>
-
-                            <span
-                              className={`
-                                max-w-[300px]
-                                truncate
-                                text-sm
-                                font-semibold
-                                ${
+                              <span
+                                className={`min-w-0 truncate text-[11px] font-semibold ${
                                   isLeader
-                                    ? 'text-amber-800 dark:text-amber-100'
+                                    ? 'text-amber-600 dark:text-amber-100'
                                     : isSecond
                                       ? 'text-slate-700 dark:text-slate-200'
-                                      : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 group-hover:dark:text-white'
-                                }
-                              `}
-                              title={row.team.name}
-                            >
-                              {row.team.name}
-                            </span>
-                          </div>
-                        </td>
+                                      : 'text-slate-700 dark:text-slate-300'
+                                }`}
+                              >
+                                {row.team.name}
+                              </span>
+                            </div>
+                          </td>
 
-                        {/* ESTADÍSTICAS */}
-                        {columns.map(([key]) => {
-                          const isPoints = key === 'points';
-                          const isGoalDifference =
-                            key === 'goalDifference';
+                          <td className="px-0.5 py-3 text-center text-[10px] font-medium text-slate-500 dark:text-slate-500">{row.played}</td>
 
-                          let valueClass = 'text-slate-500 dark:text-slate-400';
+                          <td
+                            className={`px-0.5 py-3 text-center text-[10px] font-semibold ${
+                              row.goalDifference > 0
+                                ? isLeader
+                                  ? 'text-amber-600 dark:text-amber-300'
+                                  : 'text-emerald-600 dark:text-emerald-400'
+                                : row.goalDifference < 0
+                                  ? 'text-rose-600 dark:text-rose-400'
+                                  : 'text-slate-500 dark:text-slate-500'
+                            }`}
+                          >
+                            {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
+                          </td>
 
-                          if (isPoints) {
-                            valueClass = isLeader
-                              ? 'font-black text-amber-700 dark:text-amber-300'
-                              : 'font-bold text-emerald-700 dark:text-emerald-300';
-                          } else if (
-                            isGoalDifference &&
-                            row[key] > 0
-                          ) {
-                            valueClass = isLeader
-                              ? 'font-semibold text-amber-700 dark:text-amber-300'
-                              : 'font-semibold text-emerald-600 dark:text-emerald-400';
-                          } else if (
-                            isGoalDifference &&
-                            row[key] < 0
-                          ) {
-                            valueClass =
-                              'font-semibold text-rose-600 dark:text-rose-400';
-                          }
+                          <td
+                            className={`px-0.5 py-3 text-center text-xs font-black ${
+                              isLeader
+                                ? 'text-amber-600 dark:text-amber-300'
+                                : isSecond
+                                  ? 'text-slate-800 dark:text-slate-100'
+                                  : 'text-emerald-600 dark:text-emerald-300'
+                            }`}
+                          >
+                            {row.points}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-                          return (
-                            <td
-                              className={`
-                                min-w-[56px]
-                                whitespace-nowrap
-                                px-3
-                                py-3.5
-                                text-center
-                                ${valueClass}
-                              `}
-                              key={key}
-                            >
-                              {isGoalDifference && row[key] > 0
-                                ? `+${row[key]}`
-                                : row[key]}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+              {/* =================================================
+                  LEYENDA
+              ================================================= */}
+              <div className="flex flex-wrap gap-x-3 gap-y-1 border-t border-slate-200 bg-slate-50 px-3 py-2.5 text-[9px] text-slate-600 dark:border-slate-800 dark:bg-slate-950/30 sm:px-5 sm:py-3 sm:text-[10px]">
+                <span>
+                  <strong className="text-slate-500">PJ</strong> Partidos
+                </span>
+
+                <span>
+                  <strong className="text-slate-500">GF/GC</strong> Goles
+                </span>
+
+                <span>
+                  <strong className="text-slate-500">DG</strong> Diferencia
+                </span>
+
+                <span>
+                  <strong className="text-emerald-500">PTS</strong> Puntos
+                </span>
+              </div>
+            </>
           )}
         </div>
-
-        {/* =====================================================
-            AYUDA MÓVIL
-        ===================================================== */}
-        {!isLoading && standings.length > 0 && (
-          <p className="mt-2 px-1 text-[9px] text-slate-700 sm:hidden">
-            Desliza hacia la derecha para ver las estadísticas.
-            Toca el 1.º o 2.º puesto para ver el mensaje.
-          </p>
-        )}
-
-        {/* =====================================================
-            LEYENDA
-        ===================================================== */}
-        {!isLoading && standings.length > 0 && (
-          <div
-            className="
-              mt-3
-              flex
-              flex-wrap
-              gap-x-4
-              gap-y-1.5
-              px-1
-              text-[10px]
-              text-slate-600
-              sm:mt-4
-              sm:gap-x-5
-              sm:gap-y-2
-              sm:text-[11px]
-            "
-          >
-            <span>
-              <strong className="text-slate-500">PJ</strong>{' '}
-              Partidos
-            </span>
-
-            <span>
-              <strong className="text-slate-500">PG</strong>{' '}
-              Ganados
-            </span>
-
-            <span>
-              <strong className="text-slate-500">PE</strong>{' '}
-              Empatados
-            </span>
-
-            <span>
-              <strong className="text-slate-500">PP</strong>{' '}
-              Perdidos
-            </span>
-
-            <span>
-              <strong className="text-slate-500">GF/GC</strong>{' '}
-              Goles
-            </span>
-
-            <span>
-              <strong className="text-slate-500">DG</strong>{' '}
-              Diferencia
-            </span>
-
-            <span>
-              <strong className="text-emerald-600 dark:text-emerald-400">PTS</strong>{' '}
-              Puntos
-            </span>
-          </div>
-        )}
       </section>
     </main>
   );

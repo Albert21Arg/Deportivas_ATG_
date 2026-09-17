@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNotifications } from "../context/NotificationContext.jsx";
 import ConfirmActionModal from "../components/ConfirmActionModal.jsx";
+import GenerateFixtureModal from "../components/GenerateFixtureModal.jsx";
 import DashboardNavbar from "../components/DashboardNavbar.jsx";
 import FutbolIcon from "../components/FutbolIcon.jsx";
 import api from "../services/api.js";
@@ -2066,6 +2067,8 @@ export default function MatchesPage() {
       cancelled: false,
     });
 
+  const [matchSearch, setMatchSearch] = useState("");
+
   /* ==============================================================
      LIVE UPDATES
   ============================================================== */
@@ -2320,13 +2323,13 @@ export default function MatchesPage() {
      GENERATE FIXTURE
   ============================================================== */
 
-  async function generateFixtures() {
+  async function generateFixtures({ startDate, time, intervalDays }) {
     setIsGeneratingFixtures(true);
 
     try {
       await api.post(
         `/tournaments/${selectedTournamentId}/matches/generate-fixtures`,
-        {},
+        { startDate, time, intervalDays },
       );
 
       const { data } = await api.get(
@@ -2893,9 +2896,30 @@ export default function MatchesPage() {
      GROUPS
   ============================================================== */
 
+  // Independiente de la búsqueda: el resumen de arriba (Total/En vivo/
+  // Finalizados) siempre refleja el torneo completo, no el filtro.
+  const allFinishedCount = useMemo(
+    () => matches.filter((match) => match.status === "FINISHED").length,
+    [matches],
+  );
+
+  const filteredMatches = useMemo(() => {
+    const query = matchSearch.trim().toLowerCase();
+
+    if (!query) {
+      return matches;
+    }
+
+    return matches.filter(
+      (match) =>
+        match.homeTeam.name.toLowerCase().includes(query) ||
+        match.awayTeam.name.toLowerCase().includes(query),
+    );
+  }, [matches, matchSearch]);
+
   const pendingMatches = useMemo(
     () =>
-      matches
+      filteredMatches
         .filter((match) =>
           ["SCHEDULED", "STARTED"].includes(
             match.status,
@@ -2906,12 +2930,12 @@ export default function MatchesPage() {
             getMatchTimestamp(a) -
             getMatchTimestamp(b),
         ),
-    [matches],
+    [filteredMatches],
   );
 
   const postponedMatches = useMemo(
     () =>
-      matches
+      filteredMatches
         .filter(
           (match) =>
             match.status === "POSTPONED",
@@ -2921,12 +2945,12 @@ export default function MatchesPage() {
             getMatchTimestamp(a) -
             getMatchTimestamp(b),
         ),
-    [matches],
+    [filteredMatches],
   );
 
   const finishedMatches = useMemo(
     () =>
-      matches
+      filteredMatches
         .filter(
           (match) =>
             match.status === "FINISHED",
@@ -2936,12 +2960,12 @@ export default function MatchesPage() {
             getMatchTimestamp(b) -
             getMatchTimestamp(a),
         ),
-    [matches],
+    [filteredMatches],
   );
 
   const cancelledMatches = useMemo(
     () =>
-      matches
+      filteredMatches
         .filter(
           (match) =>
             match.status === "CANCELLED",
@@ -2951,7 +2975,7 @@ export default function MatchesPage() {
             getMatchTimestamp(a) -
             getMatchTimestamp(b),
         ),
-    [matches],
+    [filteredMatches],
   );
 
   const liveMatches = useMemo(
@@ -2990,6 +3014,18 @@ export default function MatchesPage() {
       <DashboardNavbar />
 
       <section className="relative mx-auto max-w-[1500px] px-3 pb-12 pt-24 sm:px-5 sm:pb-16 sm:pt-28 lg:px-8">
+        {/* BACK */}
+        <Link
+          className="group mb-4 inline-flex min-h-10 items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-emerald-600 hover:dark:text-emerald-400"
+          to={selectedTournamentId ? `/dashboard/tournaments/${selectedTournamentId}` : "/dashboard/tournaments"}
+        >
+          <span className="text-base transition-transform duration-200 group-hover:-translate-x-1">
+            ←
+          </span>
+
+          Volver al torneo
+        </Link>
+
         {/* ======================================================
             HERO
         ====================================================== */}
@@ -3035,7 +3071,7 @@ export default function MatchesPage() {
                     <StatCard
                       label="Finalizados"
                       value={
-                        finishedMatches.length
+                        allFinishedCount
                       }
                       icon="✓"
                       tone="text-slate-900 dark:text-cyan-300"
@@ -3361,6 +3397,26 @@ export default function MatchesPage() {
             )}
           </div>
 
+          {/* SEARCH */}
+          {!isLoading && selectedTournamentId && matches.length > 0 && (
+            <div className="sticky top-[64px] z-30 -mx-4 mb-4 bg-slate-50/95 px-4 py-2.5 backdrop-blur dark:bg-[#070b12]/95 sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none sm:dark:bg-transparent">
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                  🔎
+                </span>
+
+                <input
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                  type="search"
+                  value={matchSearch}
+                  onChange={(event) => setMatchSearch(event.target.value)}
+                  placeholder="Buscar partido por equipo..."
+                  aria-label="Buscar partido por equipo"
+                />
+              </div>
+            </div>
+          )}
+
           {/* LOADING */}
 
           {isLoading ? (
@@ -3398,6 +3454,20 @@ export default function MatchesPage() {
               <p className="mt-1 text-xs text-slate-600">
                 Todavía no hay partidos programados para este torneo.
               </p>
+            </div>
+          ) : filteredMatches.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 dark:border-white/[0.07] bg-white dark:bg-[#0a1018]/70 p-10 text-center">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Ningún partido coincide con tu búsqueda.
+              </p>
+
+              <button
+                className="mt-2 text-xs font-bold text-emerald-600 hover:underline dark:text-emerald-400"
+                type="button"
+                onClick={() => setMatchSearch("")}
+              >
+                Quitar búsqueda
+              </button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -3921,11 +3991,8 @@ export default function MatchesPage() {
         />
       )}
 
-      <ConfirmActionModal
+      <GenerateFixtureModal
         isOpen={isConfirmingGenerateFixtures}
-        title="¿Generar el fixture?"
-        message="Se programarán automáticamente todos los partidos de todos contra todos para este torneo."
-        confirmLabel="Sí, generar"
         isLoading={isGeneratingFixtures}
         onCancel={() =>
           setIsConfirmingGenerateFixtures(false)

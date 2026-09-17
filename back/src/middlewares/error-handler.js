@@ -10,5 +10,6 @@ export function errorHandler(error, _request, response, _next) {
     success: false,
     message,
     ...(error.code && statusCode < 500 ? { code: error.code } : {}),
+    ...(error.data && statusCode < 500 ? { data: error.data } : {}),
   });
 }

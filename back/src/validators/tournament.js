@@ -38,6 +38,18 @@ function readTournamentPayload(body, { partial = false } = {}) {
     payload.expiresAt = validateExpiryDate(body.expiresAt, 'expiresAt');
   }
 
+  if (body.pricePerTeam !== undefined) {
+    if (body.pricePerTeam === null || body.pricePerTeam === '') {
+      payload.pricePerTeam = null;
+    } else {
+      const parsed = Number(body.pricePerTeam);
+      if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1_000_000_000) {
+        throw new HttpError(422, 'pricePerTeam debe ser un número mayor o igual a 0');
+      }
+      payload.pricePerTeam = Math.round(parsed);
+    }
+  }
+
   if (body.championLabel !== undefined) {
     if (body.championLabel !== null && body.championLabel !== '' && (typeof body.championLabel !== 'string' || body.championLabel.trim().length > 60)) {
       throw new HttpError(422, 'El texto del campeón debe tener como máximo 60 caracteres');
