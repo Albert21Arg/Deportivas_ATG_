@@ -16,6 +16,7 @@ const emptyForm = {
   paidUntil: '',
   status: 'ACTIVE',
   photo: null,
+  fixedOvr: '',
 };
 
 const mediaUrl = (path) =>
@@ -151,6 +152,7 @@ export default function PlayersPage() {
       paidUntil: toDateInputValue(player.paidUntil),
       status: player.status,
       photo: null,
+      fixedOvr: player.fixedOvr ?? '',
     });
 
     setShowForm(true);
@@ -176,7 +178,7 @@ export default function PlayersPage() {
 
     const payload = new FormData();
 
-    ['name', 'birthDate', 'documentNumber', 'jerseyNumber', 'paidUntil', 'status'].forEach(
+    ['name', 'birthDate', 'documentNumber', 'jerseyNumber', 'paidUntil', 'status', 'fixedOvr'].forEach(
       (key) => payload.append(key, form[key])
     );
 
@@ -626,6 +628,24 @@ export default function PlayersPage() {
                         value={form.paidUntil}
                         onChange={updateField}
                         className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      />
+                    </label>
+                  )}
+
+                  {/* OVR fijo (opcional: pisa el cálculo automático de la tarjeta) */}
+                  {isSuperAdmin && (
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      OVR fijo (opcional)
+
+                      <input
+                        name="fixedOvr"
+                        type="number"
+                        min={60}
+                        max={99}
+                        value={form.fixedOvr}
+                        onChange={updateField}
+                        placeholder="Automático"
+                        className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition placeholder:text-slate-600 hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
                       />
                     </label>
                   )}

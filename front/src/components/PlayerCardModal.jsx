@@ -461,6 +461,7 @@ export default function PlayerCardModal({
     matchesPlayed,
     goalsConceded,
     position,
+    goalkeeperPosition,
   } = row;
 
   /*
@@ -496,7 +497,9 @@ export default function PlayerCardModal({
   |--------------------------------------------------------------------------
   */
 
-  const overall = isGoalkeeper
+  // El superadmin puede fijar un OVR manual por jugador (fixedOvr): si está
+  // presente, pisa el cálculo automático de la tarjeta.
+  const overall = player.fixedOvr ?? (isGoalkeeper
     ? calculateGoalkeeperOverall({
         matchesPlayed,
         goalsConceded,
@@ -508,10 +511,15 @@ export default function PlayerCardModal({
         redCards,
         matchesPlayed,
         position,
-      });
+      }));
 
-  const isLeader =
-    position === 1;
+  // Un arquero abierto desde la tabla de goleadores/tarjetas trae su propio
+  // `position` dentro de ESE ranking (no el de valla), así que la carta
+  // dorada usa `goalkeeperPosition` cuando está presente; si viene de la
+  // tabla de valla menos vencida, esa tabla ya manda su posición en `position`.
+  const isLeader = isGoalkeeper
+    ? (goalkeeperPosition ?? position) === 1
+    : position === 1;
 
   /*
   |--------------------------------------------------------------------------
@@ -519,12 +527,23 @@ export default function PlayerCardModal({
   |--------------------------------------------------------------------------
   */
 
+  // Tier de la tarjeta según el OVR (fijo o calculado): 1-57 madera,
+  // 58-65 gris con madera, 66-77 plata, 78-90 dorada plata, 91-99 fuego
+  // azul cyan dorada. El #1 de goleadores o de valla menos vencida siempre
+  // cae en el tier "dorada plata", sin importar su OVR (incluso si su OVR
+  // califica para el tier de fuego azul cyan dorada).
   const cardType =
     isLeader
-      ? 'gold'
-      : player?.special
-        ? 'blue'
-        : 'silver';
+      ? 'goldSilver'
+      : overall >= 91
+        ? 'cyanGoldFire'
+        : overall >= 78
+          ? 'goldSilver'
+          : overall >= 66
+            ? 'silver'
+            : overall >= 58
+              ? 'greyWood'
+              : 'wood';
 
   /*
   |--------------------------------------------------------------------------
@@ -595,56 +614,134 @@ export default function PlayerCardModal({
   */
 
   const CARD_THEMES = {
-    silver: {
+    wood: {
       outer:
-        'from-[#ffffff] via-[#b7c0ca] to-[#26313d]',
+        'from-[#f0c48a] via-[#c2793a] to-[#3d2008]',
 
       inner:
-        'from-[#edf1f5] via-[#b9c2cc] to-[#596572]',
+        'from-[#ffdba3] via-[#b6672a] to-[#4a2810]',
 
       accent:
-        'bg-white/10',
+        'bg-amber-200/14',
 
       text:
-        'text-[#101722]',
+        'text-[#2b1a08]',
 
       line:
-        'bg-[#111827]/20',
+        'bg-[#2b1a08]/25',
 
       glowColor:
-        'rgba(203,213,225,.30)',
+        'rgba(194,121,58,.45)',
 
       shine:
-        'via-white/50',
+        'via-amber-200/60',
 
       border:
-        'border-white/30',
+        'border-amber-200/32',
     },
 
-    gold: {
+    greyWood: {
       outer:
-        'from-[#fffbd0] via-[#e4b83e] to-[#704500]',
+        'from-[#f0dcae] via-[#8a7a5c] to-[#22242a]',
 
       inner:
-        'from-[#fff4a8] via-[#d9aa2e] to-[#855400]',
+        'from-[#ffedc4] via-[#9c8a68] to-[#2e3038]',
 
       accent:
-        'bg-yellow-100/10',
+        'bg-stone-200/16',
 
       text:
-        'text-[#271800]',
+        'text-[#201e1a]',
 
       line:
-        'bg-[#3d2805]/25',
+        'bg-[#201e1a]/25',
 
       glowColor:
-        'rgba(255,190,40,.45)',
+        'rgba(154,132,92,.48)',
 
       shine:
-        'via-white/70',
+        'via-orange-100/55',
 
       border:
-        'border-yellow-100/30',
+        'border-stone-200/34',
+    },
+
+    silver: {
+      outer:
+        'from-[#ffffff] via-[#9fc3dd] to-[#101c29]',
+
+      inner:
+        'from-[#f0f8ff] via-[#a8c6dd] to-[#1c2c3d]',
+
+      accent:
+        'bg-sky-100/16',
+
+      text:
+        'text-[#0b1520]',
+
+      line:
+        'bg-[#0b1520]/22',
+
+      glowColor:
+        'rgba(147,197,253,.55)',
+
+      shine:
+        'via-sky-100/75',
+
+      border:
+        'border-sky-100/42',
+    },
+
+    goldSilver: {
+      outer:
+        'from-[#fff0a0] via-[#eab63f] to-[#3d4656]',
+
+      inner:
+        'from-[#ffe985] via-[#d9a637] to-[#495363]',
+
+      accent:
+        'bg-yellow-100/18',
+
+      text:
+        'text-[#241d08]',
+
+      line:
+        'bg-[#241d08]/22',
+
+      glowColor:
+        'rgba(234,182,63,.58)',
+
+      shine:
+        'via-yellow-50/80',
+
+      border:
+        'border-yellow-200/46',
+    },
+
+    cyanGoldFire: {
+      outer:
+        'from-[#fff28a] via-[#00e1ff] to-[#052c5c]',
+
+      inner:
+        'from-[#ffe37a] via-[#00b8e6] to-[#0a3d7a]',
+
+      accent:
+        'bg-cyan-100/22',
+
+      text:
+        'text-[#0b1a2b]',
+
+      line:
+        'bg-[#031225]/25',
+
+      glowColor:
+        'rgba(0,225,255,.65)',
+
+      shine:
+        'via-cyan-50/90',
+
+      border:
+        'border-cyan-100/55',
     },
 
     blue: {
@@ -684,14 +781,14 @@ export default function PlayerCardModal({
   */
 
   const numberShadow =
-    cardType === 'gold'
+    cardType === 'goldSilver'
       ? `
-          -1px -1px 0 #fff4a8,
-           1px -1px 0 #d4af37,
-          -1px  1px 0 #d4af37,
-           1px  1px 0 #704500,
-           0 3px 0 rgba(255,255,255,.30),
-           0 5px 8px rgba(80,50,0,.30)
+          -1px -1px 0 #fff0a0,
+           1px -1px 0 #eab63f,
+          -1px  1px 0 #3d4656,
+           1px  1px 0 #1f242c,
+           0 3px 0 rgba(255,255,255,.40),
+           0 5px 10px rgba(234,182,63,.35)
         `
       : cardType === 'blue'
         ? `
@@ -701,13 +798,40 @@ export default function PlayerCardModal({
              1px  1px 0 rgba(7,47,73,.8),
              0 4px 8px rgba(0,50,80,.35)
           `
-        : `
-            -1px -1px 0 rgba(255,255,255,.9),
-             1px -1px 0 rgba(100,116,139,.7),
-            -1px  1px 0 rgba(100,116,139,.7),
-             1px  1px 0 rgba(15,23,42,.55),
-             0 4px 8px rgba(15,23,42,.25)
-          `;
+        : cardType === 'cyanGoldFire'
+          ? `
+              -1px -1px 0 #fff28a,
+               1px -1px 0 #00e1ff,
+              -1px  1px 0 #00b8e6,
+               1px  1px 0 #052c5c,
+               0 3px 0 rgba(255,255,255,.45),
+               0 5px 12px rgba(0,225,255,.55)
+            `
+          : cardType === 'greyWood'
+            ? `
+                -1px -1px 0 #f0dcae,
+                 1px -1px 0 #8a7a5c,
+                -1px  1px 0 #8a7a5c,
+                 1px  1px 0 #22242a,
+                 0 3px 0 rgba(255,255,255,.30),
+                 0 5px 10px rgba(34,36,42,.40)
+              `
+            : cardType === 'wood'
+              ? `
+                  -1px -1px 0 #f0c48a,
+                   1px -1px 0 #c2793a,
+                  -1px  1px 0 #c2793a,
+                   1px  1px 0 #3d2008,
+                   0 3px 0 rgba(255,255,255,.30),
+                   0 5px 10px rgba(61,32,8,.40)
+                `
+              : `
+                  -1px -1px 0 rgba(255,255,255,.9),
+                   1px -1px 0 rgba(100,116,139,.7),
+                  -1px  1px 0 rgba(100,116,139,.7),
+                   1px  1px 0 rgba(15,23,42,.55),
+                   0 4px 8px rgba(15,23,42,.25)
+                `;
 
   /*
   |--------------------------------------------------------------------------

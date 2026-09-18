@@ -21,6 +21,7 @@ import AnnouncementsPage from '../pages/AnnouncementsPage.jsx';
 import FloatingBubblesPage from '../pages/FloatingBubblesPage.jsx';
 import SiteSettingsPage from '../pages/SiteSettingsPage.jsx';
 import PlayersPage from '../pages/PlayersPage.jsx';
+import DtPlayersPage from '../pages/DtPlayersPage.jsx';
 import GroupsPage from '../pages/GroupsPage.jsx';
 import BracketPage from '../pages/BracketPage.jsx';
 import TournamentWorkspacePage from '../pages/TournamentWorkspacePage.jsx';
@@ -40,7 +41,7 @@ export default function AppRoutes() {
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/tournaments/:id" element={<PublicTournamentPage />} />
-              <Route element={<ProtectedRoute />}>
+              <Route element={<ProtectedRoute allowedRoles={['SUPERADMIN', 'ADMIN']} />}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/dashboard/tournaments" element={<TournamentsPage />} />
                 <Route path="/dashboard/tournaments/:id" element={<TournamentWorkspacePage />} />
@@ -56,6 +57,9 @@ export default function AppRoutes() {
                 <Route path="/dashboard/announcements" element={<AnnouncementsPage />} />
                 <Route path="/dashboard/floating-bubbles" element={<FloatingBubblesPage />} />
                 <Route path="/dashboard/site-settings" element={<SiteSettingsPage />} />
+              </Route>
+              <Route element={<ProtectedRoute allowedRoles={['DT']} />}>
+                <Route path="/dt/jugadores" element={<DtPlayersPage />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

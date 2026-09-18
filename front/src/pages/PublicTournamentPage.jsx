@@ -2233,7 +2233,7 @@ export default function PublicTournamentPage() {
             className="w-full min-w-0 max-w-full overflow-hidden p-2.5 sm:p-5"
           >
             <p className="mb-3 px-0.5 text-[10px] text-slate-500 sm:text-xs">
-              Arquero con menos goles recibidos por partido.
+              Arquero con menos goles recibidos.
             </p>
 
             <div

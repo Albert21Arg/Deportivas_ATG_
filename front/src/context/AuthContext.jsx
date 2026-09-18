@@ -51,6 +51,7 @@ export function AuthProvider({ children }) {
     const { data } = await api.post('/auth/login', { email, password });
     sessionStorage.setItem('accessToken', data.data.token);
     setUser(data.data.user);
+    return data.data.user;
   }
 
   function logout() {

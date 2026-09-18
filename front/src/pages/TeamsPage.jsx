@@ -7,6 +7,7 @@ import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
 import ConfirmActionModal from '../components/ConfirmActionModal.jsx';
+import DtAccountModal from '../components/DtAccountModal.jsx';
 
 const emptyForm = { name: '', logo: '', paidUntil: '', logoExpiresAt: '', applyPaidUntilToPlayers: false };
 
@@ -40,6 +41,7 @@ export default function TeamsPage() {
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [teamToRemove, setTeamToRemove] = useState(null);
   const [isRemovingTeam, setIsRemovingTeam] = useState(false);
+  const [dtModalTeam, setDtModalTeam] = useState(null);
 
   const [participantSearch, setParticipantSearch] = useState('');
   const [showMobileFab, setShowMobileFab] = useState(false);
@@ -1025,6 +1027,17 @@ export default function TeamsPage() {
                       Agregar Jugadores
                     </Link>
 
+                    {selectedTournamentId && (
+                      <button
+                        className="min-h-8 rounded-lg border border-violet-400/10 bg-violet-400/[0.04] px-2 py-1.5 text-[9px] font-semibold text-violet-700 dark:text-violet-300 transition hover:bg-violet-400/10 sm:text-[10px]"
+                        onClick={() => setDtModalTeam(team)}
+                        type="button"
+                        title="Cuenta del DT de este equipo"
+                      >
+                        DT
+                      </button>
+                    )}
+
                     {isSuperAdmin && (
                       <button
                         className="min-h-8 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-2 py-1.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400/80 transition hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-700 hover:dark:text-emerald-300 sm:text-[10px]"
@@ -1069,6 +1082,14 @@ export default function TeamsPage() {
         onCancel={() => setTeamToRemove(null)}
         onConfirm={() => removeTeam(teamToRemove.id)}
       />
+
+      {dtModalTeam && (
+        <DtAccountModal
+          tournamentId={selectedTournamentId}
+          team={dtModalTeam}
+          onClose={() => setDtModalTeam(null)}
+        />
+      )}
 
       {/* =========================================================
           MOBILE FAB (acceso rápido para crear equipo sin volver arriba)

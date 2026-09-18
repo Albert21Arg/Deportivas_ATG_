@@ -74,6 +74,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
         paidUntil: player.paidUntil,
         playerExpired: player.playerExpired,
         showName: player.showName,
+        fixedOvr: player.fixedOvr,
       },
       team: row.team,
       goals: player.goals,

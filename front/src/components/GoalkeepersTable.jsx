@@ -83,7 +83,7 @@ function GoalkeeperCellBody({ row, photo, expired, nameHidden, isLeader, isSecon
 |--------------------------------------------------------------------------
 | Valla menos vencida
 |--------------------------------------------------------------------------
-| Ranking de arqueros designados por menos goles recibidos por partido
+| Ranking de arqueros designados por menos goles recibidos
 | (no hay alineación por partido: el arquero asume partidos/goles en
 | contra de todo su equipo). Al hacer clic en el nombre se abre su
 | tarjeta, con el mismo estilo que la de goleador pero con el OVR

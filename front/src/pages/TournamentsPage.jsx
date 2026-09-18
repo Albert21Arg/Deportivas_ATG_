@@ -12,6 +12,7 @@ const emptyForm = {
   description: '',
   logo: '',
   expiresAt: '',
+  playerRegistrationDeadline: '',
   pricePerTeam: '',
   championLabel: '',
   mode: 'ROUND_ROBIN',
@@ -66,6 +67,11 @@ export default function TournamentsPage() {
   const [modeEditingId, setModeEditingId] = useState(null);
   const [isSavingMode, setIsSavingMode] = useState(false);
   const [isModeModalOpen, setIsModeModalOpen] = useState(false);
+
+  const [deadlineForm, setDeadlineForm] = useState({ playerRegistrationDeadline: '' });
+  const [deadlineEditingId, setDeadlineEditingId] = useState(null);
+  const [isSavingDeadline, setIsSavingDeadline] = useState(false);
+  const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
 
   const [championForm, setChampionForm] = useState({ teamId: '' });
   const [championEditingId, setChampionEditingId] = useState(null);
@@ -141,6 +147,7 @@ export default function TournamentsPage() {
       description: tournament.description ?? '',
       logo: tournament.logo ?? '',
       expiresAt: toDateInputValue(tournament.expiresAt),
+      playerRegistrationDeadline: toDateInputValue(tournament.playerRegistrationDeadline),
       pricePerTeam: tournament.pricePerTeam ?? '',
       championLabel: tournament.championLabel ?? '',
       mode: tournament.mode ?? 'ROUND_ROBIN',
@@ -219,6 +226,61 @@ export default function TournamentsPage() {
       notify(details);
     } finally {
       setIsSavingMode(false);
+    }
+  }
+
+  function updateDeadlineField(event) {
+    setDeadlineForm({ playerRegistrationDeadline: event.target.value });
+  }
+
+  function openDeadlineModal(tournament) {
+    setDeadlineEditingId(tournament.id);
+    setDeadlineForm({ playerRegistrationDeadline: toDateInputValue(tournament.playerRegistrationDeadline) });
+    setIsDeadlineModalOpen(true);
+  }
+
+  function cancelEditingDeadline() {
+    if (isSavingDeadline) return;
+
+    setIsDeadlineModalOpen(false);
+    setDeadlineEditingId(null);
+    setDeadlineForm({ playerRegistrationDeadline: '' });
+  }
+
+  async function saveDeadline(event) {
+    event.preventDefault();
+    setIsSavingDeadline(true);
+
+    try {
+      const { data } = await api.patch(
+        `/tournaments/${deadlineEditingId}/player-registration-deadline`,
+        deadlineForm
+      );
+
+      const updatedTournament = data.data.tournament;
+
+      setTournaments((current) =>
+        current.map((tournament) =>
+          tournament.id === deadlineEditingId ? updatedTournament : tournament
+        )
+      );
+
+      notify({
+        type: 'success',
+        title: 'Fecha límite actualizada',
+        message: updatedTournament.playerRegistrationDeadline
+          ? `Los DT de "${updatedTournament.name}" pueden inscribir jugadores hasta ${formatDate(updatedTournament.playerRegistrationDeadline)}.`
+          : `"${updatedTournament.name}" ya no tiene fecha límite de inscripción.`,
+      });
+
+      setIsDeadlineModalOpen(false);
+      setDeadlineEditingId(null);
+      setDeadlineForm({ playerRegistrationDeadline: '' });
+    } catch (error) {
+      const details = getApiErrorDetails(error);
+      notify(details);
+    } finally {
+      setIsSavingDeadline(false);
     }
   }
 
@@ -982,6 +1044,22 @@ export default function TournamentsPage() {
                             </button>
                           </div>
                         )}
+
+                        {/* Fecha límite de inscripción: la puede tocar
+                            cualquier admin asignado al torneo, no solo
+                            superadmin (por eso va fuera de los bloques
+                            isSuperAdmin/!isSuperAdmin de arriba). */}
+                        <div className="mt-2">
+                          <button
+                            className="min-h-10 w-full rounded-lg border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-2 py-2 text-[11px] font-semibold text-slate-500 transition hover:border-slate-300 hover:dark:border-white/[0.12] hover:bg-slate-200 hover:dark:bg-white/[0.05] hover:text-slate-900 hover:dark:text-white sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                            onClick={() => openDeadlineModal(tournament)}
+                            type="button"
+                          >
+                            {tournament.playerRegistrationDeadline
+                              ? `Inscripción hasta ${formatDate(tournament.playerRegistrationDeadline)}`
+                              : 'Fecha límite de inscripción'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </article>
@@ -1116,6 +1194,22 @@ export default function TournamentsPage() {
 
                   <span className="mt-1.5 block text-xs font-normal text-slate-500">
                     Al llegar esta fecha el torneo se inhabilita automáticamente. Déjalo vacío para que no caduque.
+                  </span>
+                </label>
+
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Fecha límite de inscripción de jugadores
+
+                  <input
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition placeholder:text-slate-700 focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    name="playerRegistrationDeadline"
+                    type="date"
+                    value={form.playerRegistrationDeadline}
+                    onChange={updateField}
+                  />
+
+                  <span className="mt-1.5 block text-xs font-normal text-slate-500">
+                    Después de esta fecha, los DT de los equipos ya no pueden inscribir ni editar jugadores. Déjalo vacío para no poner límite.
                   </span>
                 </label>
 
@@ -1385,6 +1479,109 @@ export default function TournamentsPage() {
                   type="submit"
                 >
                   {isSavingMode ? 'Guardando...' : 'Guardar cambios'}
+                </button>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {isDeadlineModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/75 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6 sm:backdrop-blur-md"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              cancelEditingDeadline();
+            }
+          }}
+        >
+          <div
+            className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 dark:border-white/[0.09] bg-white dark:bg-[#0b1119] shadow-2xl shadow-black/70 sm:max-h-[90vh] sm:rounded-3xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tournament-deadline-modal-title"
+          >
+
+            {/* MODAL HEADER */}
+            <div className="relative overflow-hidden border-b border-slate-200 dark:border-white/[0.06] px-4 py-5 sm:px-6 sm:py-6">
+
+              <div className="absolute -right-12 -top-16 hidden h-40 w-40 rounded-full bg-emerald-400/[0.07] blur-3xl sm:block" />
+
+              <div className="relative flex items-start justify-between gap-3">
+
+                <div className="min-w-0">
+                  <div className="mb-2 inline-flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400 sm:mb-3 sm:text-[10px] sm:tracking-[0.18em]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    Inscripción de jugadores
+                  </div>
+
+                  <h2
+                    id="tournament-deadline-modal-title"
+                    className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl"
+                  >
+                    Fecha límite de inscripción
+                  </h2>
+
+                  <p className="mt-1 text-xs text-slate-500 sm:mt-1.5 sm:text-sm">
+                    Después de esta fecha, los DT de los equipos ya no pueden inscribir ni editar jugadores.
+                  </p>
+                </div>
+
+                <button
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.03] text-sm text-slate-500 transition hover:bg-slate-200 hover:dark:bg-white/[0.07] hover:text-slate-900 hover:dark:text-white"
+                  onClick={cancelEditingDeadline}
+                  type="button"
+                  aria-label="Cerrar modal"
+                  disabled={isSavingDeadline}
+                >
+                  ✕
+                </button>
+
+              </div>
+            </div>
+
+            {/* FORM */}
+            <form onSubmit={saveDeadline}>
+
+              <div className="space-y-4 px-4 py-5 sm:space-y-5 sm:px-6 sm:py-6">
+
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  Fecha límite
+
+                  <input
+                    className="mt-2 min-h-11 w-full rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-200 dark:bg-black/30 px-3.5 py-3 text-sm text-slate-900 dark:text-white outline-none transition focus:border-emerald-400/50 focus:bg-slate-200 focus:dark:bg-black/40 focus:ring-2 focus:ring-emerald-400/10 sm:px-4"
+                    name="playerRegistrationDeadline"
+                    type="date"
+                    value={deadlineForm.playerRegistrationDeadline}
+                    onChange={updateDeadlineField}
+                  />
+
+                  <span className="mt-1.5 block text-[11px] font-normal text-slate-500">
+                    Déjala vacía para no poner límite.
+                  </span>
+                </label>
+
+              </div>
+
+              {/* FOOTER */}
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-black/20 px-4 py-3 sm:flex-row sm:justify-end sm:gap-3 sm:px-6 sm:py-4">
+
+                <button
+                  className="min-h-11 rounded-xl border border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.025] px-4 py-2.5 text-sm font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-200 hover:dark:bg-white/[0.06] hover:text-slate-900 hover:dark:text-white disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                  onClick={cancelEditingDeadline}
+                  type="button"
+                  disabled={isSavingDeadline}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  className="min-h-11 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-slate-950 dark:text-slate-950 shadow-md shadow-emerald-500/10 transition hover:bg-emerald-400 hover:shadow-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={isSavingDeadline}
+                  type="submit"
+                >
+                  {isSavingDeadline ? 'Guardando...' : 'Guardar cambios'}
                 </button>
 
               </div>

@@ -161,7 +161,7 @@ export default function GoleadoresPage() {
           </h2>
 
           <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
-            Arqueros designados por equipo, ordenados por menos goles recibidos por partido.
+            Arqueros designados por equipo, ordenados por menos goles recibidos.
           </p>
 
           <div className="mt-4">

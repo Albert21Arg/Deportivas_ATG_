@@ -6,8 +6,14 @@ import { useNotifications } from '../context/NotificationContext.jsx';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import PublicNavbar from '../components/PublicNavbar.jsx';
 
+// El DT aterriza en su propia página de inscripción, no en el dashboard
+// completo de admin/superadmin.
+function homeForRole(role) {
+  return role === 'DT' ? '/dt/jugadores' : '/dashboard';
+}
+
 export default function LoginPage() {
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, user, login } = useAuth();
   const { notify } = useNotifications();
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,7 +22,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={homeForRole(user?.role)} replace />;
   }
 
   async function handleSubmit(event) {
@@ -25,13 +31,13 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      await login(form.email, form.password);
+      const loggedInUser = await login(form.email, form.password);
       notify({
         type: 'success',
         title: 'Inicio de sesión exitoso',
         message: 'Tu sesión fue validada correctamente. Bienvenido a la plataforma.',
       });
-      const destination = location.state?.from?.pathname ?? '/dashboard';
+      const destination = location.state?.from?.pathname ?? homeForRole(loggedInUser.role);
       navigate(destination, { replace: true });
     } catch (requestError) {
       const details = getApiErrorDetails(requestError);

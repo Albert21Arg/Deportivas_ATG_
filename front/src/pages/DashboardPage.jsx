@@ -33,6 +33,7 @@ const SUPERADMIN_TOOLS = [
     color: 'text-cyan-400',
     background: 'bg-cyan-400/10',
     glow: 'bg-cyan-400/10',
+    roles: ['SUPERADMIN'],
   },
   {
     label: 'Torneos',
@@ -42,6 +43,9 @@ const SUPERADMIN_TOOLS = [
     color: 'text-emerald-400',
     background: 'bg-emerald-400/10',
     glow: 'bg-emerald-400/10',
+    // Un admin ya puede gestionar bastante de sus torneos asignados
+    // (modo, fecha límite de inscripción), por eso ve esta tarjeta también.
+    roles: ['SUPERADMIN', 'ADMIN'],
   },
   {
     label: 'Equipos',
@@ -51,6 +55,7 @@ const SUPERADMIN_TOOLS = [
     color: 'text-amber-400',
     background: 'bg-amber-400/10',
     glow: 'bg-amber-400/10',
+    roles: ['SUPERADMIN'],
   },
   {
     label: 'Anuncios',
@@ -60,6 +65,7 @@ const SUPERADMIN_TOOLS = [
     color: 'text-rose-400',
     background: 'bg-rose-400/10',
     glow: 'bg-rose-400/10',
+    roles: ['SUPERADMIN'],
   },
   {
     label: 'Burbujas flotantes',
@@ -69,6 +75,7 @@ const SUPERADMIN_TOOLS = [
     color: 'text-violet-400',
     background: 'bg-violet-400/10',
     glow: 'bg-violet-400/10',
+    roles: ['SUPERADMIN'],
   },
   {
     label: 'Configuración del sitio',
@@ -78,6 +85,7 @@ const SUPERADMIN_TOOLS = [
     color: 'text-sky-400',
     background: 'bg-sky-400/10',
     glow: 'bg-sky-400/10',
+    roles: ['SUPERADMIN'],
   },
 ];
 
@@ -452,48 +460,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* HERRAMIENTAS SUPERADMIN */}
-
-        {user.role === 'SUPERADMIN' && (
-          <section
-            className="mb-8 sm:mb-12"
-            aria-labelledby="superadmin-tools-title"
-          >
-            <div className="mb-5 flex items-end justify-between gap-3 sm:mb-6">
-              <div>
-                <SectionLabel color="cyan">
-                  Administración global
-                </SectionLabel>
-
-                <h2
-                  id="superadmin-tools-title"
-                  className="
-                    mt-3
-                    text-xl
-                    font-black
-                    tracking-tight
-                    text-slate-900
-                    dark:text-white
-                    sm:text-2xl
-                  "
-                >
-                  Herramientas de superadministrador
-                </h2>
-
-                <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-                  Accesos rápidos para administrar toda la plataforma.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5">
-              {SUPERADMIN_TOOLS.map((tool) => (
-                <ToolCard key={tool.to} {...tool} />
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* TORNEOS */}
 
         <section className="mb-7 sm:mb-12">
@@ -667,6 +633,53 @@ export default function DashboardPage() {
             </div>
           )}
         </section>
+
+        {/* HERRAMIENTAS DE ADMINISTRACIÓN */}
+
+        {(() => {
+          const visibleTools = SUPERADMIN_TOOLS.filter((tool) => tool.roles.includes(user.role));
+          if (!visibleTools.length) return null;
+
+          return (
+            <section
+              className="mb-8 sm:mb-12"
+              aria-labelledby="superadmin-tools-title"
+            >
+              <div className="mb-5 flex items-end justify-between gap-3 sm:mb-6">
+                <div>
+                  <SectionLabel color="cyan">
+                    Administración global
+                  </SectionLabel>
+
+                  <h2
+                    id="superadmin-tools-title"
+                    className="
+                      mt-3
+                      text-xl
+                      font-black
+                      tracking-tight
+                      text-slate-900
+                      dark:text-white
+                      sm:text-2xl
+                    "
+                  >
+                    {user.role === 'SUPERADMIN' ? 'Herramientas de superadministrador' : 'Herramientas de administrador'}
+                  </h2>
+
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+                    Accesos rápidos para administrar toda la plataforma.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 xl:grid-cols-5">
+                {visibleTools.map((tool) => (
+                  <ToolCard key={tool.to} {...tool} />
+                ))}
+              </div>
+            </section>
+          );
+        })()}
       </section>
     </main>
   );
