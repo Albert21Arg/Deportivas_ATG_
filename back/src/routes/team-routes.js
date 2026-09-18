@@ -5,6 +5,7 @@ import {
   deleteController,
   getController,
   listController,
+  meController,
   updateController,
 } from '../controllers/team-controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
@@ -14,6 +15,7 @@ import { parseTeamId, validateCreateTeam, validateUpdateTeam } from '../validato
 const router = Router();
 
 router.use(authenticate);
+router.get('/me', authorize('DT'), meController);
 router.get('/', authorize('SUPERADMIN', 'ADMIN'), listController);
 router.get('/:id', authorize('SUPERADMIN', 'ADMIN'), parseTeamId, getController);
 router.post('/', authorize('SUPERADMIN', 'ADMIN'), validateCreateTeam, createController);

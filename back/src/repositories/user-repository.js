@@ -1,3 +1,4 @@
+import { AUTH } from '../config/auth.js';
 import prisma from '../config/prisma.js';
 
 const safeUserSelect = {
@@ -56,4 +57,43 @@ export function findAssignment(tournamentId, userId) {
   return prisma.userTournament.findUnique({
     where: { userId_tournamentId: { userId, tournamentId } },
   });
+}
+
+export function findDtByTeam(teamId) {
+  return prisma.user.findUnique({ where: { teamId }, select: safeUserSelect });
+}
+
+// Una sola cuenta DT por equipo: si ya existe, actualiza credenciales en vez
+// de crear otra (teamId es @unique en el modelo User).
+export function upsertDtForTeam(teamId, { name, email, password, role, status }) {
+  return prisma.user.upsert({
+    where: { teamId },
+    update: { name, email, password },
+    create: { name, email, password, role, status, teamId },
+    select: safeUserSelect,
+  });
+}
+
+// Se corre "al vuelo" en lugar de con un cron aparte, igual que
+// expireOverdue() en tournament-repository.js: cualquier DT cuyo equipo
+// esté en un torneo con fecha límite de inscripción vencida hace más de
+// dtAccountRetentionDays días pierde la cuenta (login y datos borrados).
+export async function deleteStaleDtAccounts() {
+  const cutoff = new Date(Date.now() - AUTH.dtAccountRetentionDays * 24 * 60 * 60 * 1000);
+
+  const staleDts = await prisma.user.findMany({
+    where: {
+      role: 'DT',
+      team: {
+        tournaments: {
+          some: { tournament: { playerRegistrationDeadline: { lt: cutoff } } },
+        },
+      },
+    },
+    select: { id: true },
+  });
+
+  if (!staleDts.length) return;
+
+  await prisma.user.deleteMany({ where: { id: { in: staleDts.map((user) => user.id) } } });
 }

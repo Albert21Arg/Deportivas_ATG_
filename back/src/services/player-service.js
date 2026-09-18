@@ -7,7 +7,16 @@ function id(value) { const parsed = Number(value); if (!Number.isInteger(parsed)
 function withAge(player) { if (!player.birthDate) return { ...player, age: null }; const now = new Date(); const birth = new Date(player.birthDate); let age = now.getFullYear() - birth.getFullYear(); const beforeBirthday = now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate()); return { ...player, age: age - Number(beforeBirthday) }; }
 async function assertTeam(tournamentId, teamId) { if (!await repository.findTeamInTournament(id(teamId), id(tournamentId))) throw new HttpError(404, 'El equipo no pertenece a este torneo'); }
 export async function listPlayers(tournamentId, teamId) { await assertTeam(tournamentId, teamId); return (await repository.findForTeam(id(teamId))).map(({ player, isGoalkeeper }) => withAge({ ...player, isGoalkeeper })); }
-export async function createPlayer(tournamentId, teamId, data) { await assertTeam(tournamentId, teamId); const result = await repository.createAndAssign(data, id(teamId)); if (result.conflict) throw new HttpError(409, `El jugador ya pertenece al equipo ${result.conflict}`); if (result.jerseyConflict) throw new HttpError(409, `Ya existe un jugador con ese dorsal en este equipo (${result.jerseyConflict})`); publish(id(tournamentId), { type: 'player.created' }); return withAge(result.player); }
+export async function createPlayer(tournamentId, teamId, data) {
+  await assertTeam(tournamentId, teamId);
+  const nameConflict = await repository.findNameConflict(id(teamId), data.name);
+  if (nameConflict) throw new HttpError(409, 'Ya existe un jugador con ese nombre en este equipo');
+  const result = await repository.createAndAssign(data, id(teamId));
+  if (result.conflict) throw new HttpError(409, `El jugador ya pertenece al equipo ${result.conflict}`);
+  if (result.jerseyConflict) throw new HttpError(409, `Ya existe un jugador con ese dorsal en este equipo (${result.jerseyConflict})`);
+  publish(id(tournamentId), { type: 'player.created' });
+  return withAge(result.player);
+}
 export async function updatePlayer(tournamentId, teamId, playerId, data) {
   await assertTeam(tournamentId, teamId);
   const player = await repository.findById(id(playerId));
@@ -15,6 +24,10 @@ export async function updatePlayer(tournamentId, teamId, playerId, data) {
   if (data.jerseyNumber) {
     const jerseyConflict = await repository.findJerseyNumberConflict(id(teamId), data.jerseyNumber, player.id);
     if (jerseyConflict) throw new HttpError(409, `Ya existe un jugador con ese dorsal en este equipo (${jerseyConflict.player.name})`);
+  }
+  if (data.name) {
+    const nameConflict = await repository.findNameConflict(id(teamId), data.name, player.id);
+    if (nameConflict) throw new HttpError(409, 'Ya existe un jugador con ese nombre en este equipo');
   }
   const updated = await repository.update(player.id, data);
   publish(id(tournamentId), { type: 'player.updated' });

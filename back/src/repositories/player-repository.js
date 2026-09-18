@@ -18,6 +18,7 @@ const select = {
   photo: true,
   paidUntil: true,
   showName: true,
+  fixedOvr: true,
   yellowCardFinePaidCount: true,
   redCardFinePaidCount: true,
   blueCardFinePaidCount: true,
@@ -53,6 +54,20 @@ export function findJerseyNumberConflict(teamId, jerseyNumber, excludePlayerId) 
     },
     select: { player: { select: { name: true } } },
   });
+}
+// Nombre único por equipo, sin importar el dorsal: dos jugadores del mismo
+// equipo no pueden compartir nombre (comparación insensible a mayúsculas;
+// se hace en JS porque SQLite no soporta `mode: 'insensitive'` en Prisma).
+export async function findNameConflict(teamId, name, excludePlayerId) {
+  const normalized = name.trim().toLowerCase();
+  const rows = await prisma.playerTeam.findMany({
+    where: {
+      teamId,
+      ...(excludePlayerId ? { playerId: { not: excludePlayerId } } : {}),
+    },
+    select: { player: { select: { name: true } } },
+  });
+  return rows.find((row) => row.player.name.trim().toLowerCase() === normalized) ?? null;
 }
 // Cuenta tarjetas cobrables, no eventos crudos: si en un mismo partido una
 // tarjeta quedó reemplazada por otra más grave (dos amarillas -> roja,

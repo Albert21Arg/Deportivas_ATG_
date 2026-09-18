@@ -2,9 +2,13 @@ export const AUTH = {
   accessTokenExpiresIn: process.env.JWT_EXPIRES_IN ?? '60m',
   bcryptRounds: 12,
   passwordResetTokenTtlMinutes: 60,
+  maxLoginAttempts: 5,
+  loginLockoutMinutes: 3,
+  dtAccountRetentionDays: 20,
   roles: {
     SUPERADMIN: 'SUPERADMIN',
     ADMIN: 'ADMIN',
+    DT: 'DT',
   },
   statuses: {
     ACTIVE: 'ACTIVE',

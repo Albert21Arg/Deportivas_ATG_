@@ -54,6 +54,15 @@ export async function updateModeController(request, response, next) {
   }
 }
 
+export async function updateRegistrationDeadlineController(request, response, next) {
+  try {
+    const tournament = await updateTournament(request.tournamentId, request.validatedBody);
+    return response.json({ success: true, data: { tournament } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export async function statusController(request, response, next) {
   try {
     const tournament = await updateTournamentStatus(request.tournamentId, request.validatedBody.status);

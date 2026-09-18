@@ -75,3 +75,46 @@ export async function requireTournamentAccess(request, _response, next) {
     return next(error);
   }
 }
+
+// El DT no tiene UserTournament (eso es solo para ADMIN/SUPERADMIN): su
+// permiso es simplemente "este equipo es el suyo". Se usa en lugar de
+// requireTournamentAccess SOLO en las rutas de jugadores/DT de un equipo,
+// nunca en grupos/bracket/partidos/etc., para que un DT no herede acceso a
+// nada más del torneo por accidente.
+export function requireTeamManagementAccess(request, response, next) {
+  if (request.user.role !== 'DT') {
+    return requireTournamentAccess(request, response, next);
+  }
+
+  const teamId = Number(request.params.teamId);
+
+  if (!Number.isInteger(teamId) || teamId <= 0 || request.user.teamId !== teamId) {
+    return next(new HttpError(403, 'No tienes permisos para administrar este equipo'));
+  }
+
+  return next();
+}
+
+// Solo restringe al DT: si la fecha límite de inscripción del torneo ya
+// pasó, no puede crear, editar ni eliminar jugadores de su equipo (queda en
+// solo lectura). Admin/superadmin no se ven afectados por esta fecha.
+export async function requireRegistrationOpen(request, _response, next) {
+  try {
+    if (request.user.role !== 'DT') return next();
+
+    const tournamentId = Number(request.tournamentId ?? request.params.id);
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { playerRegistrationDeadline: true },
+    });
+
+    if (tournament?.playerRegistrationDeadline && tournament.playerRegistrationDeadline < new Date()) {
+      throw new HttpError(403, 'La fecha límite de inscripción de jugadores ya pasó');
+    }
+
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}

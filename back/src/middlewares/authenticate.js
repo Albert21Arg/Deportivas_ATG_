@@ -30,6 +30,8 @@ export async function authenticate(request, _response, next) {
         email: true,
         role: true,
         status: true,
+        teamId: true,
+        team: { select: { id: true, name: true } },
       },
     });
 

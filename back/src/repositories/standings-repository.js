@@ -115,7 +115,7 @@ export function findGoalkeeperAssignments(tournamentId) {
     where: { isGoalkeeper: true, team: { tournaments: { some: { tournamentId } } } },
     select: {
       teamId: true,
-      player: { select: { id: true, name: true, photo: true, jerseyNumber: true, paidUntil: true, showName: true } },
+      player: { select: { id: true, name: true, photo: true, jerseyNumber: true, paidUntil: true, showName: true, fixedOvr: true } },
     },
   });
 }
@@ -130,6 +130,7 @@ export function findPlayersWithTeams(playerIds) {
       jerseyNumber: true,
       paidUntil: true,
       showName: true,
+      fixedOvr: true,
       yellowCardFinePaidCount: true,
       redCardFinePaidCount: true,
       blueCardFinePaidCount: true,

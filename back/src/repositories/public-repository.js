@@ -108,7 +108,7 @@ export function findTournamentPlayers(tournamentId) {
             select: {
               isGoalkeeper: true,
               player: {
-                select: { id: true, name: true, jerseyNumber: true, photo: true, paidUntil: true, showName: true },
+                select: { id: true, name: true, jerseyNumber: true, photo: true, paidUntil: true, showName: true, fixedOvr: true },
               },
             },
             orderBy: { player: { name: 'asc' } },

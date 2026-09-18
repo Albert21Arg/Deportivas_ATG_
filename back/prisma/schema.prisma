@@ -18,9 +18,18 @@ model User {
   status                 String           @default("ACTIVE")
   resetPasswordTokenHash String?
   resetPasswordExpiresAt DateTime?
+  // Bloqueo por intentos fallidos de login: se incrementa en cada intento
+  // con contraseña incorrecta y se resetea al loguear bien. Al llegar al
+  // máximo, se fija lockedUntil y se reinicia el contador.
+  failedLoginAttempts    Int              @default(0)
+  lockedUntil            DateTime?
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
   tournaments            UserTournament[]
+  // Solo se usa cuando role = "DT": el equipo que ese DT puede inscribir.
+  // Único por equipo (una sola cuenta DT por equipo).
+  teamId                 Int?             @unique
+  team                   Team?            @relation(fields: [teamId], references: [id])
 }
 
 model Tournament {
@@ -41,6 +50,10 @@ model Tournament {
   thirdPlaceTeamId Int?
   championLabel    String?
   finishedAt       DateTime?
+  // Fecha límite para que los DT de los equipos de este torneo inscriban
+  // jugadores. Solo restringe al rol DT; admin/superadmin no se ven
+  // afectados. null = sin límite.
+  playerRegistrationDeadline DateTime?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   admins           UserTournament[]
@@ -79,6 +92,7 @@ model Team {
   knockoutHomeTies      KnockoutTie[]    @relation("KnockoutHomeTeam")
   knockoutAwayTies      KnockoutTie[]    @relation("KnockoutAwayTeam")
   knockoutWinnerTies    KnockoutTie[]    @relation("KnockoutWinnerTeam")
+  dt                    User?
 }
 
 model Player {
@@ -90,6 +104,7 @@ model Player {
   photo                   String?
   paidUntil               DateTime?
   showName                Boolean      @default(true)
+  fixedOvr                Int?
   yellowCardFinePaidCount Int          @default(0)
   redCardFinePaidCount    Int          @default(0)
   blueCardFinePaidCount   Int          @default(0)

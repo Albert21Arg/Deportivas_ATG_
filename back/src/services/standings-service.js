@@ -192,6 +192,7 @@ async function buildPlayerStatRows(tournamentId) {
           jerseyNumber: player?.jerseyNumber ?? null,
           paidUntil: player?.paidUntil,
           showName: player?.showName ?? true,
+          fixedOvr: player?.fixedOvr ?? null,
           isGoalkeeper,
         },
         team?.teamExpired
@@ -202,8 +203,10 @@ async function buildPlayerStatRows(tournamentId) {
       goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
       // Igual que el OVR: si es arquero, la posición "dorada" que se ve en
       // su tarjeta es siempre la de valla menos vencida, sin importar que
-      // esta tabla la esté rankeando por goles o por tarjetas.
-      position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(playerId) ?? null) : undefined,
+      // esta tabla la esté rankeando por goles o por tarjetas. Va aparte de
+      // `position` (que rankBy calcula según el ranking de ESTA tabla) para
+      // no pisar el puesto real del arquero en la tabla de goleadores/tarjetas.
+      goalkeeperPosition: isGoalkeeper ? (goalkeeperPositionByPlayer.get(playerId) ?? null) : undefined,
       ...cards,
     };
   });
@@ -213,10 +216,7 @@ function rankBy(rows, key) {
   return rows
     .filter((row) => row[key] > 0)
     .sort((left, right) => right[key] - left[key] || left.player.name.localeCompare(right.player.name))
-    .map((row, index) => ({
-      ...row,
-      position: row.player.isGoalkeeper ? (row.position ?? null) : index + 1,
-    }));
+    .map((row, index) => ({ ...row, position: index + 1 }));
 }
 
 // Tabla de goleadores: goles (no autogoles), amarillas y rojas por jugador
@@ -239,7 +239,7 @@ export async function getTopCards(tournamentId) {
 }
 
 // Valla menos vencida: ranking de arqueros designados por menos goles
-// recibidos por partido. No hay alineación por partido en este esquema, así
+// recibidos en total. No hay alineación por partido en este esquema, así
 // que el arquero asume los partidos jugados y goles en contra de su equipo
 // completo (viene ya calculado en la tabla de posiciones). Solo entran
 // equipos con al menos un partido jugado.
@@ -274,8 +274,8 @@ export async function getGoalkeepers(tournamentId) {
       const leftRatio = left.goalsConceded / left.matchesPlayed;
       const rightRatio = right.goalsConceded / right.matchesPlayed;
       return (
-        leftRatio - rightRatio ||
         left.goalsConceded - right.goalsConceded ||
+        leftRatio - rightRatio ||
         right.matchesPlayed - left.matchesPlayed ||
         left.player.name.localeCompare(right.player.name)
       );

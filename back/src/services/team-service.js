@@ -1,9 +1,25 @@
 import * as teamRepository from '../repositories/team-repository.js';
+import * as tournamentRepository from '../repositories/tournament-repository.js';
 import { HttpError } from '../utils/http-error.js';
 import { publish } from './realtime-service.js';
 
 export function listTeams() {
   return teamRepository.findAll();
+}
+
+// Contexto del DT logueado: su equipo y el torneo donde está inscrito hoy
+// (un equipo solo puede estar en un torneo a la vez, ver assignTeam). El
+// front usa el tournamentId para las llamadas de jugadores/inscripción.
+export async function getMyTeamContext(teamId) {
+  if (!teamId) throw new HttpError(404, 'No tienes un equipo asignado');
+
+  const team = await teamRepository.findById(teamId);
+  if (!team) throw new HttpError(404, 'Equipo no encontrado');
+
+  const assignment = await teamRepository.findAnyAssignment(teamId);
+  const tournament = assignment ? await tournamentRepository.findById(assignment.tournamentId) : null;
+
+  return { team, tournament };
 }
 
 export async function getTeam(id) {

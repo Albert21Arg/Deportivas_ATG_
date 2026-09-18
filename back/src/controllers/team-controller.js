@@ -1,4 +1,13 @@
-import { createTeam, getTeam, listTeams, updateTeam } from '../services/team-service.js';
+import { createTeam, getMyTeamContext, getTeam, listTeams, updateTeam } from '../services/team-service.js';
+
+export async function meController(request, response, next) {
+  try {
+    const context = await getMyTeamContext(request.user.teamId);
+    return response.json({ success: true, data: context });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 export async function listController(_request, response, next) {
   try {

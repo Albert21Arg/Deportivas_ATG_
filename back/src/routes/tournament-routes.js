@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import assignmentRoutes from './assignment-routes.js';
 import bracketRoutes from './bracket-routes.js';
+import dtRoutes from './dt-routes.js';
 import groupRoutes from './group-routes.js';
 import teamAssignmentRoutes from './team-assignment-routes.js';
 import playerRoutes from './player-routes.js';
@@ -14,6 +15,7 @@ import {
   statusController,
   updateController,
   updateModeController,
+  updateRegistrationDeadlineController,
 } from '../controllers/tournament-controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorize } from '../middlewares/authorize.js';
@@ -24,6 +26,7 @@ import {
   validateCreateTournament,
   validateMove,
   validateStatus,
+  validateUpdatePlayerRegistrationDeadline,
   validateUpdateTournament,
   validateUpdateTournamentMode,
 } from '../validators/tournament.js';
@@ -36,11 +39,13 @@ router.post('/', authorize('SUPERADMIN'), validateCreateTournament, createContro
 router.use('/:id/admins', assignmentRoutes);
 router.use('/:id/teams', teamAssignmentRoutes);
 router.use('/:id/teams/:teamId/players', playerRoutes);
+router.use('/:id/teams/:teamId/dt', dtRoutes);
 router.use('/:id/groups', groupRoutes);
 router.use('/:id/bracket', bracketRoutes);
 router.get('/:id', parseTournamentId, requireTournamentAccess, getController);
 router.put('/:id', authorize('SUPERADMIN'), parseTournamentId, validateUpdateTournament, updateController);
 router.patch('/:id/mode', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateUpdateTournamentMode, updateModeController);
+router.patch('/:id/player-registration-deadline', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateUpdatePlayerRegistrationDeadline, updateRegistrationDeadlineController);
 router.patch('/:id/status', authorize('SUPERADMIN'), parseTournamentId, validateStatus, statusController);
 router.patch('/:id/move', authorize('SUPERADMIN'), parseTournamentId, validateMove, moveController);
 router.patch('/:id/champion', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateChampion, championController);

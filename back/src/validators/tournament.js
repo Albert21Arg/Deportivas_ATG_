@@ -38,6 +38,10 @@ function readTournamentPayload(body, { partial = false } = {}) {
     payload.expiresAt = validateExpiryDate(body.expiresAt, 'expiresAt');
   }
 
+  if (body.playerRegistrationDeadline !== undefined) {
+    payload.playerRegistrationDeadline = validateExpiryDate(body.playerRegistrationDeadline, 'playerRegistrationDeadline');
+  }
+
   if (body.pricePerTeam !== undefined) {
     if (body.pricePerTeam === null || body.pricePerTeam === '') {
       payload.pricePerTeam = null;
@@ -103,6 +107,20 @@ export function validateUpdateTournament(request, _response, next) {
     if (!Object.keys(request.validatedBody).length) {
       throw new HttpError(422, 'Debes enviar al menos un campo para actualizar');
     }
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+// A diferencia de expiresAt/mode/etc. (solo superadmin vía PUT /:id), esta
+// la puede tocar cualquier admin asignado al torneo: son ellos quienes
+// deciden hasta cuándo sus DT pueden inscribir jugadores.
+export function validateUpdatePlayerRegistrationDeadline(request, _response, next) {
+  try {
+    request.validatedBody = {
+      playerRegistrationDeadline: validateExpiryDate(request.body?.playerRegistrationDeadline, 'playerRegistrationDeadline'),
+    };
     return next();
   } catch (error) {
     return next(error);
