@@ -972,6 +972,7 @@ function SectionCard({
   children,
   contentId,
   className = '',
+  sectionRef,
 }) {
   const config = sectionConfig[section];
 
@@ -1029,6 +1030,7 @@ function SectionCard({
 
   return (
     <div
+      ref={sectionRef}
       className={`
         group relative min-w-0 w-full overflow-hidden
         rounded-2xl
@@ -1222,6 +1224,35 @@ export default function PublicTournamentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const historyLoadedRef = useRef(false);
+  const sectionRefs = useRef({});
+
+  useEffect(() => {
+    if (!openSection) return;
+
+    const frame = requestAnimationFrame(() => {
+      const sectionElement = sectionRefs.current[openSection];
+      if (!sectionElement) return;
+
+      const navbarElement = document.querySelector('nav');
+      const navbarHeight =
+        navbarElement?.getBoundingClientRect().height ??
+        (window.innerWidth < 640 ? 72 : 96);
+
+      const extraSpacing = 12;
+      const targetTop =
+        sectionElement.getBoundingClientRect().top +
+        window.scrollY -
+        navbarHeight -
+        extraSpacing;
+
+      window.scrollTo({
+        top: Math.max(0, targetTop),
+        behavior: 'smooth',
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [openSection]);
 
   /*
   |--------------------------------------------------------------------------
@@ -1539,6 +1570,7 @@ export default function PublicTournamentPage() {
         {competitionMode === 'ROUND_ROBIN' ? (
           <SectionCard
             section="standings"
+            sectionRef={(element) => { sectionRefs.current["standings"] = element; }}
             open={openSection === 'standings'}
             onToggle={toggleStandings}
             contentId="standings-content"
@@ -2049,6 +2081,7 @@ export default function PublicTournamentPage() {
         ) : competitionMode === 'GROUP_STAGE' ? (
           <SectionCard
             section="groups"
+            sectionRef={(element) => { sectionRefs.current["groups"] = element; }}
             open={openSection === 'standings'}
             onToggle={toggleStandings}
             contentId="pots-content"
@@ -2106,6 +2139,7 @@ export default function PublicTournamentPage() {
         ) : (
           <SectionCard
             section="bracket"
+            sectionRef={(element) => { sectionRefs.current["bracket"] = element; }}
             open={openSection === 'standings'}
             onToggle={toggleStandings}
             contentId="bracket-content"
@@ -2133,6 +2167,7 @@ export default function PublicTournamentPage() {
 
         <SectionCard
           section="upcoming"
+          sectionRef={(element) => { sectionRefs.current["upcoming"] = element; }}
           open={openSection === 'upcoming'}
           onToggle={toggleUpcoming}
           contentId="upcoming-content"
@@ -2184,6 +2219,7 @@ export default function PublicTournamentPage() {
 
         <SectionCard
           section="scorers"
+          sectionRef={(element) => { sectionRefs.current["scorers"] = element; }}
           open={openSection === 'scorers'}
           onToggle={toggleScorers}
           contentId="scorers-content"
@@ -2224,6 +2260,7 @@ export default function PublicTournamentPage() {
 
         <SectionCard
           section="goalkeepers"
+          sectionRef={(element) => { sectionRefs.current["goalkeepers"] = element; }}
           open={openSection === 'goalkeepers'}
           onToggle={toggleGoalkeepers}
           contentId="goalkeepers-content"
@@ -2261,6 +2298,7 @@ export default function PublicTournamentPage() {
 
         <SectionCard
           section="cards"
+          sectionRef={(element) => { sectionRefs.current["cards"] = element; }}
           open={openSection === 'cards'}
           onToggle={toggleCards}
           contentId="cards-content"
@@ -2433,6 +2471,7 @@ export default function PublicTournamentPage() {
 
         <SectionCard
           section="history"
+          sectionRef={(element) => { sectionRefs.current["history"] = element; }}
           open={openSection === 'history'}
           onToggle={toggleHistory}
           contentId="history-content"

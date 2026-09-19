@@ -939,7 +939,7 @@ function TournamentCard({
 
             {/* Información */}
 
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 pr-10 sm:pr-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`
@@ -981,8 +981,8 @@ function TournamentCard({
 
             <span
               className={`
-                flex h-9 w-9 shrink-0 items-center
-                justify-center rounded-xl
+                absolute right-0 top-0 flex h-9 w-9 shrink-0 items-center
+                justify-center rounded-xl sm:static
                 border border-slate-200
                 bg-slate-50 text-xs text-slate-500
                 transition-all duration-300
@@ -1591,7 +1591,7 @@ export default function HomePage() {
           HERO
       ================================================================ */}
 
-      <section className="relative w-full overflow-hidden border-b border-slate-200 bg-slate-50 px-4 pb-12 pt-24 dark:border-white/[0.06] dark:bg-[#070b12] sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
+      <section className="relative hidden w-full overflow-hidden border-b border-slate-200 bg-slate-50 px-4 pb-12 pt-24 dark:border-white/[0.06] dark:bg-[#070b12] sm:block sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.025]"
           style={{
@@ -1605,7 +1605,7 @@ export default function HomePage() {
 
         <div className="pointer-events-none absolute -right-32 -top-20 h-80 w-80 rounded-full bg-cyan-400/[0.045] blur-3xl sm:h-[30rem] sm:w-[30rem]" />
 
-        <div className="relative mx-auto w-full max-w-7xl">
+        <div className="relative mx-auto hidden w-full max-w-7xl sm:block">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-300 sm:text-[10px]">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
 
@@ -1640,7 +1640,7 @@ export default function HomePage() {
           TORNEOS
       ================================================================ */}
 
-      <section className="relative w-full px-3.5 py-8 sm:px-6 sm:py-14 lg:px-12 xl:px-20">
+      <section className="relative w-full px-3.5 pb-8 pt-24 sm:px-6 sm:py-14 lg:px-12 xl:px-20">
         <div className="mx-auto w-full max-w-7xl">
           <div className="mb-6 flex flex-col gap-4 sm:mb-9 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -1660,7 +1660,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="flex w-full items-center gap-2.5 sm:w-auto sm:gap-3">
+            <div className="flex w-full flex-col items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
               {tournaments.length > 0 && (
                 <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600">
@@ -1681,7 +1681,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              <span className="flex h-11 shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:px-4">
+              <span className="flex h-11 shrink-0 self-end items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:self-auto sm:px-4">
                 <span aria-hidden="true">
                   🏆
                 </span>
