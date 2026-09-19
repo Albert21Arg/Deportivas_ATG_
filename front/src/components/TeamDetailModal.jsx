@@ -201,13 +201,17 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
         </div>
       </section>
 
-      <PlayerCardModal
-        row={selectedPlayer}
-        respectPaymentStatus
-        blueCardEnabled={blueCardEnabled}
-        isGoalkeeper={Boolean(selectedPlayer?.isGoalkeeper)}
-        onClose={() => setSelectedPlayer(null)}
-      />
+      <div
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <PlayerCardModal
+          row={selectedPlayer}
+          respectPaymentStatus
+          blueCardEnabled={blueCardEnabled}
+          isGoalkeeper={Boolean(selectedPlayer?.isGoalkeeper)}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      </div>
     </div>
   );
 }
