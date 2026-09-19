@@ -41,9 +41,9 @@ function isLiveMatch(match) {
 
   const status = normalizeStatus(
     match.status ??
-      match.state ??
-      match.matchStatus ??
-      match.gameStatus
+    match.state ??
+    match.matchStatus ??
+    match.gameStatus
   );
 
   const liveStatuses = [
@@ -181,13 +181,13 @@ function getScore(match, side) {
     if (typeof score === 'object') {
       return isHome
         ? score.home ??
-            score.homeScore ??
-            score.local ??
-            0
+        score.homeScore ??
+        score.local ??
+        0
         : score.away ??
-            score.awayScore ??
-            score.visitor ??
-            0;
+        score.awayScore ??
+        score.visitor ??
+        0;
     }
   }
 
@@ -305,10 +305,9 @@ function LiveMatchCard({
         className={`
           rounded-xl border px-3 py-2.5
           sm:rounded-2xl sm:px-4 sm:py-3
-          ${
-            isCyan
-              ? 'border-cyan-400/10 bg-cyan-400/[0.04]'
-              : 'border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.02]'
+          ${isCyan
+            ? 'border-cyan-400/10 bg-cyan-400/[0.04]'
+            : 'border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.02]'
           }
         `}
       >
@@ -316,10 +315,9 @@ function LiveMatchCard({
           <span
             className={`
               h-1.5 w-1.5 rounded-full
-              ${
-                isCyan
-                  ? 'bg-cyan-500/60'
-                  : 'bg-slate-600'
+              ${isCyan
+                ? 'bg-cyan-500/60'
+                : 'bg-slate-600'
               }
             `}
           />
@@ -328,10 +326,9 @@ function LiveMatchCard({
             className={`
               text-[8px] font-black uppercase tracking-[0.16em]
               sm:text-[9px]
-              ${
-                isCyan
-                  ? 'text-slate-900 dark:text-cyan-500/70'
-                  : 'text-slate-600'
+              ${isCyan
+                ? 'text-slate-900 dark:text-cyan-500/70'
+                : 'text-slate-600'
               }
             `}
           >
@@ -377,10 +374,9 @@ function LiveMatchCard({
       className={`
         rounded-xl border px-3 py-2.5
         sm:rounded-2xl sm:px-4 sm:py-3
-        ${
-          isCyan
-            ? 'border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-slate-900/[0.02] to-slate-900/[0.01] dark:via-white/[0.02] dark:to-white/[0.01]'
-            : 'border-red-400/10 bg-gradient-to-br from-red-500/[0.07] via-slate-900/[0.02] to-slate-900/[0.01] dark:via-white/[0.02] dark:to-white/[0.01]'
+        ${isCyan
+          ? 'border-cyan-400/15 bg-gradient-to-br from-cyan-500/[0.08] via-slate-900/[0.02] to-slate-900/[0.01] dark:via-white/[0.02] dark:to-white/[0.01]'
+          : 'border-red-400/10 bg-gradient-to-br from-red-500/[0.07] via-slate-900/[0.02] to-slate-900/[0.01] dark:via-white/[0.02] dark:to-white/[0.01]'
         }
       `}
     >
@@ -390,10 +386,9 @@ function LiveMatchCard({
             <span
               className={`
                 absolute inline-flex h-full w-full animate-ping rounded-full opacity-60
-                ${
-                  isCyan
-                    ? 'bg-cyan-400'
-                    : 'bg-red-400'
+                ${isCyan
+                  ? 'bg-cyan-400'
+                  : 'bg-red-400'
                 }
               `}
             />
@@ -401,10 +396,9 @@ function LiveMatchCard({
             <span
               className={`
                 relative inline-flex h-2 w-2 rounded-full
-                ${
-                  isCyan
-                    ? 'bg-cyan-400'
-                    : 'bg-red-400'
+                ${isCyan
+                  ? 'bg-cyan-400'
+                  : 'bg-red-400'
                 }
               `}
             />
@@ -414,10 +408,9 @@ function LiveMatchCard({
             className={`
               text-[8px] font-black uppercase tracking-[0.16em]
               sm:text-[9px]
-              ${
-                isCyan
-                  ? 'text-slate-900 dark:text-cyan-300'
-                  : 'text-red-300'
+              ${isCyan
+                ? 'text-slate-900 dark:text-cyan-300'
+                : 'text-red-300'
               }
             `}
           >
@@ -429,10 +422,9 @@ function LiveMatchCard({
           <span
             className={`
               text-[9px] font-bold
-              ${
-                isCyan
-                  ? 'text-slate-900 dark:text-cyan-300'
-                  : 'text-red-300'
+              ${isCyan
+                ? 'text-slate-900 dark:text-cyan-300'
+                : 'text-red-300'
               }
             `}
           >
@@ -508,10 +500,9 @@ function LiveMatchCard({
             text-[9px] font-black uppercase tracking-wider
             transition
             sm:text-[10px]
-            ${
-              isCyan
-                ? 'bg-cyan-400/15 text-slate-900 hover:bg-cyan-400/25 dark:text-cyan-300'
-                : 'bg-red-400/15 text-red-700 hover:bg-red-400/25 dark:text-red-300'
+            ${isCyan
+              ? 'bg-cyan-400/15 text-slate-900 hover:bg-cyan-400/25 dark:text-cyan-300'
+              : 'bg-red-400/15 text-red-700 hover:bg-red-400/25 dark:text-red-300'
             }
           `}
         >
@@ -589,11 +580,10 @@ function TeamModal({ selection, onClose }) {
             </span>
 
             <h2
-              className={`mt-3 text-2xl font-black tracking-tight sm:text-3xl ${
-                isLeader
-                  ? 'text-amber-600 dark:text-amber-100'
-                  : 'text-slate-900 dark:text-white'
-              }`}
+              className={`mt-3 text-2xl font-black tracking-tight sm:text-3xl ${isLeader
+                ? 'text-amber-600 dark:text-amber-100'
+                : 'text-slate-900 dark:text-white'
+                }`}
               id="team-modal-title"
             >
               {row.team.name}
@@ -621,13 +611,12 @@ function TeamModal({ selection, onClose }) {
               </p>
 
               <p
-                className={`mt-1 text-xl font-black ${
-                  row.goalDifference > 0
-                    ? 'text-emerald-500 dark:text-emerald-400'
-                    : row.goalDifference < 0
-                      ? 'text-red-500 dark:text-red-400'
-                      : 'text-slate-900 dark:text-white'
-                }`}
+                className={`mt-1 text-xl font-black ${row.goalDifference > 0
+                  ? 'text-emerald-500 dark:text-emerald-400'
+                  : row.goalDifference < 0
+                    ? 'text-red-500 dark:text-red-400'
+                    : 'text-slate-900 dark:text-white'
+                  }`}
               >
                 {row.goalDifference > 0
                   ? `+${row.goalDifference}`
@@ -727,77 +716,77 @@ function TournamentCard({
 
   const colors = isCyan
     ? {
-        border:
-          'border-cyan-400/25 sm:border-cyan-400/15',
-        borderHover:
-          'hover:border-cyan-400/50',
-        bg: 'bg-white dark:bg-[#07141a]',
-        cardRing: 'border-white dark:border-[#07141a]',
-        shadow:
-          'shadow-[0_20px_70px_rgba(6,182,212,0.10)]',
-        expanded:
-          'border-cyan-400/45 shadow-[0_25px_90px_rgba(6,182,212,0.16)]',
-        glow:
-          'bg-cyan-400/[0.10] group-hover:bg-cyan-400/[0.17]',
-        glowBottom:
-          'bg-blue-400/[0.06]',
-        line:
-          'via-cyan-400/80',
-        badge:
-          'border-cyan-400/25 bg-cyan-400/[0.10] text-slate-900 dark:text-cyan-300',
-        pulse:
-          'bg-cyan-400 shadow-[0_0_8px_#22d3ee]',
-        logoGlow:
-          'bg-cyan-400/15',
-        logoBorder:
-          'border-cyan-400/20',
-        topStatus:
-          'bg-cyan-400',
-        topStatusDot:
-          'bg-white dark:bg-slate-950',
-        section:
-          'text-slate-900 dark:text-cyan-400',
-        button:
-          'border-cyan-400/30 bg-cyan-400/[0.10] text-slate-900 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18] dark:text-cyan-300',
-        closedButton:
-          'from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400',
-      }
+      border:
+        'border-cyan-400/25 sm:border-cyan-400/15',
+      borderHover:
+        'hover:border-cyan-400/50',
+      bg: 'bg-white dark:bg-[#07141a]',
+      cardRing: 'border-white dark:border-[#07141a]',
+      shadow:
+        'shadow-[0_20px_70px_rgba(6,182,212,0.10)]',
+      expanded:
+        'border-cyan-400/45 shadow-[0_25px_90px_rgba(6,182,212,0.16)]',
+      glow:
+        'bg-cyan-400/[0.10] group-hover:bg-cyan-400/[0.17]',
+      glowBottom:
+        'bg-blue-400/[0.06]',
+      line:
+        'via-cyan-400/80',
+      badge:
+        'border-cyan-400/25 bg-cyan-400/[0.10] text-slate-900 dark:text-cyan-300',
+      pulse:
+        'bg-cyan-400 shadow-[0_0_8px_#22d3ee]',
+      logoGlow:
+        'bg-cyan-400/15',
+      logoBorder:
+        'border-cyan-400/20',
+      topStatus:
+        'bg-cyan-400',
+      topStatusDot:
+        'bg-white dark:bg-slate-950',
+      section:
+        'text-slate-900 dark:text-cyan-400',
+      button:
+        'border-cyan-400/30 bg-cyan-400/[0.10] text-slate-900 hover:border-cyan-400/50 hover:bg-cyan-400/[0.18] dark:text-cyan-300',
+      closedButton:
+        'from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400',
+    }
     : {
-        border:
-          'border-emerald-400/25 sm:border-slate-200 sm:dark:border-white/[0.07]',
-        borderHover:
-          'hover:border-emerald-400/30',
-        bg: 'bg-white dark:bg-[#0a0f18]',
-        cardRing: 'border-white dark:border-[#0a0f18]',
-        shadow:
-          'shadow-[0_20px_70px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_70px_rgba(0,0,0,0.25)]',
-        expanded:
-          'border-emerald-400/40 shadow-[0_25px_90px_rgba(16,185,129,0.13)]',
-        glow:
-          'bg-emerald-400/[0.08] group-hover:bg-emerald-400/[0.13]',
-        glowBottom:
-          'bg-cyan-400/[0.04]',
-        line:
-          'via-emerald-400/70',
-        badge:
-          'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-600 dark:text-emerald-300',
-        pulse:
-          'bg-emerald-400 shadow-[0_0_8px_#34d399]',
-        logoGlow:
-          'bg-emerald-400/10',
-        logoBorder:
-          'border-slate-200 dark:border-white/[0.09]',
-        topStatus:
-          'bg-emerald-400',
-        topStatusDot:
-          'bg-white dark:bg-slate-950',
-        section:
-          'text-emerald-600 dark:text-emerald-400',
-        button:
-          'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-600 hover:border-emerald-400/40 hover:bg-emerald-400/15 dark:text-emerald-300',
-        closedButton:
-          'from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400',
-      };
+      border:
+        'border-emerald-400/25 sm:border-slate-200 sm:dark:border-white/[0.07]',
+      borderHover:
+        'hover:border-emerald-400/30',
+      bg: 'bg-white dark:bg-[#0a0f18]',
+      cardRing: 'border-white dark:border-[#0a0f18]',
+      shadow:
+        'shadow-[0_20px_70px_rgba(15,23,42,0.08)] dark:shadow-[0_20px_70px_rgba(0,0,0,0.25)]',
+      expanded:
+        'border-emerald-400/40 shadow-[0_25px_90px_rgba(16,185,129,0.13)]',
+      glow:
+        'bg-emerald-400/[0.08] group-hover:bg-emerald-400/[0.13]',
+      glowBottom:
+        'bg-cyan-400/[0.04]',
+      line:
+        'via-emerald-400/70',
+      badge:
+        'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-600 dark:text-emerald-300',
+      pulse:
+        'bg-emerald-400 shadow-[0_0_8px_#34d399]',
+      logoGlow:
+        'bg-emerald-400/10',
+      logoBorder:
+        'border-slate-200 dark:border-white/[0.09]',
+      topStatus:
+        'bg-emerald-400',
+      topStatusDot:
+        'bg-white dark:bg-slate-950',
+      section:
+        'text-emerald-600 dark:text-emerald-400',
+      button:
+        'border-emerald-400/20 bg-emerald-400/[0.07] text-emerald-600 hover:border-emerald-400/40 hover:bg-emerald-400/15 dark:text-emerald-300',
+      closedButton:
+        'from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400',
+    };
 
   return (
     <article
@@ -811,10 +800,9 @@ function TournamentCard({
         transition-all duration-500
         sm:rounded-[2rem]
         sm:${colors.border}
-        ${
-          isExpanded
-            ? colors.expanded
-            : `${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]`
+        ${isExpanded
+          ? colors.expanded
+          : `${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]`
         }
       `}
     >
@@ -848,10 +836,9 @@ function TournamentCard({
           ${colors.line}
           to-transparent
           transition-opacity duration-500
-          ${
-            isExpanded
-              ? 'opacity-100'
-              : 'opacity-80 group-hover:opacity-100'
+          ${isExpanded
+            ? 'opacity-100'
+            : 'opacity-80 group-hover:opacity-100'
           }
         `}
       />
@@ -879,10 +866,9 @@ function TournamentCard({
                   blur-xl
                   transition duration-500
                   ${colors.logoGlow}
-                  ${
-                    isExpanded
-                      ? 'opacity-100'
-                      : 'opacity-60 group-hover:opacity-100'
+                  ${isExpanded
+                    ? 'opacity-100'
+                    : 'opacity-60 group-hover:opacity-100'
                   }
                 `}
               />
@@ -989,10 +975,9 @@ function TournamentCard({
                 dark:border-white/[0.07]
                 dark:bg-white/[0.025]
                 sm:h-10 sm:w-10
-                ${
-                  isExpanded
-                    ? `rotate-180 ${colors.badge}`
-                    : 'group-hover:border-slate-300 group-hover:text-slate-900 dark:group-hover:border-white/[0.12] dark:group-hover:text-white'
+                ${isExpanded
+                  ? `rotate-180 ${colors.badge}`
+                  : 'group-hover:border-slate-300 group-hover:text-slate-900 dark:group-hover:border-white/[0.12] dark:group-hover:text-white'
                 }
               `}
               aria-hidden="true"
@@ -1002,11 +987,14 @@ function TournamentCard({
           </div>
 
           {/* ============================================================
-              ESTADÍSTICAS
-          ============================================================ */}
+    ESTADÍSTICAS
+============================================================ */}
 
           <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:grid-cols-4">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
+
+            {/* EQUIPOS
+      Oculto en móviles, visible desde sm */}
+            <div className="hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:block sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Equipos
               </p>
@@ -1016,6 +1004,7 @@ function TournamentCard({
               </p>
             </div>
 
+            {/* ÚLTIMO CAMPEÓN */}
             <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
               {tournament.tournament.championTeam && (
                 <TeamLogo
@@ -1036,6 +1025,7 @@ function TournamentCard({
               </div>
             </div>
 
+            {/* LÍDER */}
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Líder
@@ -1046,11 +1036,16 @@ function TournamentCard({
               </p>
             </div>
 
-            <LiveMatchCard
-              match={liveMatch}
-              accent={isCyan ? 'cyan' : 'emerald'}
-            />
+            {/* PARTIDO EN VIVO - ANCHO COMPLETO */}
+            <div className="col-span-2 w-full sm:col-span-4">
+              <LiveMatchCard
+                match={liveMatch}
+                accent={isCyan ? 'cyan' : 'emerald'}
+              />
+            </div>
+
           </div>
+
         </div>
       </button>
 
@@ -1062,10 +1057,9 @@ function TournamentCard({
         className={`
           grid transition-[grid-template-rows]
           duration-500 ease-out
-          ${
-            isExpanded
-              ? 'grid-rows-[1fr]'
-              : 'grid-rows-[0fr]'
+          ${isExpanded
+            ? 'grid-rows-[1fr]'
+            : 'grid-rows-[0fr]'
           }
         `}
       >
@@ -1136,10 +1130,9 @@ function TournamentCard({
                           className={`
                             w-14 px-1.5 py-3 text-center
                             sm:w-auto sm:px-3 sm:py-3.5
-                            ${
-                              isCyan
-                                ? 'text-slate-900 dark:text-cyan-400'
-                                : 'text-emerald-400'
+                            ${isCyan
+                              ? 'text-slate-900 dark:text-cyan-400'
+                              : 'text-emerald-400'
                             }
                           `}
                         >
@@ -1166,7 +1159,7 @@ function TournamentCard({
                                 row,
                                 tournament
                                   .recentFormByTeam?.[
-                                  row.team.id
+                                row.team.id
                                 ] ?? []
                               )
                             }
@@ -1181,17 +1174,16 @@ function TournamentCard({
                                   row,
                                   tournament
                                     .recentFormByTeam?.[
-                                    row.team.id
+                                  row.team.id
                                   ] ?? []
                                 );
                               }
                             }}
                             className={`
                               group/row cursor-pointer transition-all duration-200
-                              ${
-                                isLeader
-                                  ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.09] via-amber-400/[0.025] to-transparent'
-                                  : 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
+                              ${isLeader
+                                ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.09] via-amber-400/[0.025] to-transparent'
+                                : 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
                               }
                             `}
                           >
@@ -1202,12 +1194,11 @@ function TournamentCard({
                                     mx-auto flex h-7 w-7 items-center
                                     justify-center rounded-lg
                                     text-[10px] font-black
-                                    ${
-                                      row.position === 1
-                                        ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 dark:text-slate-950 shadow-[0_0_18px_rgba(251,191,36,0.22)]'
-                                        : row.position === 2
-                                          ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900 dark:text-slate-900'
-                                          : 'bg-gradient-to-br from-orange-300 to-orange-500 text-slate-950 dark:text-slate-950'
+                                    ${row.position === 1
+                                      ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 dark:text-slate-950 shadow-[0_0_18px_rgba(251,191,36,0.22)]'
+                                      : row.position === 2
+                                        ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900 dark:text-slate-900'
+                                        : 'bg-gradient-to-br from-orange-300 to-orange-500 text-slate-950 dark:text-slate-950'
                                     }
                                   `}
                                 >
@@ -1226,10 +1217,9 @@ function TournamentCard({
                                   <div
                                     className={`
                                       absolute -inset-1 rounded-full blur-md
-                                      ${
-                                        isLeader
-                                          ? 'bg-amber-400/10'
-                                          : 'bg-emerald-400/0 group-hover/row:bg-emerald-400/10'
+                                      ${isLeader
+                                        ? 'bg-amber-400/10'
+                                        : 'bg-emerald-400/0 group-hover/row:bg-emerald-400/10'
                                       }
                                     `}
                                   />
@@ -1256,10 +1246,9 @@ function TournamentCard({
                                     min-w-0 flex-1 truncate
                                     text-xs font-bold
                                     transition-colors sm:text-sm
-                                    ${
-                                      isLeader
-                                        ? 'text-amber-600 group-hover/row:text-amber-500 dark:text-amber-100 dark:group-hover/row:text-amber-300'
-                                        : 'text-slate-700 group-hover/row:text-slate-900 dark:text-slate-300 dark:group-hover/row:text-white'
+                                    ${isLeader
+                                      ? 'text-amber-600 group-hover/row:text-amber-500 dark:text-amber-100 dark:group-hover/row:text-amber-300'
+                                      : 'text-slate-700 group-hover/row:text-slate-900 dark:text-slate-300 dark:group-hover/row:text-white'
                                     }
                                   `}
                                 >
@@ -1277,17 +1266,15 @@ function TournamentCard({
                                 hidden px-2 py-3.5
                                 text-center text-sm
                                 sm:table-cell
-                                ${
-                                  row.goalDifference > 0
-                                    ? 'font-bold text-emerald-400'
-                                    : row.goalDifference < 0
-                                      ? 'font-bold text-red-400'
-                                      : 'text-slate-500'
+                                ${row.goalDifference > 0
+                                  ? 'font-bold text-emerald-400'
+                                  : row.goalDifference < 0
+                                    ? 'font-bold text-red-400'
+                                    : 'text-slate-500'
                                 }
-                                ${
-                                  expired
-                                    ? EXPIRED_CLASS
-                                    : ''
+                                ${expired
+                                  ? EXPIRED_CLASS
+                                  : ''
                                 }
                               `}
                             >
@@ -1297,31 +1284,28 @@ function TournamentCard({
                             </td>
 
                             <td
-                              className={`hidden px-2 py-3.5 text-center text-amber-300 sm:table-cell ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
-                              }`}
+                              className={`hidden px-2 py-3.5 text-center text-amber-300 sm:table-cell ${expired
+                                ? EXPIRED_CLASS
+                                : ''
+                                }`}
                             >
                               {row.yellowCards}
                             </td>
 
                             <td
-                              className={`hidden px-2 py-3.5 text-center text-red-300 sm:table-cell ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
-                              }`}
+                              className={`hidden px-2 py-3.5 text-center text-red-300 sm:table-cell ${expired
+                                ? EXPIRED_CLASS
+                                : ''
+                                }`}
                             >
                               {row.redCards}
                             </td>
 
                             <td
-                              className={`hidden px-2 py-3.5 text-center text-blue-300 sm:table-cell ${
-                                expired
-                                  ? EXPIRED_CLASS
-                                  : ''
-                              }`}
+                              className={`hidden px-2 py-3.5 text-center text-blue-300 sm:table-cell ${expired
+                                ? EXPIRED_CLASS
+                                : ''
+                                }`}
                             >
                               {row.blueCards}
                             </td>
@@ -1331,12 +1315,11 @@ function TournamentCard({
                                 w-14 px-1.5 py-3 text-center
                                 text-sm sm:w-auto
                                 sm:px-3 sm:py-3.5 sm:text-base
-                                ${
-                                  isLeader
-                                    ? 'font-black text-amber-300'
-                                    : isCyan
-                                      ? 'font-black text-slate-900 dark:text-cyan-300'
-                                      : 'font-black text-emerald-300'
+                                ${isLeader
+                                  ? 'font-black text-amber-300'
+                                  : isCyan
+                                    ? 'font-black text-slate-900 dark:text-cyan-300'
+                                    : 'font-black text-emerald-300'
                                 }
                               `}
                             >
@@ -1358,7 +1341,7 @@ function TournamentCard({
             ) : mode === 'GROUP_STAGE' ? (
               <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
                 {!tournament.pots ||
-                tournament.pots.length === 0 ? (
+                  tournament.pots.length === 0 ? (
                   <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs text-slate-500 dark:border-white/[0.08] dark:bg-white/[0.02] sm:p-8 sm:text-sm">
                     Los grupos aún no han sido generados.
                   </p>
@@ -1643,27 +1626,47 @@ export default function HomePage() {
       <section className="relative w-full px-3.5 pb-8 pt-24 sm:px-6 sm:py-14 lg:px-12 xl:px-20">
         <div className="mx-auto w-full max-w-7xl">
           <div className="mb-6 flex flex-col gap-4 sm:mb-9 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400 sm:text-xs">
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399]" />
+            <div className="w-full sm:w-auto">
+              {/* Encabezado: visible únicamente en escritorio */}
+              <div className="hidden sm:block">
+                <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400 sm:text-xs">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399]" />
 
-                En vivo
-              </p>
+                  En vivo
+                </p>
 
-              <h2 className="mt-2 text-2xl font-black tracking-[-0.025em] text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
-                Torneos activos
-              </h2>
+                <h2 className="mt-2 text-2xl font-black tracking-[-0.025em] text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
+                  Torneos activos
+                </h2>
 
-              <p className="mt-1 text-xs text-slate-600 sm:text-sm">
-                Sigue la competición y consulta
-                cada jornada.
-              </p>
+                <p className="mt-1 text-xs text-slate-600 sm:text-sm">
+                  Sigue la competición y consulta
+                  cada jornada.
+                </p>
+              </div>
+
+              {/* Buscador: visible únicamente en móviles */}
+              {tournaments.length > 0 && (
+                <div className="relative flex h-11 w-full sm:hidden">
+                  <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
+                    🔍
+                  </span>
+
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder="Buscar torneo..."
+                    className="h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="flex w-full flex-col items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
               {tournaments.length > 0 && (
-                <div className="relative min-w-0 flex-1 sm:w-72 sm:flex-none">
-                  <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600">
+                <div className="relative hidden h-11 w-72 shrink-0 items-center justify-center sm:flex sm:flex-none">
+                  <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-600 sm:left-3.5 sm:translate-x-0">
                     🔍
                   </span>
 
@@ -1676,12 +1679,12 @@ export default function HomePage() {
                       )
                     }
                     placeholder="Buscar torneo..."
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700 dark:focus:bg-white/[0.04]"
+                    className="hidden h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm sm:block text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700 dark:focus:bg-white/[0.04]"
                   />
                 </div>
               )}
 
-              <span className="flex h-11 shrink-0 self-end items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:self-auto sm:px-4">
+              <span className="hidden h-11 shrink-0 self-end items-center gap-1.5 rounded-xl border sm:flex border-slate-200 bg-white px-3 text-[10px] font-bold text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:self-auto sm:px-4">
                 <span aria-hidden="true">
                   🏆
                 </span>

@@ -432,10 +432,11 @@ export default function DashboardPage() {
                   👋
                 </h1>
 
-                <p className="mt-3 max-w-xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:mt-4 sm:text-sm">
-                  Administra tus competiciones, equipos y toda la actividad de
-                  tus torneos desde un solo lugar.
-                </p>
+                {user.role === 'SUPERADMIN' && (
+                  <p className="mt-3 max-w-xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:mt-4 sm:text-sm">
+                    Administra tus competiciones, equipos y toda la actividad de tus torneos desde un solo lugar.
+                  </p>
+                )}
               </div>
 
               <div
@@ -489,7 +490,9 @@ export default function DashboardPage() {
               </h2>
 
               <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-                Entra directo al torneo que quieres administrar.
+                {user.role === 'SUPERADMIN'
+                  ? 'Entra directo al torneo que quieres administrar.'
+                  : 'Selecciona un torneo.'}
               </p>
             </div>
 
@@ -634,9 +637,10 @@ export default function DashboardPage() {
           )}
         </section>
 
+
         {/* HERRAMIENTAS DE ADMINISTRACIÓN */}
 
-        {(() => {
+        {user.role === 'SUPERADMIN' && (() => {
           const visibleTools = SUPERADMIN_TOOLS.filter((tool) => tool.roles.includes(user.role));
           if (!visibleTools.length) return null;
 
@@ -663,11 +667,11 @@ export default function DashboardPage() {
                       sm:text-2xl
                     "
                   >
-                    {user.role === 'SUPERADMIN' ? 'Herramientas de superadministrador' : 'Herramientas de administrador'}
+                    'Herramientas de superadministrador'
                   </h2>
 
                   <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-                    Accesos rápidos para administrar toda la plataforma.
+                    'Accesos rápidos para administrar toda la plataforma.'
                   </p>
                 </div>
               </div>
