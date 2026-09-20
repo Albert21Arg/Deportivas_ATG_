@@ -142,11 +142,10 @@ export default function DtPlayersPage() {
 
             {deadline && (
               <div
-                className={`mt-4 rounded-xl border px-4 py-3 text-sm ${
-                  registrationClosed
+                className={`mt-4 rounded-xl border px-4 py-3 text-sm ${registrationClosed
                     ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-950/30 dark:text-red-300'
                     : 'border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-950/30 dark:text-amber-300'
-                }`}
+                  }`}
               >
                 {registrationClosed
                   ? `La inscripción de jugadores cerró el ${formatDate(deadline)}. Ya no podés agregar, editar ni eliminar jugadores.`
@@ -160,13 +159,14 @@ export default function DtPlayersPage() {
                 onSubmit={savePlayer}
               >
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Nombre
+                  Nombre y apellido
 
                   <input
                     className="mt-1.5 h-11 w-full rounded-xl border border-slate-300 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
                     name="name"
                     value={form.name}
                     onChange={updateField}
+                    placeholder="Ej. Juan Pérez"
                     required
                   />
                 </label>
