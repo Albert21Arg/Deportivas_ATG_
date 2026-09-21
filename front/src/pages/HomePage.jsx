@@ -303,7 +303,7 @@ function LiveMatchCard({
     return (
       <div
         className={`
-          rounded-xl border px-3 py-2.5
+          rounded-xl border px-2.5 py-2
           sm:rounded-2xl sm:px-4 sm:py-3
           ${isCyan
             ? 'border-cyan-400/10 bg-cyan-400/[0.04]'
@@ -433,7 +433,7 @@ function LiveMatchCard({
         )}
       </div>
 
-      <div className="mt-2.5 flex items-center gap-1.5">
+      <div className="mt-2 flex items-center gap-1 sm:mt-2.5 sm:gap-1.5">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             {homeLogo ? (
@@ -443,19 +443,19 @@ function LiveMatchCard({
                 alt=""
               />
             ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[8px] dark:bg-white/[0.05] sm:h-7 sm:w-7">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[8px] dark:bg-white/[0.05] sm:h-7 sm:w-7">
                 ⚽
               </div>
             )}
 
-            <span className="truncate text-[9px] font-bold text-slate-900 dark:text-white sm:text-[10px]">
+            <span className="truncate text-[8.5px] font-bold text-slate-900 dark:text-white sm:text-[10px]">
               {homeName}
             </span>
           </div>
         </div>
 
         <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-2 py-1 dark:border-white/[0.08] dark:bg-black/30">
-          <span className="text-sm font-black tracking-wider text-slate-900 dark:text-white">
+          <span className="text-[13px] font-black tracking-wider text-slate-900 dark:text-white sm:text-sm">
             {homeScore}
           </span>
 
@@ -463,7 +463,7 @@ function LiveMatchCard({
             :
           </span>
 
-          <span className="text-sm font-black tracking-wider text-slate-900 dark:text-white">
+          <span className="text-[13px] font-black tracking-wider text-slate-900 dark:text-white sm:text-sm">
             {awayScore}
           </span>
         </div>
@@ -481,7 +481,7 @@ function LiveMatchCard({
                 alt=""
               />
             ) : (
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[8px] dark:bg-white/[0.05] sm:h-7 sm:w-7">
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[8px] dark:bg-white/[0.05] sm:h-7 sm:w-7">
                 ⚽
               </div>
             )}
@@ -527,12 +527,12 @@ function TeamModal({ selection, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 px-3 py-4 sm:px-5 sm:py-8 sm:bg-slate-950/85 sm:backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-slate-950/95 px-0 pb-0 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:items-center sm:px-5 sm:py-8 sm:bg-slate-950/85 sm:backdrop-blur-sm"
       role="presentation"
       onMouseDown={onClose}
     >
       <section
-        className="relative max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-[2rem] border border-slate-200 bg-white shadow-2xl shadow-black/10 dark:border-white/[0.08] dark:bg-[#090e17] dark:shadow-black/60 sm:max-h-[92vh]"
+        className="relative max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-[1.5rem] border border-slate-200 bg-white shadow-2xl shadow-black/20 dark:border-white/[0.08] dark:bg-[#090e17] dark:shadow-black/70 sm:max-h-[92vh] sm:rounded-[2rem]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-modal-title"
@@ -542,9 +542,9 @@ function TeamModal({ selection, onClose }) {
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-emerald-500/[0.12] to-transparent" />
 
-        <div className="relative flex justify-end px-3 pt-3 sm:px-4 sm:pt-4">
+        <div className="sticky top-0 z-20 flex justify-end px-3 pb-1 pt-3 sm:static sm:px-4 sm:pt-4">
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-xl text-slate-500 transition hover:bg-slate-200 hover:text-slate-900 dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-slate-400 dark:hover:bg-white/[0.08] dark:hover:text-white"
+            className="flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-slate-200 bg-white/95 text-xl font-bold text-slate-500 shadow-lg transition active:scale-95 hover:bg-slate-100 hover:text-slate-900 dark:border-white/[0.08] dark:bg-[#111827]/95 dark:text-slate-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
             type="button"
             onClick={onClose}
             aria-label="Cerrar detalle"
@@ -553,14 +553,14 @@ function TeamModal({ selection, onClose }) {
           </button>
         </div>
 
-        <div className="relative px-4 pb-7 text-center sm:px-6 sm:pb-8">
-          <div className="relative mx-auto mt-2 w-fit">
+        <div className="relative px-3 pb-6 text-center sm:px-6 sm:pb-8">
+          <div className="relative mx-auto mt-1 w-fit sm:mt-2">
             <div className="absolute inset-0 rounded-full bg-emerald-400/10 blur-2xl" />
 
-            <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 shadow-2xl dark:border-white/[0.08] dark:from-slate-800 dark:to-slate-950 sm:h-32 sm:w-32">
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-[1.5rem] border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200 shadow-2xl dark:border-white/[0.08] dark:from-slate-800 dark:to-slate-950 sm:h-32 sm:w-32">
               <TeamLogo
                 team={row.team}
-                size="h-20 w-20 sm:h-24 sm:w-24"
+                size="h-16 w-16 sm:h-24 sm:w-24"
               />
             </div>
 
@@ -574,7 +574,7 @@ function TeamModal({ selection, onClose }) {
             )}
           </div>
 
-          <div className="mt-5">
+          <div className="mt-4 sm:mt-5">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-300">
               Posición #{row.position}
             </span>
@@ -594,7 +594,7 @@ function TeamModal({ selection, onClose }) {
             </p>
           </div>
 
-          <div className="mt-7 grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.06] dark:bg-white/[0.025]">
+          <div className="mt-5 grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.06] dark:bg-white/[0.025] sm:mt-7">
             <div className="border-r border-slate-200 px-3 py-4 dark:border-white/[0.06]">
               <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-500">
                 PJ
@@ -635,7 +635,7 @@ function TeamModal({ selection, onClose }) {
             </div>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-5 sm:mt-6">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-500">
               Últimos resultados
             </p>
@@ -660,6 +660,123 @@ function TeamModal({ selection, onClose }) {
         </div>
       </section>
     </div>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Botón de like del torneo
+|
+| El backend valida el límite real de 1 like por IP/torneo cada 24h; acá
+| solo recordamos localmente (localStorage) que este navegador ya dio like
+| a este torneo, para no mostrar el corazón activo otra vez hasta que
+| pasen las 24h, aunque el usuario recargue la página. Mientras esté
+| "liked", el mismo botón permite deshacerlo (por si fue un click por
+| error) — el backend solo deja quitar el más reciente, dentro de esa
+| misma ventana de 24h.
+|--------------------------------------------------------------------------
+*/
+
+const LIKE_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+function hasLikedRecently(tournamentId) {
+  try {
+    const storedAt = localStorage.getItem(`tournamentLike:${tournamentId}`);
+    return Boolean(storedAt) && Date.now() - Number(storedAt) < LIKE_COOLDOWN_MS;
+  } catch {
+    return false;
+  }
+}
+
+function rememberLike(tournamentId) {
+  try {
+    localStorage.setItem(`tournamentLike:${tournamentId}`, String(Date.now()));
+  } catch {
+    // localStorage puede fallar en modo privado; no es crítico, el backend
+    // igual aplica el límite real por IP.
+  }
+}
+
+function forgetLike(tournamentId) {
+  try {
+    localStorage.removeItem(`tournamentLike:${tournamentId}`);
+  } catch {
+    // Ídem: si falla, no es crítico.
+  }
+}
+
+function TournamentLikeButton({ tournamentId, initialTotal }) {
+  const { notify } = useNotifications();
+  const [total, setTotal] = useState(initialTotal);
+  const [isLiked, setIsLiked] = useState(() => hasLikedRecently(tournamentId));
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    setTotal(initialTotal);
+  }, [initialTotal]);
+
+  async function handleToggleLike(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    try {
+      if (isLiked) {
+        const { data } = await api.delete(`/public/tournaments/${tournamentId}/like`);
+        setTotal(data.data.total);
+        setIsLiked(false);
+        forgetLike(tournamentId);
+      } else {
+        const { data } = await api.post(`/public/tournaments/${tournamentId}/like`);
+        setTotal(data.data.total);
+        setIsLiked(true);
+        rememberLike(tournamentId);
+      }
+    } catch (error) {
+      const details = getApiErrorDetails(error);
+      if (details.message?.startsWith('Ya diste like')) {
+        setIsLiked(true);
+        rememberLike(tournamentId);
+      } else if (details.message?.includes('No tenés un like reciente')) {
+        // Ya no había nada que deshacer (ej. pasaron las 24h): sincronizamos
+        // el estado local con lo que dice el backend.
+        setIsLiked(false);
+        forgetLike(tournamentId);
+      }
+      notify(details);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleToggleLike}
+      disabled={isSaving}
+      className={`
+        absolute right-2 top-2 z-10
+        flex items-center gap-1.5
+        rounded-full border px-2.5 py-1.5
+        text-xs font-bold
+        shadow-lg
+        backdrop-blur-md transition-all duration-200
+        sm:right-2.5 sm:top-2.5
+        ${
+          isLiked
+            ? 'border-rose-400/40 bg-rose-400/15 text-rose-600 hover:border-rose-400/60 hover:bg-rose-400/25 dark:text-rose-300'
+            : 'border-slate-200 bg-white/90 text-slate-500 hover:border-rose-400/40 hover:bg-rose-400/10 hover:text-rose-600 dark:border-white/[0.08] dark:bg-black/40 dark:text-slate-400 dark:hover:text-rose-300'
+        }
+        ${isSaving ? 'cursor-wait opacity-70' : 'cursor-pointer active:scale-95'}
+      `}
+      title={isLiked ? 'Quitar like (por si fue un error)' : 'Dar like a este torneo'}
+    >
+      <span aria-hidden="true">{isLiked ? '❤️' : '🤍'}</span>
+      <span>{total}</span>
+    </button>
   );
 }
 
@@ -792,7 +909,7 @@ function TournamentCard({
     <article
       className={`
         group relative w-full min-w-0 overflow-hidden
-        rounded-[1.75rem]
+        rounded-2xl
         border
         ${colors.border}
         ${colors.bg}
@@ -843,6 +960,11 @@ function TournamentCard({
         `}
       />
 
+      <TournamentLikeButton
+        tournamentId={tournament.tournament.id}
+        initialTotal={tournament.tournament.likesTotal ?? 0}
+      />
+
       {/* ============================================================
           CABECERA
       ============================================================ */}
@@ -855,8 +977,8 @@ function TournamentCard({
         aria-expanded={isExpanded}
         aria-controls={contentId}
       >
-        <div className="p-4 sm:p-6 lg:p-7">
-          <div className="flex items-start gap-4 sm:gap-6">
+        <div className="p-3.5 sm:p-6 lg:p-7">
+          <div className="flex items-start gap-3 sm:gap-6">
             {/* Logo */}
 
             <div className="relative shrink-0">
@@ -873,34 +995,33 @@ function TournamentCard({
                 `}
               />
 
-              <div
-                className={`
-                  relative flex h-16 w-16
-                  items-center justify-center
-                  rounded-[1.25rem]
-                  border
-                  ${colors.logoBorder}
-                  bg-gradient-to-br
-                  from-slate-100 via-slate-200 to-slate-300
-                  dark:from-slate-800 dark:via-slate-900 dark:to-slate-950
-                  p-2 shadow-2xl
-                  sm:h-20 sm:w-20
-                  sm:rounded-[1.5rem]
-                  sm:p-2.5
-                `}
-              >
-                {tournament.tournament.logo ? (
-                  <img
-                    className="h-full w-full rounded-xl object-cover"
-                    src={tournament.tournament.logo}
-                    alt=""
-                  />
-                ) : (
-                  <span className="text-2xl sm:text-3xl">
+              {tournament.tournament.logo ? (
+                <img
+                  className="relative h-14 w-14 rounded-xl object-cover shadow-2xl sm:h-24 sm:w-24 sm:rounded-[1.5rem]"
+                  src={tournament.tournament.logo}
+                  alt=""
+                />
+              ) : (
+                <div
+                  className={`
+                    relative flex h-14 w-14
+                    items-center justify-center
+                    rounded-[1.25rem]
+                    border
+                    ${colors.logoBorder}
+                    bg-gradient-to-br
+                    from-slate-100 via-slate-200 to-slate-300
+                    dark:from-slate-800 dark:via-slate-900 dark:to-slate-950
+                    shadow-2xl
+                    sm:h-24 sm:w-24
+                    sm:rounded-[1.5rem]
+                  `}
+                >
+                  <span className="text-xl sm:text-3xl">
                     🏆
                   </span>
-                )}
-              </div>
+                </div>
+              )}
 
               <span
                 className={`
@@ -925,7 +1046,7 @@ function TournamentCard({
 
             {/* Información */}
 
-            <div className="min-w-0 flex-1 pr-10 sm:pr-0">
+            <div className="min-w-0 flex-1 pr-9 sm:pr-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`
@@ -953,11 +1074,11 @@ function TournamentCard({
                 </span>
               </div>
 
-              <h2 className="mt-3 truncate text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-2xl lg:text-[1.7rem]">
+              <h2 className="mt-2 line-clamp-2 text-[1.05rem] font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:mt-3 sm:truncate sm:text-2xl lg:text-[1.7rem]">
                 {tournament.tournament.name}
               </h2>
 
-              <p className="mt-1.5 line-clamp-2 max-w-3xl text-xs leading-5 text-slate-500 sm:mt-2 sm:text-sm sm:leading-6">
+              <p className="mt-1 line-clamp-2 max-w-3xl text-[11px] leading-4 text-slate-500 sm:mt-2 sm:text-sm sm:leading-6">
                 {tournament.tournament.description ||
                   'Consulta la clasificación, partidos y resultados de esta competición.'}
               </p>
@@ -990,7 +1111,7 @@ function TournamentCard({
     ESTADÍSTICAS
 ============================================================ */}
 
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:mt-6 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-1.5 sm:mt-6 sm:grid-cols-4 sm:gap-2">
 
             {/* EQUIPOS
       Oculto en móviles, visible desde sm */}
@@ -1005,7 +1126,7 @@ function TournamentCard({
             </div>
 
             {/* ÚLTIMO CAMPEÓN */}
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
               {tournament.tournament.championTeam && (
                 <TeamLogo
                   team={tournament.tournament.championTeam}
@@ -1019,7 +1140,7 @@ function TournamentCard({
                   Último campeón
                 </p>
 
-                <p className="mt-0.5 truncate text-sm font-black text-slate-900 dark:text-white sm:text-base">
+                <p className="mt-0.5 truncate text-[12px] font-black text-slate-900 dark:text-white sm:text-base">
                   {tournament.tournament.championTeam?.name ?? '—'}
                 </p>
               </div>
@@ -1050,26 +1171,34 @@ function TournamentCard({
       </button>
 
       {/* ================================================================
-          CONTENIDO
+          CONTENIDO (modal, no expansión en línea)
       ================================================================ */}
 
-      <div
-        className={`
-          grid transition-[grid-template-rows]
-          duration-500 ease-out
-          ${isExpanded
-            ? 'grid-rows-[1fr]'
-            : 'grid-rows-[0fr]'
-          }
-        `}
-      >
-        <div className="min-h-0 overflow-hidden">
+      {isExpanded && (
+        <div
+          className="fixed inset-0 z-[55] flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) onToggle();
+          }}
+        >
           <div
             id={contentId}
-            role="region"
+            role="dialog"
+            aria-modal="true"
             aria-labelledby={buttonId}
-            className="w-full min-w-0 border-t border-slate-200 dark:border-white/[0.06]"
+            className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/[0.09] dark:bg-[#0b1119] sm:rounded-3xl"
+            onMouseDown={(event) => event.stopPropagation()}
           >
+            <button
+              type="button"
+              onClick={onToggle}
+              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-sm text-slate-500 backdrop-blur-md transition hover:bg-slate-100 hover:text-slate-900 dark:border-white/[0.08] dark:bg-black/40 dark:text-slate-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+
             {/* Header clasificación */}
 
             <div className="flex items-center justify-between bg-slate-50 px-4 py-3 dark:bg-black/10 sm:px-6 sm:py-4">
@@ -1420,14 +1549,13 @@ function TournamentCard({
             </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Footer cerrado */}
+      {/* Footer */}
 
-      {!isExpanded && (
-        <div className="relative border-t border-slate-200 px-3 py-3 dark:border-white/[0.05] sm:px-5 sm:py-4">
-          <Link
-            className={`
+      <div className="relative border-t border-slate-200 px-3 py-3 dark:border-white/[0.05] sm:px-5 sm:py-4">
+        <Link
+          className={`
               group/link flex min-h-11 w-full
               items-center justify-center gap-2
               rounded-xl
@@ -1440,16 +1568,15 @@ function TournamentCard({
               transition-all duration-300
               sm:py-3 sm:text-sm
             `}
-            to={`/tournaments/${tournament.tournament.id}`}
-          >
-            Ver torneo y próximos partidos
+          to={`/tournaments/${tournament.tournament.id}`}
+        >
+          Ver torneo y próximos partidos
 
-            <span className="transition-transform duration-300 group-hover/link:translate-x-1">
-              →
-            </span>
-          </Link>
-        </div>
-      )}
+          <span className="transition-transform duration-300 group-hover/link:translate-x-1">
+            →
+          </span>
+        </Link>
+      </div>
     </article>
   );
 }
@@ -1623,23 +1750,23 @@ export default function HomePage() {
           TORNEOS
       ================================================================ */}
 
-      <section className="relative w-full px-3.5 pb-8 pt-24 sm:px-6 sm:py-14 lg:px-12 xl:px-20">
+      <section className="relative w-full px-3 pb-7 pt-[5.5rem] sm:px-6 sm:py-14 lg:px-12 xl:px-20">
         <div className="mx-auto w-full max-w-7xl">
-          <div className="mb-6 flex flex-col gap-4 sm:mb-9 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 sm:mb-9 sm:flex-row sm:items-end sm:justify-between">
             <div className="w-full sm:w-auto">
               {/* Encabezado: visible únicamente en escritorio */}
-              <div className="hidden sm:block">
-                <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-400 sm:text-xs">
+              <div className="block">
+                <p className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.16em] text-emerald-400 sm:text-xs">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_7px_#34d399]" />
 
                   En vivo
                 </p>
 
-                <h2 className="mt-2 text-2xl font-black tracking-[-0.025em] text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
+                <h2 className="mt-1.5 text-xl font-black tracking-[-0.025em] text-slate-900 dark:text-white sm:mt-2 sm:text-3xl lg:text-4xl">
                   Torneos activos
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-600 sm:text-sm">
+                <p className="mt-0.5 text-[11px] leading-4 text-slate-500 sm:mt-1 sm:text-sm">
                   Sigue la competición y consulta
                   cada jornada.
                 </p>
@@ -1647,7 +1774,7 @@ export default function HomePage() {
 
               {/* Buscador: visible únicamente en móviles */}
               {tournaments.length > 0 && (
-                <div className="relative flex h-11 w-full sm:hidden">
+                <div className="relative mt-2 flex h-11 w-full sm:hidden">
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
                     🔍
                   </span>
@@ -1657,7 +1784,7 @@ export default function HomePage() {
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Buscar torneo..."
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700"
+                    className="h-12 w-full touch-manipulation rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700"
                   />
                 </div>
               )}
@@ -1726,7 +1853,7 @@ export default function HomePage() {
               </p>
             </div>
           ) : (
-            <div className="flex w-full flex-col gap-5 sm:gap-5 lg:gap-6">
+            <div className="grid w-full grid-cols-1 gap-3.5 sm:gap-5 lg:grid-cols-2 lg:gap-6">
               {filteredTournaments.map(
                 (tournament, index) => {
                   const tournamentId =

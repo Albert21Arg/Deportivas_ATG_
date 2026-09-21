@@ -384,7 +384,7 @@ export default function TournamentWorkspacePage() {
             MODULE CARDS
         ======================================================= */}
 
-        <div className="grid gap-2 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-5 lg:grid-cols-3">
 
           {sections.map((section) => {
             const styles = colorStyles[section.color];
@@ -396,8 +396,8 @@ export default function TournamentWorkspacePage() {
                 className={`group relative overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/95 p-3 shadow-lg shadow-black/15 transition-all duration-300 ease-out
                   hover:border-slate-300 hover:dark:border-white/[0.12]
                   hover:bg-slate-50 hover:dark:bg-[#0c141e]
+                  min-h-[168px]
                   sm:min-h-[310px]
-                  sm:-translate-y-0
                   sm:rounded-3xl
                   sm:p-6
                   sm:hover:-translate-y-2
@@ -432,14 +432,14 @@ export default function TournamentWorkspacePage() {
                   {section.number}
                 </span>
 
-                <div className="relative flex h-full items-center gap-3 sm:flex-col sm:items-stretch sm:gap-0">
+                <div className="relative flex h-full flex-col items-stretch">
 
                   {/* =================================================
                       ICON
                   ================================================= */}
 
                   <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-lg transition-all duration-300 ease-out
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-base transition-all duration-300 ease-out
                       group-hover:scale-110
                       group-hover:rotate-2
                       sm:h-14
@@ -458,34 +458,26 @@ export default function TournamentWorkspacePage() {
                       CONTENT
                   ================================================= */}
 
-                  <div className="min-w-0 flex-1 sm:mt-7 sm:flex-none lg:mt-8">
+                  <div className="mt-3 min-w-0 sm:mt-7 lg:mt-8">
 
-                    <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white transition-transform duration-300 group-hover:translate-x-1 sm:mt-2 sm:text-xl lg:text-2xl">
+                    <h3 className="text-xs font-bold tracking-tight text-slate-900 dark:text-white transition-transform duration-300 group-hover:translate-x-1 sm:mt-2 sm:text-xl lg:text-2xl">
                       {section.title}
                     </h3>
 
-                    <p className="mt-0.5 line-clamp-1 max-w-sm text-xs leading-5 text-slate-500 transition-colors duration-300 group-hover:text-slate-500 group-hover:dark:text-slate-400 sm:mt-3 sm:line-clamp-none sm:text-sm sm:leading-6">
+                    <p className="mt-0.5 line-clamp-2 max-w-sm text-[11px] leading-4 text-slate-500 transition-colors duration-300 group-hover:text-slate-500 group-hover:dark:text-slate-400 sm:mt-3 sm:line-clamp-none sm:text-sm sm:leading-6">
                       {section.description}
                     </p>
 
                   </div>
 
                   {/* =================================================
-                      MOBILE CHEVRON (reemplaza el botón "Abrir módulo" en filas compactas)
-                  ================================================= */}
-
-                  <span className="shrink-0 text-lg text-slate-400 transition-transform duration-300 group-hover:translate-x-1 sm:hidden">
-                    →
-                  </span>
-
-                  {/* =================================================
                       CTA
                   ================================================= */}
 
-                  <div className="mt-auto hidden pt-5 sm:block sm:pt-7 lg:pt-8">
+                  <div className="mt-auto pt-3 sm:pt-7 lg:pt-8">
 
                     <div
-                      className={`flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition-all duration-300 sm:px-5 sm:py-3 sm:text-sm ${styles.text} ${styles.cta}`}
+                      className={`flex w-full items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-[10px] font-bold transition-all duration-300 sm:rounded-xl sm:px-5 sm:py-3 sm:text-sm ${styles.text} ${styles.cta}`}
                     >
                       Abrir
                       <span className="hidden sm:inline">
@@ -497,7 +489,7 @@ export default function TournamentWorkspacePage() {
                       </span>
                     </div>
 
-                    <div className="mt-3 h-px w-full bg-gradient-to-r from-white/[0.06] to-transparent transition-all duration-300 group-hover:from-white/[0.12] sm:mt-4" />
+                    <div className="mt-3 hidden h-px w-full bg-gradient-to-r from-white/[0.06] to-transparent transition-all duration-300 group-hover:from-white/[0.12] sm:block sm:mt-4" />
 
                   </div>
 

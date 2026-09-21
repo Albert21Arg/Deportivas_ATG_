@@ -208,7 +208,9 @@ function TeamLogo({ team, size = "normal" }) {
   const sizeClasses =
     size === "large"
       ? "h-16 w-16 sm:h-20 sm:w-20"
-      : "h-11 w-11 sm:h-14 sm:w-14 lg:h-16 lg:w-16";
+      : size === "small"
+        ? "h-7 w-7 sm:h-8 sm:w-8"
+        : "h-11 w-11 sm:h-14 sm:w-14 lg:h-16 lg:w-16";
 
   if (!team?.logo || hasError) {
     return (
@@ -229,24 +231,13 @@ function TeamLogo({ team, size = "normal" }) {
   }
 
   return (
-    <div
-      className={`
-        mx-auto flex ${sizeClasses}
-        items-center justify-center
-        rounded-full
-        border border-slate-200 dark:border-white/[0.06]
-        bg-slate-100 dark:bg-white/[0.025]
-        p-2
-      `}
-    >
-      <img
-        className="h-full w-full object-contain"
-        src={team.logo}
-        alt={`Logo de ${team.name}`}
-        loading="lazy"
-        onError={() => setHasError(true)}
-      />
-    </div>
+    <img
+      className={`mx-auto ${sizeClasses} object-contain`}
+      src={team.logo}
+      alt={`Logo de ${team.name}`}
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
   );
 }
 
@@ -490,11 +481,8 @@ function MatchEventsPanel({
   const [query, setQuery] = useState("");
   const [player, setPlayer] = useState(null);
   const [minute, setMinute] = useState("");
-
-  const [score, setScore] = useState({
-    homeScore: String(match.homeScore ?? 0),
-    awayScore: String(match.awayScore ?? 0),
-  });
+  const [isPlayerPickerOpen, setIsPlayerPickerOpen] =
+    useState(false);
 
   const [currentMatch, setCurrentMatch] = useState(match);
   const [eventToRemove, setEventToRemove] = useState(null);
@@ -542,11 +530,6 @@ function MatchEventsPanel({
 
   useEffect(() => {
     setCurrentMatch(match);
-
-    setScore({
-      homeScore: String(match.homeScore ?? 0),
-      awayScore: String(match.awayScore ?? 0),
-    });
   }, [
     match.id,
     match.homeScore,
@@ -586,24 +569,6 @@ function MatchEventsPanel({
         detail: updated,
       }),
     );
-  }
-
-  async function saveScore(event) {
-    event.preventDefault();
-
-    try {
-      const { data } = await api.patch(
-        `/matches/${match.id}/live-score`,
-        {
-          homeScore: Number(score.homeScore),
-          awayScore: Number(score.awayScore),
-        },
-      );
-
-      apply(data.data.match);
-    } catch (error) {
-      notify(getApiErrorDetails(error));
-    }
   }
 
   async function saveCard(event) {
@@ -653,65 +618,7 @@ function MatchEventsPanel({
 
   return (
     <div className="mt-4 space-y-2.5 border-t border-slate-200 dark:border-white/[0.05] pt-3.5 sm:space-y-3 sm:pt-4">
-      {isLiveVariant ? (
-        <form
-          className="
-            rounded-xl
-            border border-emerald-400/10
-            bg-emerald-400/[0.035]
-            p-2.5 sm:p-3
-          "
-          onSubmit={saveScore}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
-              Corrección manual del marcador
-            </p>
-
-            <span className="flex items-center gap-1 text-[8px] font-bold text-red-600 dark:text-red-400">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
-              EN VIVO
-            </span>
-          </div>
-
-          <p className="mt-1 text-[9px] leading-4 text-slate-500">
-            Usa esto solo para corregir errores. Para anotar
-            goles usa los eventos.
-          </p>
-
-          <div className="mt-2 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-            <input
-              className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-center text-xl font-black text-slate-900 dark:text-white outline-none focus:border-emerald-400"
-              min="0"
-              type="number"
-              value={score.homeScore}
-              onChange={(event) =>
-                setScore((current) => ({
-                  ...current,
-                  homeScore: event.target.value,
-                }))
-              }
-            />
-
-            <span className="text-sm font-bold text-slate-600">
-              -
-            </span>
-
-            <input
-              className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-center text-xl font-black text-slate-900 dark:text-white outline-none focus:border-emerald-400"
-              min="0"
-              type="number"
-              value={score.awayScore}
-              onChange={(event) =>
-                setScore((current) => ({
-                  ...current,
-                  awayScore: event.target.value,
-                }))
-              }
-            />
-          </div>
-        </form>
-      ) : (
+      {!isLiveVariant && (
         <div className="rounded-xl border border-cyan-400/10 bg-cyan-400/[0.035] p-2.5 sm:p-3">
           <p className="text-[9px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300">
             Goleadores y tarjetas
@@ -736,7 +643,7 @@ function MatchEventsPanel({
           }`}
         >
           <button
-            className={`h-9 rounded-lg text-[9px] font-bold transition ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
               type === "GOAL"
                 ? "bg-emerald-400 text-slate-950 dark:text-slate-950"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -748,11 +655,12 @@ function MatchEventsPanel({
               setQuery("");
             }}
           >
-            ⚽
+            <span className="text-xl sm:text-2xl">⚽</span>
+            <span>Gol</span>
           </button>
 
           <button
-            className={`flex h-9 items-center justify-center rounded-lg text-[9px] font-bold transition ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
               type === "OWN_GOAL"
                 ? "bg-orange-400 text-slate-950 dark:text-slate-950"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -765,16 +673,17 @@ function MatchEventsPanel({
             }}
           >
             <FutbolIcon
-              className={`h-4 w-4 ${
+              className={`h-6 w-6 sm:h-7 sm:w-7 ${
                 type === "OWN_GOAL"
                   ? "text-red-600"
                   : "text-red-500"
               }`}
             />
+            <span>Autogol</span>
           </button>
 
           <button
-            className={`h-9 rounded-lg text-[9px] font-bold transition ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
               type === "YELLOW_CARD"
                 ? "bg-amber-400 text-slate-950 dark:text-slate-950"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -786,11 +695,12 @@ function MatchEventsPanel({
               setQuery("");
             }}
           >
-            🟨
+            <span className="text-xl sm:text-2xl">🟨</span>
+            <span>Amarilla</span>
           </button>
 
           <button
-            className={`h-9 rounded-lg text-[9px] font-bold transition ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
               type === "RED_CARD"
                 ? "bg-red-500 text-slate-900 dark:text-white"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -802,12 +712,13 @@ function MatchEventsPanel({
               setQuery("");
             }}
           >
-            🟥
+            <span className="text-xl sm:text-2xl">🟥</span>
+            <span>Roja</span>
           </button>
 
           {blueCardEnabled && (
             <button
-              className={`h-9 rounded-lg text-[9px] font-bold transition ${
+              className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
                 type === "BLUE_CARD"
                   ? "bg-blue-500 text-slate-900 dark:text-white"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -819,7 +730,8 @@ function MatchEventsPanel({
                 setQuery("");
               }}
             >
-              🟦
+              <span className="text-xl sm:text-2xl">🟦</span>
+              <span>Azul</span>
             </button>
           )}
         </div>
@@ -831,60 +743,189 @@ function MatchEventsPanel({
           </p>
         )}
 
-        <select
-          className="mt-2 h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 text-xs text-slate-900 dark:text-white outline-none focus:border-emerald-400"
-          value={teamId}
-          onChange={(event) => {
-            setTeamId(event.target.value);
-            setPlayer(null);
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
+          <button
+            className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 text-left transition ${
+              String(teamId) === String(match.homeTeamId)
+                ? "border-emerald-400/40 bg-emerald-400/10"
+                : "border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 hover:dark:bg-slate-700"
+            }`}
+            type="button"
+            onClick={() => {
+              setTeamId(String(match.homeTeamId));
+              setPlayer(null);
+              setQuery("");
+            }}
+          >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-slate-950">
+              <TeamLogo team={match.homeTeam} size="small" />
+            </span>
+
+            <span
+              className={`min-w-0 truncate text-[11px] font-bold ${
+                String(teamId) === String(match.homeTeamId)
+                  ? "text-emerald-700 dark:text-emerald-300"
+                  : "text-slate-600 dark:text-slate-400"
+              }`}
+            >
+              {match.homeTeam.name}
+            </span>
+          </button>
+
+          <button
+            className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 text-left transition ${
+              String(teamId) === String(match.awayTeamId)
+                ? "border-emerald-400/40 bg-emerald-400/10"
+                : "border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 hover:dark:bg-slate-700"
+            }`}
+            type="button"
+            onClick={() => {
+              setTeamId(String(match.awayTeamId));
+              setPlayer(null);
+              setQuery("");
+            }}
+          >
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-slate-950">
+              <TeamLogo team={match.awayTeam} size="small" />
+            </span>
+
+            <span
+              className={`min-w-0 truncate text-[11px] font-bold ${
+                String(teamId) === String(match.awayTeamId)
+                  ? "text-emerald-700 dark:text-emerald-300"
+                  : "text-slate-600 dark:text-slate-400"
+              }`}
+            >
+              {match.awayTeam.name}
+            </span>
+          </button>
+        </div>
+
+        <button
+          className="mt-2 flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 text-left text-xs outline-none transition hover:border-emerald-400/50"
+          type="button"
+          onClick={() => {
             setQuery("");
+            setIsPlayerPickerOpen(true);
           }}
         >
-          <option value={match.homeTeamId}>
-            {match.homeTeam.name}
-          </option>
+          <span
+            className={`min-w-0 truncate ${
+              player
+                ? "text-slate-900 dark:text-white"
+                : "text-slate-600"
+            }`}
+          >
+            {player ? player.name : "Buscar jugador..."}
+          </span>
 
-          <option value={match.awayTeamId}>
-            {match.awayTeam.name}
-          </option>
-        </select>
+          <span className="shrink-0 text-slate-500">
+            🔍
+          </span>
+        </button>
 
-        <div className="relative">
-          <input
-            className="mt-2 h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
-            placeholder="Buscar jugador..."
-            value={query}
-            onChange={(event) => {
-              setQuery(event.target.value);
-              setPlayer(null);
+        {isPlayerPickerOpen && (
+          <div
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setIsPlayerPickerOpen(false);
+              }
             }}
-            autoComplete="off"
-          />
+          >
+            <section
+              className="flex max-h-[85vh] w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-slate-900 shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="player-picker-title"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-center justify-between gap-3 border-b border-slate-200 dark:border-white/[0.06] px-4 py-3.5">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 dark:border-white/[0.08] bg-slate-50 dark:bg-slate-950">
+                    <TeamLogo
+                      team={
+                        String(teamId) ===
+                        String(match.homeTeamId)
+                          ? match.homeTeam
+                          : match.awayTeam
+                      }
+                      size="small"
+                    />
+                  </span>
 
-          {query && !player && (
-            <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-32 overflow-y-auto rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 shadow-xl">
-              {results.map((item) => (
+                  <div className="min-w-0">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                      Seleccionar jugador
+                    </p>
+
+                    <h3
+                      id="player-picker-title"
+                      className="truncate text-xs font-bold text-slate-900 dark:text-white"
+                    >
+                      {String(teamId) ===
+                      String(match.homeTeamId)
+                        ? match.homeTeam.name
+                        : match.awayTeam.name}
+                    </h3>
+                  </div>
+                </div>
+
                 <button
-                  className="block w-full truncate px-3 py-2.5 text-left text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-800"
-                  key={item.id}
                   type="button"
-                  onClick={() => {
-                    setPlayer(item);
-                    setQuery(item.name);
-                  }}
+                  onClick={() =>
+                    setIsPlayerPickerOpen(false)
+                  }
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.06] text-slate-500 transition hover:bg-slate-100 hover:dark:bg-slate-800"
+                  aria-label="Cerrar"
                 >
-                  {item.name}
+                  ✕
                 </button>
-              ))}
+              </div>
 
-              {results.length === 0 && (
-                <p className="px-3 py-2.5 text-xs text-slate-500">
-                  No hay jugadores disponibles.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+              <div className="border-b border-slate-200 dark:border-white/[0.06] p-3">
+                <input
+                  className="h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
+                  placeholder="Buscar jugador..."
+                  value={query}
+                  onChange={(event) =>
+                    setQuery(event.target.value)
+                  }
+                  autoComplete="off"
+                  autoFocus
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-2">
+                {results.length === 0 ? (
+                  <p className="px-2 py-6 text-center text-xs text-slate-500">
+                    No hay jugadores disponibles.
+                  </p>
+                ) : (
+                  results.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setPlayer(item);
+                        setQuery(item.name);
+                        setIsPlayerPickerOpen(false);
+                      }}
+                      className={`block w-full truncate rounded-lg px-3 py-2.5 text-left text-xs transition ${
+                        player?.id === item.id
+                          ? "bg-emerald-400/10 font-bold text-emerald-700 dark:text-emerald-300"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 hover:dark:bg-slate-800"
+                      }`}
+                    >
+                      {item.name}
+                    </button>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+        )}
 
         <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
           <input
@@ -900,7 +941,7 @@ function MatchEventsPanel({
           />
 
           <button
-            className="rounded-lg bg-slate-100 px-3 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-lg bg-amber-400 px-3 text-[10px] font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!player}
           >
             Registrar
@@ -2059,9 +2100,13 @@ export default function MatchesPage() {
   const [isScheduleOpen, setIsScheduleOpen] =
     useState(false);
 
+  const [isFixtureSectionOpen, setIsFixtureSectionOpen] =
+    useState(false);
+
   const [openSections, setOpenSections] =
     useState({
-      pending: true,
+      live: true,
+      pending: false,
       postponed: false,
       finished: false,
       cancelled: false,
@@ -2216,11 +2261,6 @@ export default function MatchesPage() {
     });
 
     setIsScheduleOpen(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   }
 
   function cancelEditing() {
@@ -2827,6 +2867,14 @@ export default function MatchesPage() {
         ),
       );
 
+      if (action === "start") {
+        setOpenSections((current) => ({
+          ...current,
+          live: true,
+          pending: false,
+        }));
+      }
+
       notify({
         type: "success",
         title:
@@ -2920,10 +2968,9 @@ export default function MatchesPage() {
   const pendingMatches = useMemo(
     () =>
       filteredMatches
-        .filter((match) =>
-          ["SCHEDULED", "STARTED"].includes(
-            match.status,
-          ),
+        .filter(
+          (match) =>
+            match.status === "SCHEDULED",
         )
         .sort(
           (a, b) =>
@@ -2980,10 +3027,24 @@ export default function MatchesPage() {
 
   const liveMatches = useMemo(
     () =>
+      filteredMatches
+        .filter(
+          (match) =>
+            match.status === "STARTED",
+        )
+        .sort(
+          (a, b) =>
+            getMatchTimestamp(a) -
+            getMatchTimestamp(b),
+        ),
+    [filteredMatches],
+  );
+
+  const liveMatchesCount = useMemo(
+    () =>
       matches.filter(
-        (match) =>
-          match.status === "STARTED",
-      ),
+        (match) => match.status === "STARTED",
+      ).length,
     [matches],
   );
 
@@ -3030,7 +3091,7 @@ export default function MatchesPage() {
             HERO
         ====================================================== */}
 
-        <div className="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.07] bg-gradient-to-br from-white via-slate-50 to-emerald-50/60 dark:from-[#101923] dark:via-[#0a111a] dark:to-[#070c12] shadow-2xl shadow-black/5 dark:shadow-black/20">
+        <div className="hidden overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.07] bg-gradient-to-br from-white via-slate-50 to-emerald-50/60 dark:from-[#101923] dark:via-[#0a111a] dark:to-[#070c12] shadow-2xl shadow-black/5 dark:shadow-black/20 sm:relative sm:block">
           <div className="absolute right-0 top-0 h-56 w-56 rounded-full bg-emerald-400/[0.045] blur-3xl" />
 
           <div className="relative p-5 sm:p-7 lg:p-8">
@@ -3062,7 +3123,7 @@ export default function MatchesPage() {
 
                     <StatCard
                       label="En vivo"
-                      value={liveMatches.length}
+                      value={liveMatchesCount}
                       icon="●"
                       tone="text-emerald-600 dark:text-emerald-400"
                       accent="border-emerald-400/10"
@@ -3087,7 +3148,7 @@ export default function MatchesPage() {
             TOURNAMENT
         ====================================================== */}
 
-        <div className="mt-4 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3.5 shadow-xl shadow-black/10 sm:mt-5 sm:p-4">
+        <div className="hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3.5 shadow-xl shadow-black/10 sm:mt-5 sm:block sm:p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-400/10 bg-emerald-400/[0.05] text-emerald-700 dark:text-emerald-300">
@@ -3147,7 +3208,7 @@ export default function MatchesPage() {
         </div>
 
         {/* ======================================================
-            GENERATE FIXTURE
+            GENERATE FIXTURE (acordeón cerrado por defecto)
         ====================================================== */}
 
         {isAdmin &&
@@ -3155,107 +3216,180 @@ export default function MatchesPage() {
           (selectedTournament?.mode ??
             "ROUND_ROBIN") ===
             "ROUND_ROBIN" && (
-            <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-cyan-400/10 bg-cyan-400/[0.035] px-4 py-3.5 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[8px] font-bold uppercase tracking-[0.15em] text-slate-900 dark:text-cyan-400">
-                  Automatización
-                </p>
+            <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 shadow-xl shadow-black/10 sm:mt-5">
+              <button
+                className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:px-5"
+                onClick={() =>
+                  setIsFixtureSectionOpen(
+                    (current) => !current,
+                  )
+                }
+                type="button"
+                aria-expanded={isFixtureSectionOpen}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-400/10 bg-cyan-500/[0.06] text-sm">
+                    ⚡
+                  </div>
 
-                <p className="mt-1 text-[11px] text-slate-600 dark:text-cyan-100 sm:text-xs">
-                  Genera automáticamente el fixture
-                  completo de todos contra todos.
-                </p>
-              </div>
+                  <div className="min-w-0">
+                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-900 dark:text-cyan-400">
+                      Automatización
+                    </p>
 
-              <div className="flex shrink-0 gap-2">
-                <button
-                  className="rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
-                  type="button"
-                  disabled={isGeneratingFixtures}
-                  onClick={() =>
-                    setIsConfirmingGenerateFixtures(true)
-                  }
+                    <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
+                      Generar fixture
+                    </h2>
+
+                    <p className="mt-0.5 hidden text-[10px] text-slate-600 sm:block">
+                      Crea automáticamente los partidos de todos contra todos.
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-white/[0.06] text-xs text-slate-500 transition-transform ${
+                    isFixtureSectionOpen
+                      ? "rotate-180"
+                      : ""
+                  }`}
                 >
-                  {isGeneratingFixtures
-                    ? "Generando…"
-                    : "Generar fixture"}
-                </button>
+                  ↓
+                </span>
+              </button>
 
-                {matches.length > 0 && (
-                  <button
-                    className="rounded-xl border border-red-400/25 bg-red-400/[0.06] px-4 py-2.5 text-[10px] font-bold text-red-700 dark:text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
-                    type="button"
-                    disabled={isDeletingFixtures}
-                    onClick={() =>
-                      setIsConfirmingDeleteFixtures(true)
-                    }
-                  >
-                    {isDeletingFixtures
-                      ? "Eliminando…"
-                      : "Eliminar fixture"}
-                  </button>
-                )}
+              <div
+                className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
+                  isFixtureSectionOpen
+                    ? "max-h-[400px] opacity-100"
+                    : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="flex flex-col gap-3 border-t border-slate-200 dark:border-white/[0.05] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                  <p className="text-[11px] text-slate-600 dark:text-cyan-100 sm:text-xs">
+                    Solo agrega los enfrentamientos que aún no existen, sin importar quién fue local o visitante en un partido ya creado.
+                  </p>
+
+                  <div className="flex shrink-0 gap-2">
+                    <button
+                      className="rounded-xl bg-cyan-500 px-4 py-2.5 text-[10px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                      type="button"
+                      disabled={isGeneratingFixtures}
+                      onClick={() =>
+                        setIsConfirmingGenerateFixtures(true)
+                      }
+                    >
+                      {isGeneratingFixtures
+                        ? "Generando…"
+                        : "Generar fixture"}
+                    </button>
+
+                    {matches.length > 0 && (
+                      <button
+                        className="rounded-xl border border-red-400/25 bg-red-400/[0.06] px-4 py-2.5 text-[10px] font-bold text-red-700 dark:text-red-300 transition hover:bg-red-400/[0.12] disabled:cursor-not-allowed disabled:opacity-60 sm:text-xs"
+                        type="button"
+                        disabled={isDeletingFixtures}
+                        onClick={() =>
+                          setIsConfirmingDeleteFixtures(true)
+                        }
+                      >
+                        {isDeletingFixtures
+                          ? "Eliminando…"
+                          : "Eliminar fixture"}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
         {/* ======================================================
-            SCHEDULE
+            SCHEDULE — botón que abre una modal
         ====================================================== */}
 
         {isAdmin && selectedTournamentId && (
-          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 shadow-xl shadow-black/10 sm:mt-5">
+          <div className="mt-4 sm:mt-5">
             <button
-              className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:px-5"
-              onClick={() =>
-                setIsScheduleOpen(
-                  (current) => !current,
-                )
-              }
+              className="flex w-full items-center gap-3 rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 px-4 py-4 text-left shadow-xl shadow-black/10 transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:px-5"
+              onClick={() => setIsScheduleOpen(true)}
               type="button"
-              aria-expanded={isScheduleOpen}
             >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-400/10 bg-blue-500/[0.06] text-sm">
-                  {editingId ? "✏️" : "＋"}
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
-                    Calendario
-                  </p>
-
-                  <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
-                    {editingId
-                      ? "Editar partido"
-                      : "Programar partido"}
-                  </h2>
-
-                  <p className="mt-0.5 hidden text-[10px] text-slate-600 sm:block">
-                    Añade o modifica encuentros del torneo.
-                  </p>
-                </div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-400/10 bg-blue-500/[0.06] text-sm">
+                ＋
               </div>
 
-              <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 dark:border-white/[0.06] text-xs text-slate-500 transition-transform ${
-                  isScheduleOpen
-                    ? "rotate-180"
-                    : ""
-                }`}
-              >
-                ↓
-              </span>
-            </button>
+              <div className="min-w-0">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
+                  Calendario
+                </p>
 
-            <div
-              className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
-                isScheduleOpen
-                  ? "max-h-[1000px] opacity-100"
-                  : "max-h-0 opacity-0"
-              }`}
+                <h2 className="mt-0.5 truncate text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
+                  Programar partido
+                </h2>
+
+                <p className="mt-0.5 hidden text-[10px] text-slate-600 sm:block">
+                  Añade un nuevo encuentro del torneo.
+                </p>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {isScheduleOpen && (
+          <div
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                cancelEditing();
+                setIsScheduleOpen(false);
+              }
+            }}
+          >
+            <section
+              className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018] shadow-2xl shadow-black/20 dark:shadow-black/50"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="schedule-match-title"
+              onMouseDown={(event) => event.stopPropagation()}
             >
-              <div className="border-t border-slate-200 dark:border-white/[0.05] p-3.5 sm:p-5">
+              <div className="flex items-center justify-between gap-3 border-b border-slate-200 dark:border-white/[0.06] px-5 py-4 sm:px-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-400/10 bg-blue-500/[0.06] text-sm">
+                    {editingId ? "✏️" : "＋"}
+                  </div>
+
+                  <div>
+                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
+                      Calendario
+                    </p>
+
+                    <h2
+                      id="schedule-match-title"
+                      className="mt-0.5 text-sm font-bold text-slate-900 dark:text-white"
+                    >
+                      {editingId
+                        ? "Editar partido"
+                        : "Programar partido"}
+                    </h2>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    cancelEditing();
+                    setIsScheduleOpen(false);
+                  }}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.06] text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 hover:dark:bg-slate-800 hover:dark:text-white"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-3.5 sm:p-5">
                 <form onSubmit={saveMatch}>
                   <div className="grid gap-3.5 md:grid-cols-2">
                     <TeamSearch
@@ -3329,18 +3463,16 @@ export default function MatchesPage() {
                   </div>
 
                   <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                    {editingId && (
-                      <button
-                        className="h-11 rounded-xl border border-slate-200 dark:border-white/[0.08] px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-white/[0.03] hover:text-slate-900 hover:dark:text-white"
-                        onClick={() => {
-                          cancelEditing();
-                          setIsScheduleOpen(false);
-                        }}
-                        type="button"
-                      >
-                        Cancelar
-                      </button>
-                    )}
+                    <button
+                      className="h-11 rounded-xl border border-slate-200 dark:border-white/[0.08] px-4 text-xs font-semibold text-slate-500 dark:text-slate-400 transition hover:bg-slate-100 hover:dark:bg-white/[0.03] hover:text-slate-900 hover:dark:text-white"
+                      onClick={() => {
+                        cancelEditing();
+                        setIsScheduleOpen(false);
+                      }}
+                      type="button"
+                    >
+                      Cancelar
+                    </button>
 
                     <button
                       className="h-11 rounded-xl bg-emerald-500 px-5 text-xs font-bold text-slate-950 dark:text-slate-950 shadow-lg shadow-emerald-500/10 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
@@ -3356,7 +3488,7 @@ export default function MatchesPage() {
                   </div>
                 </form>
               </div>
-            </div>
+            </section>
           </div>
         )}
 
@@ -3472,12 +3604,62 @@ export default function MatchesPage() {
           ) : (
             <div className="space-y-3">
               {/* ==================================================
+                  EN VIVO
+              ================================================== */}
+
+              <MatchAccordion
+                title="Partidos en vivo"
+                description="Encuentros que se están jugando en este momento"
+                icon="🔴"
+                tone="text-emerald-700 dark:text-emerald-300"
+                count={liveMatches.length}
+                isOpen={openSections.live}
+                onToggle={() =>
+                  toggleSection("live")
+                }
+              >
+                {liveMatches.length === 0 ? (
+                  <EmptySection message="No hay partidos en vivo en este momento." />
+                ) : (
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                    {liveMatches.map(
+                      (match) => (
+                        <MatchCard
+                          key={match.id}
+                          match={match}
+                          isAdmin={isAdmin}
+                          canCorrectFinished={
+                            canCorrectFinished
+                          }
+                          startEditing={
+                            startEditing
+                          }
+                          registerResult={
+                            registerResult
+                          }
+                          changeStatus={
+                            changeStatus
+                          }
+                          updateStreamUrl={
+                            updateStreamUrl
+                          }
+                          tournament={
+                            selectedTournament
+                          }
+                        />
+                      ),
+                    )}
+                  </div>
+                )}
+              </MatchAccordion>
+
+              {/* ==================================================
                   PENDIENTES
               ================================================== */}
 
               <MatchAccordion
                 title="Próximos partidos"
-                description="Encuentros programados y partidos actualmente en vivo"
+                description="Encuentros programados que aún no comienzan"
                 icon="📅"
                 tone="text-blue-700 dark:text-blue-300"
                 count={pendingMatches.length}

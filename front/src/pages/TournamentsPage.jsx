@@ -6,6 +6,7 @@ import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
+import TournamentViewsModal from '../components/TournamentViewsModal.jsx';
 
 const emptyForm = {
   name: '',
@@ -109,6 +110,7 @@ export default function TournamentsPage() {
     });
   }
   const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
+  const [viewsModalTournament, setViewsModalTournament] = useState(null);
 
   useEffect(() => {
     async function loadTournaments() {
@@ -768,7 +770,7 @@ export default function TournamentsPage() {
 
                 return (
                   <article
-                    className={`group relative flex h-full flex-col overflow-hidden rounded-xl border bg-white dark:bg-[#0b1119]/95 shadow-lg transition-all duration-200 sm:rounded-2xl sm:shadow-xl sm:hover:-translate-y-1 ${
+                    className={`group relative flex h-full flex-col overflow-hidden rounded-[1.5rem] border bg-white dark:bg-[#0b1119]/95 shadow-lg transition-all duration-300 sm:rounded-[1.75rem] sm:shadow-xl sm:hover:-translate-y-1 ${
                       isActive
                         ? 'border-emerald-400/[0.11] sm:hover:border-emerald-400/25'
                         : 'border-slate-200 dark:border-white/[0.06] sm:hover:border-slate-300 sm:hover:dark:border-white/[0.12]'
@@ -780,65 +782,51 @@ export default function TournamentsPage() {
                     <div
                       className={`h-[2px] w-full ${
                         isActive
-                          ? 'bg-gradient-to-r from-emerald-400 via-emerald-500 to-cyan-400'
+                          ? 'bg-gradient-to-r from-transparent via-emerald-400 to-transparent'
                           : 'bg-slate-200 dark:bg-slate-700'
                       }`}
                     />
 
                     {/* CARD GLOW - desktop only */}
                     {isActive && (
-                      <div className="pointer-events-none absolute -right-20 -top-20 hidden h-48 w-48 rounded-full bg-emerald-400/[0.055] blur-3xl sm:block" />
+                      <>
+                        <div className="pointer-events-none absolute -right-20 -top-20 hidden h-48 w-48 rounded-full bg-emerald-400/[0.07] blur-3xl sm:block" />
+                        <div className="pointer-events-none absolute -bottom-24 -left-16 hidden h-44 w-44 rounded-full bg-cyan-400/[0.05] blur-3xl sm:block" />
+                      </>
                     )}
 
                     <div className="relative flex flex-1 flex-col p-4 sm:p-6">
 
-                      {/* HEADER */}
-                      <div className="flex items-start justify-between gap-3">
-
-                        <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-
-                          <div
-                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-lg sm:h-12 sm:w-12 sm:rounded-xl sm:text-xl ${
-                              isActive
-                                ? 'border-emerald-400/15 bg-emerald-400/[0.07]'
-                                : 'border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-white/[0.035] grayscale'
-                            }`}
-                          >
-                            🏆
-                          </div>
-
-                          <div className="min-w-0">
-                            <p className="mb-0.5 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:mb-1 sm:text-[9px]">
-                              Torneo
-                            </p>
-
-                            <h3
-                              className="line-clamp-2 break-words text-sm font-bold leading-tight text-slate-900 dark:text-white sm:text-base"
-                              title={tournament.name}
-                            >
-                              {tournament.name}
-                            </h3>
-                          </div>
-                        </div>
-
-                        {/* STATUS */}
-                        <span
-                          className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-1 text-[9px] font-bold sm:gap-1.5 sm:px-2.5 sm:text-[10px] ${
-                            isActive
-                              ? 'border-emerald-400/15 bg-emerald-400/[0.07] text-emerald-700 dark:text-emerald-300'
-                              : 'border-slate-200 dark:border-white/[0.07] bg-slate-100 dark:bg-white/[0.035] text-slate-500'
-                          }`}
-                        >
+                      {/* HEADER — mismo patrón que el hero de la página
+                          pública de un torneo: punto pulsante + etiqueta
+                          arriba del título, sin caja de logo. */}
+                      <div className="min-w-0">
+                        <div className="mb-1.5 flex items-center gap-1.5 sm:mb-2">
                           <span
-                            className={`h-1.5 w-1.5 rounded-full ${
+                            className={`h-1.5 w-1.5 rounded-full sm:h-2 sm:w-2 ${
                               isActive
-                                ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,.8)]'
-                                : 'bg-slate-600'
+                                ? 'animate-pulse bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.7)]'
+                                : 'bg-slate-500'
                             }`}
                           />
 
-                          {isActive ? 'Activo' : 'Inactivo'}
-                        </span>
+                          <p
+                            className={`text-[9px] font-black uppercase tracking-[0.18em] sm:text-[10px] ${
+                              isActive
+                                ? 'text-emerald-600 dark:text-emerald-400'
+                                : 'text-slate-500'
+                            }`}
+                          >
+                            {isActive ? 'Torneo activo' : 'Torneo inactivo'}
+                          </p>
+                        </div>
+
+                        <h3
+                          className="line-clamp-2 break-words text-base font-black tracking-tight text-slate-900 dark:text-white sm:text-xl"
+                          title={tournament.name}
+                        >
+                          {tournament.name}
+                        </h3>
                       </div>
 
                       {/* DESCRIPTION */}
@@ -848,41 +836,38 @@ export default function TournamentsPage() {
                       </p>
 
                       {/* STATS */}
-                      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-black/20 sm:mt-6 sm:rounded-2xl">
+                      <div className="mt-4 grid grid-cols-3 gap-2 sm:mt-6 sm:gap-2.5">
 
-                        <div className="grid grid-cols-3">
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-3 sm:py-4">
+                          <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
+                            {tournament._count.teams}
+                          </span>
 
-                          <div className="px-2 py-3 text-center sm:px-3 sm:py-4">
-                            <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
-                              {tournament._count.teams}
-                            </span>
-
-                            <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wider text-slate-600 sm:mt-1 sm:text-[9px]">
-                              Equipos
-                            </span>
-                          </div>
-
-                          <div className="border-x border-slate-200 dark:border-white/[0.05] px-2 py-3 text-center sm:px-3 sm:py-4">
-                            <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
-                              {tournament._count.matches}
-                            </span>
-
-                            <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wider text-slate-600 sm:mt-1 sm:text-[9px]">
-                              Partidos
-                            </span>
-                          </div>
-
-                          <div className="px-2 py-3 text-center sm:px-3 sm:py-4">
-                            <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
-                              {tournament._count.admins}
-                            </span>
-
-                            <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wider text-slate-600 sm:mt-1 sm:text-[9px]">
-                              Admins
-                            </span>
-                          </div>
-
+                          <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wider text-slate-600 sm:mt-1 sm:text-[9px]">
+                            Equipos
+                          </span>
                         </div>
+
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-3 sm:py-4">
+                          <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
+                            {tournament._count.matches}
+                          </span>
+
+                          <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wider text-slate-600 sm:mt-1 sm:text-[9px]">
+                            Partidos
+                          </span>
+                        </div>
+
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-3 text-center dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-3 sm:py-4">
+                          <span className="block text-lg font-black text-slate-900 dark:text-white sm:text-xl">
+                            {tournament._count.admins}
+                          </span>
+
+                          <span className="mt-0.5 block text-[8px] font-bold uppercase tracking-wider text-slate-600 sm:mt-1 sm:text-[9px]">
+                            Admins
+                          </span>
+                        </div>
+
                       </div>
 
                       {/* CREATED */}
@@ -1026,6 +1011,14 @@ export default function TournamentsPage() {
                                   {tournament.championTeam
                                     ? `Campeón: ${tournament.championTeam.name}`
                                     : 'Declarar campeón'}
+                                </button>
+
+                                <button
+                                  className="col-span-2 min-h-10 rounded-lg border border-cyan-400/15 bg-cyan-400/[0.03] px-2 py-2 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400/90 transition hover:border-cyan-400/30 hover:bg-cyan-400/[0.08] sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                                  onClick={() => setViewsModalTournament(tournament)}
+                                  type="button"
+                                >
+                                  👁️ Ver visitas
                                 </button>
 
                               </div>
@@ -1700,6 +1693,13 @@ export default function TournamentsPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {viewsModalTournament && (
+        <TournamentViewsModal
+          tournament={viewsModalTournament}
+          onClose={() => setViewsModalTournament(null)}
+        />
       )}
 
       {/* =========================================================

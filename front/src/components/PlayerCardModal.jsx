@@ -57,7 +57,7 @@ const CARD_CLIP = 'url(#player-card-shape)';
 | +1 por gol
 |
 | Partidos:
-| +1 por cada 5 partidos
+| +1 por partido (jugados por el EQUIPO, no eventos propios del jugador)
 |
 | Posición:
 | 1.º = +5
@@ -133,9 +133,7 @@ function calculateOverall({
   |--------------------------------------------------------------------------
   */
 
-  overall += Math.floor(
-    matchesValue / 5
-  );
+  overall += matchesValue;
 
   /*
   |--------------------------------------------------------------------------

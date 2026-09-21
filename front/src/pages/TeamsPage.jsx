@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
 import { useNotifications } from '../context/NotificationContext.jsx';
@@ -19,6 +19,7 @@ export default function TeamsPage() {
   const { user } = useAuth();
   const { notify } = useNotifications();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [teams, setTeams] = useState([]);
   const [tournaments, setTournaments] = useState([]);
@@ -961,8 +962,19 @@ export default function TeamsPage() {
 
                 return (
                 <article
-                  className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3 shadow-md shadow-black/5 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-400/20 hover:bg-white hover:dark:bg-[#0c131d] sm:rounded-2xl sm:p-4 sm:shadow-lg sm:shadow-black/10"
+                  className="group relative cursor-pointer overflow-hidden rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 p-3 shadow-md shadow-black/5 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-400/20 hover:bg-white hover:dark:bg-[#0c131d] sm:rounded-2xl sm:p-4 sm:shadow-lg sm:shadow-black/10"
                   key={team.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() =>
+                    navigate(`/dashboard/tournaments/${selectedTournamentId}/teams/${team.id}/players`)
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      navigate(`/dashboard/tournaments/${selectedTournamentId}/teams/${team.id}/players`);
+                    }
+                  }}
                 >
 
                   {/* Green accent */}
@@ -1018,7 +1030,10 @@ export default function TeamsPage() {
                   </div>
 
                   {/* ACTIONS */}
-                  <div className="mt-3 flex items-center gap-1.5 border-t border-slate-200 dark:border-white/[0.04] pt-3">
+                  <div
+                    className="mt-3 flex items-center gap-1.5 border-t border-slate-200 dark:border-white/[0.04] pt-3"
+                    onClick={(event) => event.stopPropagation()}
+                  >
 
                     <Link
                       className="flex min-h-8 flex-1 items-center justify-center rounded-lg border border-cyan-400/10 bg-cyan-400/[0.04] px-2 py-1.5 text-[9px] font-semibold text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/10 sm:flex-none sm:text-[10px]"
@@ -1038,7 +1053,7 @@ export default function TeamsPage() {
                       </button>
                     )}
 
-                    {isSuperAdmin && (
+                    {canCreateTeams && (
                       <button
                         className="min-h-8 rounded-lg border border-emerald-400/10 bg-emerald-400/[0.03] px-2 py-1.5 text-[9px] font-semibold text-emerald-600 dark:text-emerald-400/80 transition hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-700 hover:dark:text-emerald-300 sm:text-[10px]"
                         onClick={() => startEditing(team)}

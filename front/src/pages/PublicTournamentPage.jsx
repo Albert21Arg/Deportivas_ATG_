@@ -266,7 +266,24 @@ function MatchRow({ match, onClick }) {
 |--------------------------------------------------------------------------
 */
 
-function LiveMatchCard({ match, onClick }) {
+function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
+  function shareOnWhatsapp(event) {
+    event.stopPropagation();
+
+    const shareUrl = `${window.location.origin}/tournaments/${tournamentId}`;
+
+    const shareText =
+      `⚽ EN VIVO: ${match.homeTeam.name} ${match.homeScore ?? 0} - ${match.awayScore ?? 0} ${match.awayTeam.name}\n` +
+      `${tournamentName}\n` +
+      shareUrl;
+
+    window.open(
+      `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+      '_blank',
+      'noopener,noreferrer',
+    );
+  }
+
   return (
     <div
       role="button"
@@ -279,6 +296,7 @@ function LiveMatchCard({ match, onClick }) {
         }
       }}
       className="
+        col-span-2
         cursor-pointer
         group relative w-full overflow-hidden
         rounded-2xl
@@ -373,27 +391,47 @@ function LiveMatchCard({ match, onClick }) {
           <span>{formatTime(match.time)} · Colombia</span>
         </div>
 
-        {match.streamUrl && (
-          <a
-            href={match.streamUrl}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(event) => event.stopPropagation()}
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+          {match.streamUrl && (
+            <a
+              href={match.streamUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => event.stopPropagation()}
+              className="
+                flex flex-1 items-center justify-center gap-2
+                rounded-xl border border-red-400/30
+                bg-red-500/10
+                py-2.5
+                text-[11px] font-black uppercase tracking-wider
+                text-red-600 dark:text-red-300
+                transition
+                hover:bg-red-500/20
+                sm:py-3 sm:text-xs
+              "
+            >
+              ▶ Ver transmisión en vivo
+            </a>
+          )}
+
+          <button
+            type="button"
+            onClick={shareOnWhatsapp}
             className="
-              mt-4 flex items-center justify-center gap-2
-              rounded-xl border border-red-400/30
-              bg-red-500/10
+              flex flex-1 items-center justify-center gap-2
+              rounded-xl border border-emerald-400/30
+              bg-emerald-500/10
               py-2.5
               text-[11px] font-black uppercase tracking-wider
-              text-red-600 dark:text-red-300
+              text-emerald-700 dark:text-emerald-300
               transition
-              hover:bg-red-500/20
+              hover:bg-emerald-500/20
               sm:py-3 sm:text-xs
             "
           >
-            ▶ Ver transmisión en vivo
-          </a>
-        )}
+            ✆ Compartir por WhatsApp
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1029,144 +1067,187 @@ function SectionCard({
   const colors = accentClasses[config.accent];
 
   return (
-    <div
-      ref={sectionRef}
-      className={`
-        group relative min-w-0 w-full overflow-hidden
-        rounded-2xl
-        border
-        bg-white dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-[#080b11]
-        shadow-[0_12px_40px_rgba(15,23,42,0.06)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
-        transition-all duration-300
-        ${open ? colors.border : 'border-slate-200 dark:border-white/[0.055]'}
-        ${open ? 'shadow-[0_12px_45px_rgba(15,23,42,0.10)] dark:shadow-[0_12px_45px_rgba(0,0,0,0.28)]' : ''}
-        ${className}
-      `}
-    >
-      <div
+    <>
+      <article
+        ref={sectionRef}
         className={`
-          pointer-events-none absolute inset-x-0 top-0 h-28
-          bg-gradient-to-b from-transparent to-transparent
-          opacity-0 transition-opacity duration-300
-          ${open ? `${colors.glow} opacity-100` : ''}
+          group relative min-w-0 w-full overflow-hidden
+          rounded-2xl border
+          bg-white
+          shadow-[0_12px_40px_rgba(15,23,42,0.06)]
+          transition-all duration-300
+          dark:bg-gradient-to-br dark:from-slate-900 dark:via-slate-950 dark:to-[#080b11]
+          dark:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
+          ${colors.border}
+          ${className}
         `}
-      />
-
-      <button
-        type="button"
-        onClick={onToggle}
-        className="
-          relative z-10
-          flex w-full items-center
-          justify-between gap-4
-          px-3.5 py-3.5
-          text-left
-          sm:px-5 sm:py-4
-          lg:px-6 lg:py-5
-        "
-        aria-expanded={open}
-        aria-controls={contentId}
       >
-        <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-          <div
-            className={`
-              flex h-11 w-11 shrink-0
-              items-center justify-center
-              rounded-xl border
-              text-lg
-              shadow-inner
-              transition-all duration-300
-              sm:h-12 sm:w-12 sm:text-xl
-              ${colors.icon}
-              ${open ? 'scale-105 shadow-lg' : ''}
-            `}
-          >
-            {config.icon}
+        <div
+          className={`
+            pointer-events-none absolute inset-x-0 top-0 h-28
+            ${colors.glow}
+          `}
+        />
+
+        <button
+          type="button"
+          onClick={onToggle}
+          className="
+            relative z-10 flex min-h-[150px] w-full
+            flex-col justify-between
+            p-4 text-left
+            transition-all duration-300
+            hover:bg-slate-50/70
+            active:scale-[0.99]
+            dark:hover:bg-white/[0.025]
+            sm:min-h-[175px] sm:p-5
+          "
+          aria-expanded={open}
+          aria-controls={contentId}
+          aria-label={`Abrir ${config.title}`}
+        >
+          <div className="flex w-full items-start justify-between gap-3">
+            <div
+              className={`
+                flex h-11 w-11 shrink-0 items-center justify-center
+                rounded-xl border text-lg shadow-inner
+                transition-all duration-300
+                sm:h-12 sm:w-12 sm:text-xl
+                ${colors.icon}
+              `}
+            >
+              {config.icon}
+            </div>
+
+            <span
+              className={`
+                inline-flex h-8 w-8 shrink-0 items-center justify-center
+                rounded-full border
+                bg-slate-50 text-slate-500
+                dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-slate-400
+                ${colors.border}
+              `}
+              aria-hidden="true"
+            >
+              ↗
+            </span>
           </div>
 
-          <div className="min-w-0">
+          <div className="mt-5 min-w-0">
             <div className="flex items-center gap-2">
-              <span
-                className={`
-                  h-1.5 w-1.5 shrink-0 rounded-full
-                  ${colors.dot}
-                  ${open ? 'animate-pulse' : ''}
-                `}
-              />
+              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${colors.dot}`} />
 
               <span
                 className={`
-                  text-[8px] font-black uppercase
-                  tracking-[0.18em]
+                  text-[8px] font-black uppercase tracking-[0.18em]
                   sm:text-[10px]
                   ${colors.text}
                 `}
               >
                 {config.eyebrow}
               </span>
-
-              {open && (
-                <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/[0.06] dark:bg-white/[0.03] sm:inline-flex">
-                  Abierto
-                </span>
-              )}
             </div>
 
-            <h2 className="mt-1 text-base font-black tracking-tight text-slate-900 dark:text-white sm:mt-1.5 sm:text-xl lg:text-2xl">
+            <h2 className="mt-1.5 text-base font-black tracking-tight text-slate-900 dark:text-white sm:text-xl">
               {config.title}
             </h2>
-          </div>
-        </div>
 
-        <div
-          className={`
-            flex h-9 w-9 shrink-0
-            items-center justify-center
-            rounded-full
-            border border-slate-200
-            bg-slate-50
-            text-slate-500
-            transition-all duration-300
-            dark:border-white/[0.07]
-            dark:bg-white/[0.025]
-            sm:h-10 sm:w-10
-            ${
-              open
-                ? `rotate-180 ${colors.text} border-slate-300 dark:border-white/[0.12]`
-                : ''
-            }
-          `}
-          aria-hidden="true"
-        >
-          <span className="text-xs">⌄</span>
-        </div>
-      </button>
+            <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400 sm:text-xs">
+              Toca para ver la información
+            </p>
+          </div>
+        </button>
+      </article>
 
       {open && (
         <div
-          id={contentId}
           className="
-            relative z-10
-            min-w-0 max-w-full
-            overflow-hidden
-            border-t border-slate-200
-            bg-slate-50
-            dark:border-white/[0.055]
-            dark:bg-black/[0.08]
+            fixed inset-0 z-[55]
+            flex items-center justify-center
+            bg-slate-950/80
+            px-2 py-3
+            backdrop-blur-sm
+            sm:px-5 sm:py-8
           "
+          role="presentation"
+          onMouseDown={onToggle}
         >
-          {children}
+          <section
+            className="
+              flex max-h-[94vh] w-full max-w-6xl flex-col
+              overflow-hidden rounded-2xl
+              border border-slate-200
+              bg-white shadow-2xl shadow-black/20
+              dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/50
+            "
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${contentId}-title`}
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <header
+              className="
+                flex shrink-0 items-center justify-between gap-3
+                border-b border-slate-200
+                px-4 py-3
+                dark:border-slate-800
+                sm:px-6 sm:py-4
+              "
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${colors.dot}`} />
+                  <span
+                    className={`
+                      text-[9px] font-black uppercase tracking-[0.18em]
+                      sm:text-xs
+                      ${colors.text}
+                    `}
+                  >
+                    {config.eyebrow}
+                  </span>
+                </div>
+
+                <h2
+                  id={`${contentId}-title`}
+                  className="mt-1 text-base font-black tracking-tight text-slate-900 dark:text-white sm:text-xl"
+                >
+                  {config.title}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={onToggle}
+                className="
+                  flex h-9 w-9 shrink-0 items-center justify-center
+                  rounded-full border border-slate-200
+                  bg-slate-50 text-lg text-slate-500
+                  transition hover:bg-slate-100 hover:text-slate-900
+                  dark:border-white/[0.07] dark:bg-white/[0.025]
+                  dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white
+                "
+                aria-label={`Cerrar ${config.title}`}
+              >
+                ×
+              </button>
+            </header>
+
+            <div
+              id={contentId}
+              className="
+                min-h-0 flex-1 overflow-y-auto
+                bg-slate-50 dark:bg-black/[0.08]
+              "
+            >
+              {children}
+            </div>
+          </section>
         </div>
       )}
-    </div>
+    </>
   );
 }
-
-/*
-|--------------------------------------------------------------------------
-| Clases responsive para ScorersTable
-|--------------------------------------------------------------------------
-*/
 
 const responsiveScorersTableClass = `
   min-w-0
@@ -1225,51 +1306,7 @@ export default function PublicTournamentPage() {
 
   const historyLoadedRef = useRef(false);
   const sectionRefs = useRef({});
-
-  useEffect(() => {
-    if (!openSection) return;
-
-    const frame = requestAnimationFrame(() => {
-      const sectionElement = sectionRefs.current[openSection];
-      if (!sectionElement) return;
-
-      const navbarElement = document.querySelector('nav');
-      const navbarHeight =
-        navbarElement?.getBoundingClientRect().height ??
-        (window.innerWidth < 640 ? 72 : 96);
-
-      const extraSpacing = 12;
-      const targetTop =
-        sectionElement.getBoundingClientRect().top +
-        window.scrollY -
-        navbarHeight -
-        extraSpacing;
-
-      window.scrollTo({
-        top: Math.max(0, targetTop),
-        behavior: 'smooth',
-      });
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [openSection]);
-
-  /*
-  |--------------------------------------------------------------------------
-  | NUEVO
-  |--------------------------------------------------------------------------
-  | Si Tarjetas está abierta, el modal de jugador queda completamente
-  | bloqueado desde esta página.
-  |--------------------------------------------------------------------------
-  */
-
-  const cardsSectionOpen = openSection === 'cards';
-
-  useEffect(() => {
-    if (cardsSectionOpen && selectedTeam) {
-      setSelectedTeam(null);
-    }
-  }, [cardsSectionOpen, selectedTeam]);
+  const visitLoggedIdRef = useRef(null);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -1324,6 +1361,15 @@ export default function PublicTournamentPage() {
       clearInterval(interval);
     };
   }, [id, loadTournament]);
+
+  // Contador de visitas (solo para el superadmin): se registra UNA vez por
+  // carga de la página, no en cada refresco del polling/SSE de arriba (que
+  // llama loadTournament cada 10s y en cada evento en vivo).
+  useEffect(() => {
+    if (visitLoggedIdRef.current === id) return;
+    visitLoggedIdRef.current = id;
+    api.post(`/public/tournaments/${id}/visit`).catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     if (!selectedMatch || !data) return;
@@ -1390,13 +1436,6 @@ export default function PublicTournamentPage() {
   }
 
   function toggleCards() {
-    /*
-     * IMPORTANTE:
-     * Al entrar a Tarjetas se elimina cualquier jugador seleccionado.
-     * De esta forma nunca queda abierto el modal del jugador.
-     */
-    setSelectedTeam(null);
-
     setOpenSection((current) =>
       current === 'cards'
         ? null
@@ -1554,7 +1593,7 @@ export default function PublicTournamentPage() {
           w-full
           max-w-7xl
           min-w-0
-          grid-cols-1
+          grid-cols-2
           gap-3
           sm:gap-4
           lg:gap-5
@@ -1564,6 +1603,8 @@ export default function PublicTournamentPage() {
           <LiveMatchCard
             match={liveMatch}
             onClick={() => setSelectedMatch(liveMatch)}
+            tournamentId={id}
+            tournamentName={data.tournament.name}
           />
         )}
 
@@ -2526,22 +2567,11 @@ export default function PublicTournamentPage() {
         onClose={() => setSelectedMatch(null)}
       />
 
-      {/*
-       * CAMBIO IMPORTANTE:
-       *
-       * Cuando Tarjetas está abierta, NO renderizamos TeamDetailModal.
-       * Por lo tanto, aunque ScorersTable intente seleccionar un jugador,
-       * este modal no puede aparecer.
-       *
-       * Fuera de Tarjetas se mantiene exactamente el comportamiento anterior.
-       */}
-      {!cardsSectionOpen && (
-        <TeamDetailModal
-          selection={selectedTeam}
-          blueCardEnabled={data.tournament.blueCardEnabled}
-          onClose={() => setSelectedTeam(null)}
-        />
-      )}
+      <TeamDetailModal
+        selection={selectedTeam}
+        blueCardEnabled={data.tournament.blueCardEnabled}
+        onClose={() => setSelectedTeam(null)}
+      />
     </main>
   );
 }

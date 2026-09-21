@@ -156,13 +156,6 @@ export default function PlayersPage() {
     });
 
     setShowForm(true);
-
-    setTimeout(() => {
-      document.getElementById('player-form')?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
-    }, 50);
   }
 
   /*
@@ -460,72 +453,57 @@ export default function PlayersPage() {
         </header>
 
         {/* ---------------------------------------------------------------- */}
-        {/* Formulario */}
+        {/* Formulario (ventana flotante) */}
         {/* ---------------------------------------------------------------- */}
 
-        <div
-          id="player-form"
-          className="mt-5 overflow-hidden rounded-3xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/20"
-        >
-          {/* Header */}
-          <button
-            type="button"
-            onClick={() => {
-              if (showForm) {
-                closeForm();
-              } else {
-                openCreateForm();
-              }
-            }}
-            className="group flex w-full items-center justify-between px-5 py-4 text-left transition hover:bg-slate-100 hover:dark:bg-slate-800/30 sm:px-6"
-          >
-            <div className="flex items-center gap-3">
-
-              <div
-                className={`flex h-9 w-9 items-center justify-center rounded-xl border transition ${
-                  showForm
-                    ? 'border-emerald-400/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
-                    : 'border-slate-200 dark:border-white/[0.06] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:border-emerald-400/15 group-hover:text-emerald-700 group-hover:dark:text-emerald-300'
-                }`}
-              >
-                <span
-                  className={`text-xl leading-none transition-transform duration-200 ${
-                    showForm ? 'rotate-45' : ''
-                  }`}
-                >
-                  +
-                </span>
-              </div>
-
-              <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {editingId ? 'Editar jugador' : 'Nuevo jugador'}
-                </h2>
-
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {editingId
-                    ? 'Actualiza la información del jugador'
-                    : 'Añade un nuevo integrante a la plantilla'}
-                </p>
-              </div>
-            </div>
-
-            <span
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition-transform duration-200 ${
-                showForm ? 'rotate-180' : ''
-              }`}
-            >
-              ↓
-            </span>
-          </button>
-
-          {/* Contenido */}
+        {showForm && (
           <div
-            className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-              showForm ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
-            }`}
+            className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) closeForm();
+            }}
           >
-            <div className="overflow-hidden">
+            <section
+              className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-slate-200 dark:border-white/[0.06] bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 shadow-2xl shadow-black/20 dark:shadow-black/50"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="player-form-title"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6">
+                <div className="flex items-center gap-3">
+
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-400/15 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    <span className="text-xl leading-none">
+                      {editingId ? '✎' : '+'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h2 id="player-form-title" className="text-sm font-bold text-slate-900 dark:text-white">
+                      {editingId ? 'Editar jugador' : 'Nuevo jugador'}
+                    </h2>
+
+                    <p className="mt-0.5 text-xs text-slate-500">
+                      {editingId
+                        ? 'Actualiza la información del jugador'
+                        : 'Añade un nuevo integrante a la plantilla'}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeForm}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.06] text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 hover:dark:bg-slate-800 hover:dark:text-white"
+                  aria-label="Cerrar"
+                >
+                  ✕
+                </button>
+              </div>
+
               <form
                 onSubmit={savePlayer}
                 className="border-t border-slate-200 dark:border-white/[0.06]"
@@ -689,9 +667,9 @@ export default function PlayersPage() {
                   </button>
                 </div>
               </form>
-            </div>
+            </section>
           </div>
-        </div>
+        )}
 
         {/* ---------------------------------------------------------------- */}
         {/* Plantilla */}
