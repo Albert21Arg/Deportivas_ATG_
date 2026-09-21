@@ -16,10 +16,18 @@ import publicRoutes from './routes/public-routes.js';
 import announcementRoutes from './routes/announcement-routes.js';
 import floatingBubbleRoutes from './routes/floating-bubble-routes.js';
 import siteSettingRoutes from './routes/site-setting-routes.js';
+import { isPreviewCrawler, renderTournamentPreview } from './middlewares/share-preview.js';
 import { errorHandler } from './middlewares/error-handler.js';
 import { HttpError } from './utils/http-error.js';
 
 const app = express();
+
+// La app corre detrás de un solo proxy inverso (túnel de VS Code / Cloudflare
+// worker), así que confiamos en un salto de X-Forwarded-For para que
+// request.ip refleje la IP real del visitante (necesario para el límite de
+// likes por IP y el rate limiting).
+app.set('trust proxy', 1);
+
 const backendDirectory = path.dirname(fileURLToPath(import.meta.url));
 const frontendDistDirectory = path.resolve(backendDirectory, '../../front/dist');
 const allowedOrigins = new Set([
@@ -59,6 +67,15 @@ app.use('/api/matches', matchDetailRoutes);
 
 app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok' });
+});
+
+// Vista previa para crawlers de WhatsApp/Telegram/etc: no ejecutan JS, así
+// que si el visitante es uno de esos bots respondemos HTML con las etiquetas
+// og:* ya resueltas (nombre del torneo o marcador en vivo). Cualquier otro
+// visitante sigue hacia la SPA normal.
+app.get('/tournaments/:id', (request, response, next) => {
+  if (!isPreviewCrawler(request.get('user-agent'))) return next();
+  return renderTournamentPreview(request, response, next);
 });
 
 // Producción/túnel: una sola aplicación en el puerto del backend.

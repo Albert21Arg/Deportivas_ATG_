@@ -16,6 +16,7 @@ import {
   updateController,
   updateModeController,
   updateRegistrationDeadlineController,
+  viewsController,
 } from '../controllers/tournament-controller.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import { authorize } from '../middlewares/authorize.js';
@@ -49,5 +50,6 @@ router.patch('/:id/player-registration-deadline', parseTournamentId, requireTour
 router.patch('/:id/status', authorize('SUPERADMIN'), parseTournamentId, validateStatus, statusController);
 router.patch('/:id/move', authorize('SUPERADMIN'), parseTournamentId, validateMove, moveController);
 router.patch('/:id/champion', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateChampion, championController);
+router.get('/:id/views', authorize('SUPERADMIN'), parseTournamentId, viewsController);
 
 export default router;

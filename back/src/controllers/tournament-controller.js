@@ -7,6 +7,7 @@ import {
   updateTournament,
   updateTournamentStatus,
 } from '../services/tournament-service.js';
+import { getStats } from '../services/tournament-view-service.js';
 import { HttpError } from '../utils/http-error.js';
 
 export async function listController(request, response, next) {
@@ -77,6 +78,15 @@ export async function moveController(request, response, next) {
     await moveTournament(request.tournamentId, request.validatedBody.direction);
     const tournaments = await listTournaments(request.user);
     return response.json({ success: true, data: { tournaments } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function viewsController(request, response, next) {
+  try {
+    const stats = await getStats(request.tournamentId);
+    return response.json({ success: true, data: stats });
   } catch (error) {
     return next(error);
   }

@@ -36,7 +36,7 @@ export async function createController(request, response, next) {
 
 export async function updateController(request, response, next) {
   try {
-    return response.json({ success: true, data: { team: await updateTeam(request.teamId, request.validatedBody) } });
+    return response.json({ success: true, data: { team: await updateTeam(request.teamId, request.validatedBody, request.user.role) } });
   } catch (error) {
     return next(error);
   }
@@ -44,7 +44,8 @@ export async function updateController(request, response, next) {
 
 export async function deleteController(request, response, next) {
   try {
-    const team = await updateTeam(request.teamId, { status: 'INACTIVE' });
+    // Esta ruta ya está restringida a SUPERADMIN (authorize en el router).
+    const team = await updateTeam(request.teamId, { status: 'INACTIVE' }, 'SUPERADMIN');
     return response.json({ success: true, data: { team } });
   } catch (error) {
     return next(error);

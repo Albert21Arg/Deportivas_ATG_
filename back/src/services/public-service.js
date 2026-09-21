@@ -1,6 +1,7 @@
 import * as publicRepository from '../repositories/public-repository.js';
 import { expireOverdue } from '../repositories/tournament-repository.js';
 import { getGoalkeepers, getPlayerStatMaps, getStandings, getStandingsByPot, getTopCards, getTopScorers } from './standings-service.js';
+import { getLikeScoresForTournaments } from './tournament-like-service.js';
 import { HttpError } from '../utils/http-error.js';
 import { withExpiryFlags, withPlayerExpiryFlags } from '../utils/team-expiry.js';
 
@@ -33,15 +34,29 @@ function withPublicGroup(group) {
   };
 }
 
+// Orden del Home: likes totales + likes recientes con más peso (ver
+// LIKES.recentWeight), para que un torneo nuevo con movimiento pueda
+// posicionarse por encima de uno viejo con muchos likes acumulados pero ya
+// sin actividad. A igual puntaje, se desempata por nombre.
 export async function listPublicTournaments() {
   await expireOverdue();
-  return publicRepository.findActiveTournaments();
+  const tournaments = await publicRepository.findActiveTournaments();
+  const scoresById = await getLikeScoresForTournaments(tournaments.map((tournament) => tournament.id));
+
+  return tournaments
+    .map((tournament) => ({ ...tournament, likesTotal: scoresById.get(tournament.id)?.total ?? 0 }))
+    .sort((a, b) => {
+      const scoreA = scoresById.get(a.id)?.score ?? 0;
+      const scoreB = scoresById.get(b.id)?.score ?? 0;
+      return scoreB - scoreA || a.name.localeCompare(b.name);
+    });
 }
 
 export async function getPublicTournament(id) {
   await expireOverdue();
   const tournament = await publicRepository.findActiveTournament(id);
   if (!tournament) throw new HttpError(404, 'Torneo público no encontrado');
+  tournament.likesTotal = (await getLikeScoresForTournaments([id])).get(id)?.total ?? 0;
 
   const [standings, pots, scorers, cards, goalkeepers, upcomingMatches, finishedMatches, groups, ties, tournamentPlayers, playerStatMaps] = await Promise.all([
     getStandings(id),
@@ -74,20 +89,18 @@ export async function getPublicTournament(id) {
       team.players.map(({ player, isGoalkeeper }) => {
         const cards = cardsByPlayer.get(player.id) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
 
-        // Igual que en Goleadores/Tarjetas: el arquero usa las cifras de
-        // su equipo (partidos jugados y goles recibidos), no las de sus
-        // propios eventos, para que el OVR de su tarjeta no cambie según
-        // desde dónde se abra.
+        // Igual que en Goleadores/Tarjetas: todo jugador (no solo el
+        // arquero) usa los partidos jugados de su equipo, no los suyos
+        // propios. goalsConceded sigue siendo solo del arquero.
         const teamStandingRow = standingsByTeam.get(team.id);
-        const standingRow = isGoalkeeper ? teamStandingRow : null;
 
         return withPlayerExpiryFlags(
           {
             ...player,
             isGoalkeeper,
             goals: goalsByPlayer.get(player.id) ?? 0,
-            matchesPlayed: standingRow ? standingRow.played : (matchesPlayedByPlayer.get(player.id) ?? 0),
-            goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
+            matchesPlayed: teamStandingRow ? teamStandingRow.played : (matchesPlayedByPlayer.get(player.id) ?? 0),
+            goalsConceded: isGoalkeeper ? teamStandingRow?.goalsAgainst : undefined,
             // Igual que goles/partidos: si es arquero, la posición "dorada"
             // es siempre la de valla menos vencida, no la de goleadores.
             position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(player.id) ?? null) : (positionByPlayer.get(player.id) ?? null),

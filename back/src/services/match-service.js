@@ -122,6 +122,12 @@ function addHoursToSchedule(date, time, hoursToAdd) {
   return { date: resultDate, time: resultTime };
 }
 
+// Sin importar quién jugó de local o visitante, A-vs-B y B-vs-A son el
+// mismo enfrentamiento a efectos de no duplicarlo.
+function pairKey(teamIdA, teamIdB) {
+  return [teamIdA, teamIdB].sort((a, b) => a - b).join('-');
+}
+
 export async function generateFixtures(tournamentId, options = {}) {
   const { groupId = null, startDate, time = '15:00', intervalDays = 7 } = options;
   if (!await matchRepository.findTournament(tournamentId)) throw new HttpError(404, 'Torneo no encontrado');
@@ -129,26 +135,41 @@ export async function generateFixtures(tournamentId, options = {}) {
     ? await matchRepository.findGroupTeamIds(groupId, tournamentId)
     : await matchRepository.findTournamentTeamIds(tournamentId);
   if (teamIds.length < 2) throw new HttpError(422, 'Se necesitan al menos 2 equipos para generar el fixture');
-  // Si ya hay partidos de este alcance, solo se puede volver a generar
-  // cuando todos quedaron finalizados (p.ej. para armar la vuelta después
-  // de la ida). Si queda alguno pendiente, hay que borrarlo primero.
-  const existingStatuses = await matchRepository.findFixtureMatchStatuses(tournamentId, groupId);
-  if (existingStatuses.length && existingStatuses.some((match) => match.status !== 'FINISHED')) {
-    throw new HttpError(409, 'Ya existen partidos generados para este alcance, elimínalos antes de volver a generar');
-  }
+
+  // No se recrea un enfrentamiento que ya existe en este alcance (torneo o
+  // grupo), sin importar el estado de ese partido ni quién fue local o
+  // visitante: el fixture solo agrega los que faltan.
+  const existingPairs = await matchRepository.findFixturePairs(tournamentId, groupId);
+  const existingPairKeys = new Set(existingPairs.map(({ homeTeamId, awayTeamId }) => pairKey(homeTeamId, awayTeamId)));
+
   const rounds = buildRoundRobinRounds(teamIds);
   const base = startDate ? new Date(`${startDate}T00:00:00.000Z`) : new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00.000Z');
   const matchesData = [];
+  let skipped = 0;
+
   rounds.forEach((pairs, roundIndex) => {
     const roundDate = new Date(base.getTime() + roundIndex * intervalDays * 24 * 60 * 60 * 1000);
-    pairs.forEach(([homeTeamId, awayTeamId], matchIndex) => {
+    let matchIndex = 0;
+
+    pairs.forEach(([homeTeamId, awayTeamId]) => {
+      if (existingPairKeys.has(pairKey(homeTeamId, awayTeamId))) {
+        skipped += 1;
+        return;
+      }
+
       const { date, time: matchTime } = addHoursToSchedule(roundDate, time, matchIndex);
+      matchIndex += 1;
       matchesData.push({ tournamentId, homeTeamId, awayTeamId, date, time: matchTime, groupId, stage: groupId ? 'GROUP' : null });
     });
   });
+
+  if (!matchesData.length) {
+    return { created: 0, skipped };
+  }
+
   const { count } = await matchRepository.createMany(matchesData);
   publish(tournamentId, { type: 'fixtures.generated' });
-  return { created: count };
+  return { created: count, skipped };
 }
 
 // Solo se puede borrar el fixture completo (para volver a generarlo con

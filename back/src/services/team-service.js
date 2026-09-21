@@ -33,11 +33,16 @@ export async function createTeam(data, role) {
   return teamRepository.create(payload);
 }
 
-export async function updateTeam(id, data) {
+// Igual que en createTeam: solo un SUPERADMIN puede tocar escudo, fechas de
+// pago/vigencia del escudo y el estado (usado por deleteController para el
+// borrado suave). Un ADMIN autorizado a editar el equipo solo puede cambiar
+// el nombre.
+export async function updateTeam(id, data, role) {
   await getTeam(id);
   const { applyPaidUntilToPlayers, ...teamData } = data;
-  const updated = await teamRepository.update(id, teamData);
-  if (applyPaidUntilToPlayers) {
+  const payload = role === 'SUPERADMIN' ? teamData : { name: teamData.name };
+  const updated = await teamRepository.update(id, payload);
+  if (role === 'SUPERADMIN' && applyPaidUntilToPlayers) {
     await teamRepository.updatePlayersPaidUntil(id, updated.paidUntil);
   }
   const assignment = await teamRepository.findAnyAssignment(id);

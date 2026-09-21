@@ -78,6 +78,17 @@ export function findFixtureMatchStatuses(tournamentId, groupId) {
   return prisma.match.findMany({ where: fixtureScopeWhere(tournamentId, groupId), select: { status: true } });
 }
 
+// Enfrentamientos ya existentes en este alcance (torneo o grupo), para que
+// generar el fixture no vuelva a crear un partido entre los mismos dos
+// equipos, sin importar quién fue local o visitante ni el estado del
+// partido ya creado.
+export function findFixturePairs(tournamentId, groupId) {
+  return prisma.match.findMany({
+    where: fixtureScopeWhere(tournamentId, groupId),
+    select: { homeTeamId: true, awayTeamId: true },
+  });
+}
+
 export function deleteFixtureMatches(tournamentId, groupId) {
   return prisma.match.deleteMany({ where: fixtureScopeWhere(tournamentId, groupId) });
 }

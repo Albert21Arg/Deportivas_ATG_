@@ -177,11 +177,12 @@ async function buildPlayerStatRows(tournamentId) {
     const isGoalkeeper = player?.teams[0]?.isGoalkeeper ?? false;
     const cards = cardsByPlayer.get(playerId) ?? { yellowCards: 0, redCards: 0, blueCards: 0 };
 
-    // Un arquero usa las mismas cifras de partidos jugados y goles
-    // recibidos que "valla menos vencida" (las de su equipo), no las de
-    // sus propios eventos, para que el OVR de su tarjeta sea igual sin
-    // importar desde qué vista se abra.
-    const standingRow = isGoalkeeper ? standingsByTeam.get(team?.id) : null;
+    // Todo jugador (no solo el arquero) usa los partidos jugados de su
+    // EQUIPO, no los suyos propios (no hay alineación por partido en este
+    // esquema, así que "jugó" el partido si su equipo lo jugó). goalsConceded
+    // sigue siendo solo del arquero, es una estadística propia de esa
+    // posición.
+    const standingRow = standingsByTeam.get(team?.id);
 
     return {
       player: withPlayerExpiryFlags(
@@ -200,7 +201,7 @@ async function buildPlayerStatRows(tournamentId) {
       team,
       goals: goalsByPlayer.get(playerId) ?? 0,
       matchesPlayed: standingRow ? standingRow.played : (matchesPlayedByPlayer.get(playerId) ?? 0),
-      goalsConceded: standingRow ? standingRow.goalsAgainst : undefined,
+      goalsConceded: isGoalkeeper ? standingRow?.goalsAgainst : undefined,
       // Igual que el OVR: si es arquero, la posición "dorada" que se ve en
       // su tarjeta es siempre la de valla menos vencida, sin importar que
       // esta tabla la esté rankeando por goles o por tarjetas. Va aparte de

@@ -127,9 +127,12 @@ export function findTies(tournamentId) {
   });
 }
 
+// Los aplazados no cuentan como "programados": no tienen fecha confirmada,
+// así que no deben aparecer en esta lista pública hasta que el admin les
+// asigne una fecha nueva (momento en el que vuelven a SCHEDULED).
 export function findUpcomingMatches(tournamentId) {
   return prisma.match.findMany({
-    where: { tournamentId, status: { in: ['SCHEDULED', 'STARTED', 'POSTPONED'] } },
+    where: { tournamentId, status: { in: ['SCHEDULED', 'STARTED'] } },
     select: matchSelect,
     orderBy: [{ date: 'asc' }, { time: 'asc' }],
   });
