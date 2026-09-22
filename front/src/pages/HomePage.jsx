@@ -299,49 +299,7 @@ function LiveMatchCard({
 }) {
   const isCyan = accent === 'cyan';
 
-  if (!match) {
-    return (
-      <div
-        className={`
-          rounded-xl border px-2.5 py-2
-          sm:rounded-2xl sm:px-4 sm:py-3
-          ${isCyan
-            ? 'border-cyan-400/10 bg-cyan-400/[0.04]'
-            : 'border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.02]'
-          }
-        `}
-      >
-        <div className="flex items-center gap-2">
-          <span
-            className={`
-              h-1.5 w-1.5 rounded-full
-              ${isCyan
-                ? 'bg-cyan-500/60'
-                : 'bg-slate-600'
-              }
-            `}
-          />
-
-          <p
-            className={`
-              text-[8px] font-black uppercase tracking-[0.16em]
-              sm:text-[9px]
-              ${isCyan
-                ? 'text-slate-900 dark:text-cyan-500/70'
-                : 'text-slate-600'
-              }
-            `}
-          >
-            Partido
-          </p>
-        </div>
-
-        <p className="mt-2 text-xs font-bold text-slate-500">
-          Sin partido en vivo
-        </p>
-      </div>
-    );
-  }
+  if (!match) return null;
 
   const homeTeam = getHomeTeam(match);
   const awayTeam = getAwayTeam(match);
@@ -758,13 +716,13 @@ function TournamentLikeButton({ tournamentId, initialTotal }) {
       onClick={handleToggleLike}
       disabled={isSaving}
       className={`
-        absolute right-2 top-2 z-10
-        flex items-center gap-1.5
-        rounded-full border px-2.5 py-1.5
-        text-xs font-bold
-        shadow-lg
+        absolute right-3 top-3 z-30
+        flex min-h-12 min-w-[4.5rem] items-center justify-center gap-2
+        rounded-2xl border-2 px-4 py-3
+        text-lg font-black
+        shadow-[0_8px_28px_rgba(244,63,94,0.22)]
         backdrop-blur-md transition-all duration-200
-        sm:right-2.5 sm:top-2.5
+        sm:right-4 sm:top-4 sm:min-h-14 sm:min-w-[5.25rem] sm:rounded-2xl sm:px-5 sm:py-3.5 sm:text-xl
         ${
           isLiked
             ? 'border-rose-400/40 bg-rose-400/15 text-rose-600 hover:border-rose-400/60 hover:bg-rose-400/25 dark:text-rose-300'
@@ -774,8 +732,10 @@ function TournamentLikeButton({ tournamentId, initialTotal }) {
       `}
       title={isLiked ? 'Quitar like (por si fue un error)' : 'Dar like a este torneo'}
     >
-      <span aria-hidden="true">{isLiked ? '❤️' : '🤍'}</span>
-      <span>{total}</span>
+      <span className="text-2xl leading-none sm:text-3xl" aria-hidden="true">
+        {isLiked ? '❤️' : '🤍'}
+      </span>
+      <span className="min-w-[2rem] text-center text-lg font-black tabular-nums sm:text-xl">{total}</span>
     </button>
   );
 }
@@ -1046,7 +1006,7 @@ function TournamentCard({
 
             {/* Información */}
 
-            <div className="min-w-0 flex-1 pr-9 sm:pr-0">
+            <div className="min-w-0 flex-1 pr-20 sm:pr-0">
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`
@@ -1083,39 +1043,21 @@ function TournamentCard({
                   'Consulta la clasificación, partidos y resultados de esta competición.'}
               </p>
             </div>
-
-            {/* Toggle */}
-
-            <span
-              className={`
-                absolute right-0 top-0 flex h-9 w-9 shrink-0 items-center
-                justify-center rounded-xl sm:static
-                border border-slate-200
-                bg-slate-50 text-xs text-slate-500
-                transition-all duration-300
-                dark:border-white/[0.07]
-                dark:bg-white/[0.025]
-                sm:h-10 sm:w-10
-                ${isExpanded
-                  ? `rotate-180 ${colors.badge}`
-                  : 'group-hover:border-slate-300 group-hover:text-slate-900 dark:group-hover:border-white/[0.12] dark:group-hover:text-white'
-                }
-              `}
-              aria-hidden="true"
-            >
-              ▼
-            </span>
           </div>
 
-          {/* ============================================================
+        </div>
+      </button>
+
+      <div className="px-3.5 pb-3.5 sm:px-6 sm:pb-6 lg:px-7">
+        {/* ============================================================
     ESTADÍSTICAS
 ============================================================ */}
 
-          <div className="mt-3 grid grid-cols-2 gap-1.5 sm:mt-6 sm:grid-cols-4 sm:gap-2">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-12 sm:gap-2">
 
             {/* EQUIPOS
       Oculto en móviles, visible desde sm */}
-            <div className="hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:block sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:col-span-4 sm:rounded-2xl sm:px-4 sm:py-3 sm:block">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Equipos
               </p>
@@ -1126,49 +1068,49 @@ function TournamentCard({
             </div>
 
             {/* ÚLTIMO CAMPEÓN */}
-            <div className="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
-              {tournament.tournament.championTeam && (
-                <TeamLogo
-                  team={tournament.tournament.championTeam}
-                  size="h-6 w-6 sm:h-7 sm:w-7"
-                  className="shrink-0"
-                />
-              )}
-
-              <div className="min-w-0">
+            <div className="flex min-w-0 items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:col-span-4 sm:px-4 sm:py-4">
+              <div className="min-w-0 flex-1">
                 <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                   Último campeón
                 </p>
 
-                <p className="mt-0.5 truncate text-[12px] font-black text-slate-900 dark:text-white sm:text-base">
+                <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-slate-900 dark:text-white sm:text-base sm:leading-6">
                   {tournament.tournament.championTeam?.name ?? '—'}
                 </p>
               </div>
+
+              {tournament.tournament.championTeam && (
+                <TeamLogo
+                  team={tournament.tournament.championTeam}
+                  size="h-14 w-14 sm:h-16 sm:w-16"
+                  className="shrink-0"
+                />
+              )}
             </div>
 
             {/* LÍDER */}
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:rounded-2xl sm:px-4 sm:py-3">
+            <div className="hidden min-w-0 items-start gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] px-3 py-3 dark:bg-amber-400/[0.04] sm:col-span-4 sm:px-4 sm:py-3 sm:flex">
               <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
                 Líder
               </p>
 
-              <p className="mt-0.5 truncate text-sm font-black text-amber-600 dark:text-amber-300 sm:text-base">
+              <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-amber-700 dark:text-amber-200 sm:text-base sm:leading-6">
                 {leader?.team?.name ?? '—'}
               </p>
             </div>
 
             {/* PARTIDO EN VIVO - ANCHO COMPLETO */}
-            <div className="col-span-2 w-full sm:col-span-4">
-              <LiveMatchCard
-                match={liveMatch}
-                accent={isCyan ? 'cyan' : 'emerald'}
-              />
-            </div>
+            {liveMatch && (
+              <div className="col-span-1 w-full sm:col-span-12">
+                <LiveMatchCard
+                  match={liveMatch}
+                  accent={isCyan ? 'cyan' : 'emerald'}
+                />
+              </div>
+            )}
 
           </div>
-
         </div>
-      </button>
 
       {/* ================================================================
           CONTENIDO (modal, no expansión en línea)
@@ -1904,3 +1846,5 @@ export default function HomePage() {
     </main>
   );
 }
+
+
