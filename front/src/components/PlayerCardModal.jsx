@@ -1,6 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import api from '../services/api.js';
+import { useNotifications } from '../context/NotificationContext.jsx';
+import { getApiErrorDetails } from '../utils/api-error.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
@@ -8,6 +10,112 @@ import {
   isTeamExpired,
   PLAYER_EXPIRED_CLASS,
 } from '../utils/team-expiry.js';
+
+/*
+|--------------------------------------------------------------------------
+| Like de jugador
+|
+| El backend valida el límite real de 1 like por IP/jugador cada 3h; acá
+| solo recordamos localmente (localStorage) que este navegador ya dio like
+| a este jugador, para no mostrar el botón activo otra vez hasta que pasen
+| las 3h, aunque se recargue la página.
+|--------------------------------------------------------------------------
+*/
+
+const PLAYER_LIKE_COOLDOWN_MS = 3 * 60 * 60 * 1000;
+
+function hasLikedPlayerRecently(playerId) {
+  try {
+    const storedAt = localStorage.getItem(`playerLike:${playerId}`);
+    return Boolean(storedAt) && Date.now() - Number(storedAt) < PLAYER_LIKE_COOLDOWN_MS;
+  } catch {
+    return false;
+  }
+}
+
+function rememberPlayerLike(playerId) {
+  try {
+    localStorage.setItem(`playerLike:${playerId}`, String(Date.now()));
+  } catch {
+    // localStorage puede fallar en modo privado; no es crítico, el backend
+    // igual aplica el límite real por IP.
+  }
+}
+
+function forgetPlayerLike(playerId) {
+  try {
+    localStorage.removeItem(`playerLike:${playerId}`);
+  } catch {
+    // Ídem: si falla, no es crítico.
+  }
+}
+
+// El botón permite deshacer el like (por si fue un click por error): el
+// backend solo deja quitar el más reciente, dentro de la misma ventana de
+// cooldown en la que se muestra como "ya le diste like".
+function PlayerLikeButton({ playerId, total, onLiked }) {
+  const { notify } = useNotifications();
+  const [isLiked, setIsLiked] = useState(() => hasLikedPlayerRecently(playerId));
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function handleToggleLike(event) {
+    event.stopPropagation();
+    if (isSaving) return;
+
+    setIsSaving(true);
+
+    try {
+      if (isLiked) {
+        const { data } = await api.delete(`/public/players/${playerId}/like`);
+        setIsLiked(false);
+        forgetPlayerLike(playerId);
+        onLiked(data.data);
+      } else {
+        const { data } = await api.post(`/public/players/${playerId}/like`);
+        setIsLiked(true);
+        rememberPlayerLike(playerId);
+        onLiked(data.data);
+      }
+    } catch (error) {
+      const details = getApiErrorDetails(error);
+      if (details.message?.startsWith('Ya le diste like')) {
+        setIsLiked(true);
+        rememberPlayerLike(playerId);
+      } else if (details.message?.includes('No tenés un like reciente')) {
+        setIsLiked(false);
+        forgetPlayerLike(playerId);
+      }
+      notify(details);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleToggleLike}
+      disabled={isSaving}
+      className={`
+        absolute -left-3 -top-3 z-[100]
+        flex h-10 min-w-[2.75rem] items-center justify-center gap-1
+        rounded-full border px-2.5
+        text-sm font-black leading-none
+        shadow-2xl backdrop-blur-xl transition-all duration-200
+        ${
+          isLiked
+            ? 'border-rose-400/40 bg-rose-400/20 text-rose-300'
+            : 'border-white/20 bg-black/85 text-white hover:scale-110 hover:border-rose-400/40 hover:bg-rose-400/10'
+        }
+        ${isSaving ? 'cursor-wait opacity-70' : 'cursor-pointer active:scale-95'}
+      `}
+      title={isLiked ? 'Quitar like (por si fue un error)' : 'Dar like a este jugador'}
+    >
+      <span aria-hidden="true">{isLiked ? '❤️' : '🤍'}</span>
+      <span className="tabular-nums">{total}</span>
+    </button>
+  );
+}
 
 function mediaUrl(path) {
   if (!path) return null;
@@ -344,6 +452,20 @@ export default function PlayerCardModal({
 }) {
   /*
   |--------------------------------------------------------------------------
+  | LIKES (bonus de OVR)
+  |--------------------------------------------------------------------------
+  */
+
+  const [likeTotal, setLikeTotal] = useState(row?.player?.likesTotal ?? 0);
+  const [likeBonus, setLikeBonus] = useState(row?.player?.likesOvrBonus ?? 0);
+
+  useEffect(() => {
+    setLikeTotal(row?.player?.likesTotal ?? 0);
+    setLikeBonus(row?.player?.likesOvrBonus ?? 0);
+  }, [row?.player?.id, row?.player?.likesTotal, row?.player?.likesOvrBonus]);
+
+  /*
+  |--------------------------------------------------------------------------
   | BLOQUEAR SCROLL DEL FONDO
   |--------------------------------------------------------------------------
   */
@@ -496,8 +618,9 @@ export default function PlayerCardModal({
   */
 
   // El superadmin puede fijar un OVR manual por jugador (fixedOvr): si está
-  // presente, pisa el cálculo automático de la tarjeta.
-  const overall = player.fixedOvr ?? (isGoalkeeper
+  // presente, pisa el cálculo automático de la tarjeta (y no recibe el
+  // bonus de likes, que solo aplica sobre el cálculo automático).
+  const calculatedOverall = isGoalkeeper
     ? calculateGoalkeeperOverall({
         matchesPlayed,
         goalsConceded,
@@ -509,7 +632,16 @@ export default function PlayerCardModal({
         redCards,
         matchesPlayed,
         position,
-      }));
+      });
+
+  // El equipo líder en likes del torneo (ver team-like-service.js) le suma
+  // este bonus fijo a todos sus jugadores, igual que likeBonus: solo aplica
+  // sobre el cálculo automático, no sobre un OVR fijo.
+  const teamLikeBonus = player.teamLikeBonus ?? 0;
+
+  const overall =
+    player.fixedOvr ??
+    Math.min(calculatedOverall + likeBonus + teamLikeBonus, 99);
 
   // Un arquero abierto desde la tabla de goleadores/tarjetas trae su propio
   // `position` dentro de ESE ranking (no el de valla), así que la carta
@@ -1167,6 +1299,19 @@ export default function PlayerCardModal({
         >
           ×
         </button>
+
+        {/* ==============================================================
+            BOTÓN LIKE
+        ============================================================== */}
+
+        <PlayerLikeButton
+          playerId={player.id}
+          total={likeTotal}
+          onLiked={({ total, ovrBonus }) => {
+            setLikeTotal(total);
+            setLikeBonus(ovrBonus);
+          }}
+        />
 
         {/* ==============================================================
             MARCO

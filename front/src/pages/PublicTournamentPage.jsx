@@ -7,6 +7,7 @@ import { getApiErrorDetails } from '../utils/api-error.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
+  isPlayerExpired,
   isTeamExpired,
   PLAYER_EXPIRED_CLASS,
 } from '../utils/team-expiry.js';
@@ -16,6 +17,7 @@ import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import FutbolIcon from '../components/FutbolIcon.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
 import GoalkeepersTable from '../components/GoalkeepersTable.jsx';
+import PlayerCardModal from '../components/PlayerCardModal.jsx';
 import ScorersTable from '../components/ScorersTable.jsx';
 import StandingsTable from '../components/StandingsTable.jsx';
 import TeamDetailModal from '../components/TeamDetailModal.jsx';
@@ -91,6 +93,14 @@ function groupMatchesByDate(matches, direction = 'asc') {
     .sort(([left], [right]) => sign * left.localeCompare(right));
 }
 
+function mediaUrl(path) {
+  if (!path) return null;
+
+  return path.startsWith('http')
+    ? path
+    : `${api.defaults.baseURL.replace(/\/api\/?$/, '')}${path}`;
+}
+
 /*
 |--------------------------------------------------------------------------
 | Logo
@@ -126,6 +136,26 @@ function TeamLogo({
       src={team.logo}
       alt={expired ? '' : `Escudo de ${team.name}`}
     />
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Silueta de jugador (sin foto)
+|--------------------------------------------------------------------------
+*/
+
+function PlayerSilhouette({ className = 'h-[60%] w-[60%] text-white/70' }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="4.2" />
+      <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8v1H4v-1z" />
+    </svg>
   );
 }
 
@@ -1301,6 +1331,7 @@ export default function PublicTournamentPage() {
 
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const [featuredPlayerRow, setFeaturedPlayerRow] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -1492,6 +1523,21 @@ export default function PublicTournamentPage() {
       .flatMap((tie) => tie.matches ?? [])
       .find((match) => match.status === 'STARTED');
 
+  // Igual que en el resto de la página pública: si el jugador (o su
+  // equipo) tiene el pago vencido, su foto y nombre se distorsionan.
+  const topScorer = data.scorers?.[0] ?? null;
+  const topScorerExpired = isPlayerExpired(topScorer?.player);
+  const topScorerNameHidden =
+    topScorer?.player?.showName === false ||
+    topScorerExpired;
+
+  const topLikedPlayerExpired = isPlayerExpired(
+    data.topLikedPlayer?.player
+  );
+  const topLikedPlayerNameHidden =
+    data.topLikedPlayer?.player?.showName === false ||
+    topLikedPlayerExpired;
+
   return (
     <main
       className="
@@ -1586,6 +1632,225 @@ export default function PublicTournamentPage() {
         </div>
       </section>
 
+      {/* Marcador en vivo */}
+
+      {liveMatch && (
+        <section className="mx-auto mb-3 w-full max-w-7xl min-w-0 sm:mb-4">
+          <LiveMatchCard
+            match={liveMatch}
+            onClick={() => setSelectedMatch(liveMatch)}
+            tournamentId={id}
+            tournamentName={data.tournament.name}
+          />
+        </section>
+      )}
+
+      {data.scorers?.[0] && (
+        <section className="mx-auto mb-3 w-full max-w-7xl min-w-0 sm:mb-4">
+          <button
+            type="button"
+            onClick={() => setFeaturedPlayerRow(data.scorers[0])}
+            className="
+              group relative flex w-full min-w-0 items-center gap-3
+              overflow-hidden rounded-3xl border-2 border-amber-400/40
+              bg-gradient-to-br from-amber-400/[0.16] via-amber-500/[0.06] to-transparent
+              p-4 text-left
+              shadow-[0_12px_45px_rgba(251,191,36,0.16)]
+              transition
+              hover:border-amber-400/60 hover:shadow-[0_18px_55px_rgba(251,191,36,0.24)]
+              sm:gap-5 sm:p-6
+            "
+          >
+            <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-amber-400/25 blur-3xl transition group-hover:bg-amber-400/35" />
+
+            <div
+              className="
+                relative flex h-16 w-16 shrink-0 items-center justify-center
+                overflow-hidden rounded-2xl
+                bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700
+                shadow-lg ring-2 ring-amber-300/50
+                sm:h-24 sm:w-24
+              "
+            >
+              {data.scorers[0].player.photo ? (
+                <img
+                  className={`h-full w-full object-cover ${topScorerExpired ? PLAYER_EXPIRED_CLASS : ''}`}
+                  src={mediaUrl(data.scorers[0].player.photo)}
+                  alt={topScorerExpired ? '' : `Foto de ${data.scorers[0].player.name}`}
+                />
+              ) : (
+                <PlayerSilhouette
+                  className={`h-[60%] w-[60%] text-white/70 ${topScorerExpired ? PLAYER_EXPIRED_CLASS : ''}`}
+                />
+              )}
+            </div>
+
+            <div className="relative min-w-0 flex-1">
+              <p className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-amber-600 dark:text-amber-300 sm:text-[11px]">
+                <span aria-hidden="true">👑</span>
+                Goleador del torneo
+              </p>
+
+              <p
+                className={`mt-1 truncate text-lg font-black text-slate-900 dark:text-white sm:text-2xl ${topScorerNameHidden ? PLAYER_EXPIRED_CLASS : ''}`}
+              >
+                {data.scorers[0].player.name}
+              </p>
+
+              {data.scorers[0].team && (
+                <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+                  {data.scorers[0].team.name}
+                </p>
+              )}
+            </div>
+
+            <div className="relative flex shrink-0 flex-col items-center">
+              <span className="text-3xl font-black leading-none text-amber-600 dark:text-amber-300 sm:text-5xl">
+                {data.scorers[0].goals}
+              </span>
+
+              <span className="mt-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+                Goles
+              </span>
+            </div>
+          </button>
+        </section>
+      )}
+
+      {(data.topLikedTeam || data.topLikedPlayer) && (
+        <section className="mx-auto mb-3 w-full max-w-7xl min-w-0 sm:mb-4">
+          <div
+            className="
+              flex min-w-0 flex-col divide-y divide-slate-200 overflow-hidden
+              rounded-2xl border border-slate-200 bg-white
+              dark:divide-white/[0.08] dark:border-white/[0.08] dark:bg-[#0a1018]/90
+              sm:flex-row sm:divide-x sm:divide-y-0
+            "
+          >
+            {data.topLikedTeam?.team && (
+              <button
+                type="button"
+                onClick={() => {
+                  const row = data.standings.find(
+                    (item) => item.team.id === data.topLikedTeam.team.id
+                  );
+
+                  if (row) {
+                    setSelectedTeam({
+                      row,
+                      recentForm:
+                        data.recentFormByTeam?.[row.team.id] ?? [],
+                    });
+                  }
+                }}
+                className="
+                  flex min-w-0 flex-1 items-center gap-3
+                  p-3 text-left
+                  transition
+                  hover:bg-amber-400/[0.06]
+                  sm:p-4
+                "
+              >
+                <TeamLogo
+                  team={data.topLikedTeam.team}
+                  size="h-12 w-12 sm:h-14 sm:w-14"
+                />
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-[8px] font-black uppercase tracking-[0.16em] text-amber-600 dark:text-amber-300 sm:text-[9px]">
+                    🏆 Equipo Favorito
+                  </p>
+
+                  <p className="mt-0.5 truncate text-sm font-black text-slate-900 dark:text-white sm:text-base">
+                    {data.topLikedTeam.team.name}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1 text-rose-500 dark:text-rose-300">
+                  <span aria-hidden="true">❤️</span>
+                  <span className="text-base font-black tabular-nums sm:text-lg">
+                    {data.topLikedTeam.total}
+                  </span>
+                </div>
+              </button>
+            )}
+
+            {data.topLikedPlayer?.player && (
+              <button
+                type="button"
+                onClick={() =>
+                  setFeaturedPlayerRow({
+                    player: data.topLikedPlayer.player,
+                    team: data.topLikedPlayer.team,
+                    goals: data.topLikedPlayer.player.goals,
+                    yellowCards: data.topLikedPlayer.player.yellowCards,
+                    redCards: data.topLikedPlayer.player.redCards,
+                    blueCards: data.topLikedPlayer.player.blueCards,
+                    matchesPlayed:
+                      data.topLikedPlayer.player.matchesPlayed,
+                    goalsConceded:
+                      data.topLikedPlayer.player.goalsConceded,
+                    position: data.topLikedPlayer.player.position,
+                    isGoalkeeper: Boolean(
+                      data.topLikedPlayer.player.isGoalkeeper
+                    ),
+                  })
+                }
+                className="
+                  flex min-w-0 flex-1 items-center gap-3
+                  p-3 text-left
+                  transition
+                  hover:bg-rose-400/[0.06]
+                  sm:p-4
+                "
+              >
+                <div
+                  className="
+                    relative h-14 w-11 shrink-0 overflow-hidden rounded-lg
+                    bg-gradient-to-b from-amber-300 via-amber-500 to-amber-700
+                    shadow-md ring-1 ring-black/10
+                    sm:h-16 sm:w-12
+                  "
+                >
+                  {data.topLikedPlayer.player.photo ? (
+                    <img
+                      className={`h-full w-full object-cover ${topLikedPlayerExpired ? PLAYER_EXPIRED_CLASS : ''}`}
+                      src={mediaUrl(data.topLikedPlayer.player.photo)}
+                      alt={topLikedPlayerExpired ? '' : `Foto de ${data.topLikedPlayer.player.name}`}
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center">
+                      <PlayerSilhouette
+                        className={`h-[65%] w-[65%] text-white/70 ${topLikedPlayerExpired ? PLAYER_EXPIRED_CLASS : ''}`}
+                      />
+                    </span>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-[8px] font-black uppercase tracking-[0.16em] text-rose-600 dark:text-rose-300 sm:text-[9px]">
+                    🔥 Jugador Favorito
+                  </p>
+
+                  <p
+                    className={`mt-0.5 truncate text-sm font-black text-slate-900 dark:text-white sm:text-base ${topLikedPlayerNameHidden ? PLAYER_EXPIRED_CLASS : ''}`}
+                  >
+                    {data.topLikedPlayer.player.name}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-1 text-rose-500 dark:text-rose-300">
+                  <span aria-hidden="true">❤️</span>
+                  <span className="text-base font-black tabular-nums sm:text-lg">
+                    {data.topLikedPlayer.total}
+                  </span>
+                </div>
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
       <section
         className="
           mx-auto
@@ -1599,15 +1864,6 @@ export default function PublicTournamentPage() {
           lg:gap-5
         "
       >
-        {liveMatch && (
-          <LiveMatchCard
-            match={liveMatch}
-            onClick={() => setSelectedMatch(liveMatch)}
-            tournamentId={id}
-            tournamentName={data.tournament.name}
-          />
-        )}
-
         {competitionMode === 'ROUND_ROBIN' ? (
           <SectionCard
             section="standings"
@@ -2571,6 +2827,17 @@ export default function PublicTournamentPage() {
         selection={selectedTeam}
         blueCardEnabled={data.tournament.blueCardEnabled}
         onClose={() => setSelectedTeam(null)}
+      />
+
+      <PlayerCardModal
+        row={featuredPlayerRow}
+        respectPaymentStatus
+        blueCardEnabled={data.tournament.blueCardEnabled}
+        isGoalkeeper={Boolean(
+          featuredPlayerRow?.isGoalkeeper ??
+            featuredPlayerRow?.player?.isGoalkeeper
+        )}
+        onClose={() => setFeaturedPlayerRow(null)}
       />
     </main>
   );

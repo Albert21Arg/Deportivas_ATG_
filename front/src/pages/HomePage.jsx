@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useNotifications } from '../context/NotificationContext.jsx';
@@ -14,6 +14,7 @@ import AnnouncementModal from '../components/AnnouncementModal.jsx';
 import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
 import StandingsTable from '../components/StandingsTable.jsx';
+import TeamLikeButton from '../components/TeamLikeButton.jsx';
 
 const formStyles = {
   G: 'bg-emerald-500 text-slate-950 dark:text-slate-950',
@@ -550,6 +551,10 @@ function TeamModal({ selection, onClose }) {
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {row.points} puntos en la competición
             </p>
+
+            <div className="mt-3 flex justify-center">
+              <TeamLikeButton teamId={row.team.id} />
+            </div>
           </div>
 
           <div className="mt-5 grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.06] dark:bg-white/[0.025] sm:mt-7">
@@ -749,23 +754,13 @@ function TournamentLikeButton({ tournamentId, initialTotal }) {
 function TournamentCard({
   tournament,
   onSelectTeam,
-  isExpanded,
-  onToggle,
   colorVariant = 'emerald',
 }) {
   const standings = tournament.standings ?? [];
 
-  // En el home solo se muestra un adelanto: los 4 primeros de la tabla, no
-  // la clasificación completa (esa se ve en la página del torneo).
-  const topStandings = standings.slice(0, 4);
-
   const mode =
     tournament.tournament.mode ??
     'ROUND_ROBIN';
-
-  const contentId = `tournament-content-${tournament.tournament.id}`;
-
-  const buttonId = `tournament-button-${tournament.tournament.id}`;
 
   const leader = standings.find(
     (row) => row.position === 1
@@ -877,10 +872,7 @@ function TournamentCard({
         transition-all duration-500
         sm:rounded-[2rem]
         sm:${colors.border}
-        ${isExpanded
-          ? colors.expanded
-          : `${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]`
-        }
+        ${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]
       `}
     >
       {/* ============================================================
@@ -913,10 +905,7 @@ function TournamentCard({
           ${colors.line}
           to-transparent
           transition-opacity duration-500
-          ${isExpanded
-            ? 'opacity-100'
-            : 'opacity-80 group-hover:opacity-100'
-          }
+          opacity-80 group-hover:opacity-100
         `}
       />
 
@@ -929,14 +918,7 @@ function TournamentCard({
           CABECERA
       ============================================================ */}
 
-      <button
-        id={buttonId}
-        className="relative w-full overflow-hidden text-left"
-        type="button"
-        onClick={onToggle}
-        aria-expanded={isExpanded}
-        aria-controls={contentId}
-      >
+      <div className="relative w-full overflow-hidden text-left">
         <div className="p-3.5 sm:p-6 lg:p-7">
           <div className="flex items-start gap-3 sm:gap-6">
             {/* Logo */}
@@ -948,10 +930,7 @@ function TournamentCard({
                   blur-xl
                   transition duration-500
                   ${colors.logoGlow}
-                  ${isExpanded
-                    ? 'opacity-100'
-                    : 'opacity-60 group-hover:opacity-100'
-                  }
+                  opacity-60 group-hover:opacity-100
                 `}
               />
 
@@ -1046,7 +1025,7 @@ function TournamentCard({
           </div>
 
         </div>
-      </button>
+      </div>
 
       <div className="px-3.5 pb-3.5 sm:px-6 sm:pb-6 lg:px-7">
         {/* ============================================================
@@ -1089,14 +1068,24 @@ function TournamentCard({
             </div>
 
             {/* LÍDER */}
-            <div className="hidden min-w-0 items-start gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] px-3 py-3 dark:bg-amber-400/[0.04] sm:col-span-4 sm:px-4 sm:py-3 sm:flex">
-              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
-                Líder
-              </p>
+            <div className="hidden min-w-0 items-center justify-between gap-4 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] px-3.5 py-3.5 dark:bg-amber-400/[0.04] sm:col-span-4 sm:flex sm:px-4 sm:py-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
+                  Líder
+                </p>
 
-              <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-amber-700 dark:text-amber-200 sm:text-base sm:leading-6">
-                {leader?.team?.name ?? '—'}
-              </p>
+                <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-amber-700 dark:text-amber-200 sm:text-base sm:leading-6">
+                  {leader?.team?.name ?? '—'}
+                </p>
+              </div>
+
+              {leader?.team && (
+                <TeamLogo
+                  team={leader.team}
+                  size="h-14 w-14 sm:h-16 sm:w-16"
+                  className="shrink-0"
+                />
+              )}
             </div>
 
             {/* PARTIDO EN VIVO - ANCHO COMPLETO */}
@@ -1111,387 +1100,6 @@ function TournamentCard({
 
           </div>
         </div>
-
-      {/* ================================================================
-          CONTENIDO (modal, no expansión en línea)
-      ================================================================ */}
-
-      {isExpanded && (
-        <div
-          className="fixed inset-0 z-[55] flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
-          role="presentation"
-          onMouseDown={(event) => {
-            if (event.target === event.currentTarget) onToggle();
-          }}
-        >
-          <div
-            id={contentId}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={buttonId}
-            className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/[0.09] dark:bg-[#0b1119] sm:rounded-3xl"
-            onMouseDown={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={onToggle}
-              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-sm text-slate-500 backdrop-blur-md transition hover:bg-slate-100 hover:text-slate-900 dark:border-white/[0.08] dark:bg-black/40 dark:text-slate-300 dark:hover:bg-white/[0.08] dark:hover:text-white"
-              aria-label="Cerrar"
-            >
-              ✕
-            </button>
-
-            {/* Header clasificación */}
-
-            <div className="flex items-center justify-between bg-slate-50 px-4 py-3 dark:bg-black/10 sm:px-6 sm:py-4">
-              <div>
-                <p
-                  className={`text-[9px] font-bold uppercase tracking-[0.18em] sm:text-[10px] ${colors.section}`}
-                >
-                  Clasificación
-                </p>
-
-                <p className="mt-0.5 text-xs text-slate-500">
-                  Rendimiento actual de los equipos
-                </p>
-              </div>
-
-              <span className="hidden rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:border-white/[0.06] dark:bg-white/[0.025] sm:inline-flex">
-                {standings.length} equipos
-              </span>
-            </div>
-
-            {/* ROUND ROBIN */}
-
-            {mode === 'ROUND_ROBIN' ? (
-              <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
-                <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.05]">
-                  <table className="w-full table-fixed text-sm">
-                    <thead className="border-b border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.02]">
-                      <tr className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-600 sm:text-[10px] sm:tracking-[0.16em]">
-                        <th className="w-12 px-1.5 py-3 text-center sm:w-14 sm:px-2 sm:py-3.5">
-                          Pos
-                        </th>
-
-                        <th className="px-1.5 py-3 text-left sm:px-3 sm:py-3.5">
-                          Equipo
-                        </th>
-
-                        <th className="hidden px-2 py-3.5 text-center sm:table-cell">
-                          PJ
-                        </th>
-
-                        <th className="hidden px-2 py-3.5 text-center sm:table-cell">
-                          DG
-                        </th>
-
-                        <th className="hidden px-2 py-3.5 text-center text-amber-400 sm:table-cell">
-                          🟨
-                        </th>
-
-                        <th className="hidden px-2 py-3.5 text-center text-red-400 sm:table-cell">
-                          🟥
-                        </th>
-
-                        <th className="hidden px-2 py-3.5 text-center text-blue-400 sm:table-cell">
-                          🟦
-                        </th>
-
-                        <th
-                          className={`
-                            w-14 px-1.5 py-3 text-center
-                            sm:w-auto sm:px-3 sm:py-3.5
-                            ${isCyan
-                              ? 'text-slate-900 dark:text-cyan-400'
-                              : 'text-emerald-400'
-                            }
-                          `}
-                        >
-                          PTS
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-                      {topStandings.map((row) => {
-                        const isLeader =
-                          row.position === 1;
-
-                        const expired =
-                          isTeamExpired(row.team);
-
-                        return (
-                          <tr
-                            key={row.team.id}
-                            role="button"
-                            tabIndex={0}
-                            onClick={() =>
-                              onSelectTeam(
-                                row,
-                                tournament
-                                  .recentFormByTeam?.[
-                                row.team.id
-                                ] ?? []
-                              )
-                            }
-                            onKeyDown={(event) => {
-                              if (
-                                event.key === 'Enter' ||
-                                event.key === ' '
-                              ) {
-                                event.preventDefault();
-
-                                onSelectTeam(
-                                  row,
-                                  tournament
-                                    .recentFormByTeam?.[
-                                  row.team.id
-                                  ] ?? []
-                                );
-                              }
-                            }}
-                            className={`
-                              group/row cursor-pointer transition-all duration-200
-                              ${isLeader
-                                ? 'border-l-2 border-amber-400 bg-gradient-to-r from-amber-400/[0.09] via-amber-400/[0.025] to-transparent'
-                                : 'hover:bg-slate-50 dark:hover:bg-white/[0.025]'
-                              }
-                            `}
-                          >
-                            <td className="w-12 px-1.5 py-3 text-center sm:w-auto sm:px-2 sm:py-3.5">
-                              {row.position <= 3 ? (
-                                <span
-                                  className={`
-                                    mx-auto flex h-7 w-7 items-center
-                                    justify-center rounded-lg
-                                    text-[10px] font-black
-                                    ${row.position === 1
-                                      ? 'bg-gradient-to-br from-amber-300 to-amber-500 text-slate-950 dark:text-slate-950 shadow-[0_0_18px_rgba(251,191,36,0.22)]'
-                                      : row.position === 2
-                                        ? 'bg-gradient-to-br from-slate-200 to-slate-400 text-slate-900 dark:text-slate-900'
-                                        : 'bg-gradient-to-br from-orange-300 to-orange-500 text-slate-950 dark:text-slate-950'
-                                    }
-                                  `}
-                                >
-                                  {row.position}
-                                </span>
-                              ) : (
-                                <span className="text-xs font-semibold text-slate-600 sm:text-sm">
-                                  {row.position}
-                                </span>
-                              )}
-                            </td>
-
-                            <td className="min-w-0 px-1.5 py-3 sm:px-3 sm:py-3.5">
-                              <div className="flex min-w-0 w-full items-center gap-2.5 text-left sm:gap-3">
-                                <div className="relative shrink-0">
-                                  <div
-                                    className={`
-                                      absolute -inset-1 rounded-full blur-md
-                                      ${isLeader
-                                        ? 'bg-amber-400/10'
-                                        : 'bg-emerald-400/0 group-hover/row:bg-emerald-400/10'
-                                      }
-                                    `}
-                                  />
-
-                                  <TeamLogo
-                                    team={row.team}
-                                    size="h-9 w-9 sm:h-11 sm:w-11"
-                                    className="relative"
-                                  />
-
-                                  {isLeader && (
-                                    <span
-                                      className="absolute -right-1.5 -top-2 z-10 text-xs leading-none drop-shadow-[0_0_6px_rgba(251,191,36,0.8)] sm:-right-2 sm:-top-3 sm:text-sm"
-                                      title="Primer lugar"
-                                      aria-label="Primer lugar"
-                                    >
-                                      👑
-                                    </span>
-                                  )}
-                                </div>
-
-                                <span
-                                  className={`
-                                    min-w-0 flex-1 truncate
-                                    text-xs font-bold
-                                    transition-colors sm:text-sm
-                                    ${isLeader
-                                      ? 'text-amber-600 group-hover/row:text-amber-500 dark:text-amber-100 dark:group-hover/row:text-amber-300'
-                                      : 'text-slate-700 group-hover/row:text-slate-900 dark:text-slate-300 dark:group-hover/row:text-white'
-                                    }
-                                  `}
-                                >
-                                  {row.team.name}
-                                </span>
-                              </div>
-                            </td>
-
-                            <td className="hidden px-2 py-3.5 text-center text-slate-500 sm:table-cell">
-                              {row.played}
-                            </td>
-
-                            <td
-                              className={`
-                                hidden px-2 py-3.5
-                                text-center text-sm
-                                sm:table-cell
-                                ${row.goalDifference > 0
-                                  ? 'font-bold text-emerald-400'
-                                  : row.goalDifference < 0
-                                    ? 'font-bold text-red-400'
-                                    : 'text-slate-500'
-                                }
-                                ${expired
-                                  ? EXPIRED_CLASS
-                                  : ''
-                                }
-                              `}
-                            >
-                              {row.goalDifference > 0
-                                ? `+${row.goalDifference}`
-                                : row.goalDifference}
-                            </td>
-
-                            <td
-                              className={`hidden px-2 py-3.5 text-center text-amber-300 sm:table-cell ${expired
-                                ? EXPIRED_CLASS
-                                : ''
-                                }`}
-                            >
-                              {row.yellowCards}
-                            </td>
-
-                            <td
-                              className={`hidden px-2 py-3.5 text-center text-red-300 sm:table-cell ${expired
-                                ? EXPIRED_CLASS
-                                : ''
-                                }`}
-                            >
-                              {row.redCards}
-                            </td>
-
-                            <td
-                              className={`hidden px-2 py-3.5 text-center text-blue-300 sm:table-cell ${expired
-                                ? EXPIRED_CLASS
-                                : ''
-                                }`}
-                            >
-                              {row.blueCards}
-                            </td>
-
-                            <td
-                              className={`
-                                w-14 px-1.5 py-3 text-center
-                                text-sm sm:w-auto
-                                sm:px-3 sm:py-3.5 sm:text-base
-                                ${isLeader
-                                  ? 'font-black text-amber-300'
-                                  : isCyan
-                                    ? 'font-black text-slate-900 dark:text-cyan-300'
-                                    : 'font-black text-emerald-300'
-                                }
-                              `}
-                            >
-                              {row.points}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-
-                  {standings.length === 0 && (
-                    <p className="p-6 text-center text-xs text-slate-500 sm:p-8 sm:text-sm">
-                      Aún no hay equipos en este torneo.
-                    </p>
-                  )}
-                </div>
-              </div>
-            ) : mode === 'GROUP_STAGE' ? (
-              <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
-                {!tournament.pots ||
-                  tournament.pots.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-xs text-slate-500 dark:border-white/[0.08] dark:bg-white/[0.02] sm:p-8 sm:text-sm">
-                    Los grupos aún no han sido generados.
-                  </p>
-                ) : (
-                  <div className="w-full space-y-5">
-                    {tournament.pots.map(
-                      ({
-                        pot,
-                        standings: potStandings,
-                      }) => (
-                        <div
-                          key={pot}
-                          className="w-full min-w-0"
-                        >
-                          <div className="mb-2.5 flex items-center gap-3">
-                            <span className="h-px flex-1 bg-slate-200 dark:bg-white/[0.05]" />
-
-                            <h3
-                              className={`text-[10px] font-black uppercase tracking-[0.18em] ${colors.section}`}
-                            >
-                              Bombo {pot}
-                            </h3>
-
-                            <span className="h-px flex-1 bg-slate-200 dark:bg-white/[0.05]" />
-                          </div>
-
-                          <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.05]">
-                            <StandingsTable
-                              standings={potStandings.slice(0, 4)}
-                              respectPaymentStatus
-                            />
-                          </div>
-                        </div>
-                      )
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="w-full min-w-0 overflow-hidden p-2.5 sm:p-5">
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.015]">
-                  <CompetitionOverview
-                    mode={mode}
-                    groups={tournament.groups}
-                    ties={tournament.ties}
-                    championLabel={
-                      tournament.tournament
-                        .championLabel
-                    }
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Footer */}
-
-            <div className="border-t border-slate-200 bg-slate-50 px-3 py-3 dark:border-white/[0.05] dark:bg-black/10 sm:px-5 sm:py-4">
-              <Link
-                className={`
-                  group/link flex min-h-11 w-full
-                  items-center justify-center gap-2
-                  rounded-xl border px-4 py-2.5
-                  text-center text-xs font-black
-                  transition-all duration-300
-                  sm:py-3 sm:text-sm
-                  ${colors.button}
-                `}
-                to={`/tournaments/${tournament.tournament.id}`}
-              >
-                Abrir competición completa
-
-                <span className="transition-transform duration-300 group-hover/link:translate-x-1">
-                  →
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Footer */}
 
@@ -1542,19 +1150,8 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] =
     useState('');
 
-  const [expandedTournamentId, setExpandedTournamentId] =
-    useState(null);
-
-  function toggleTournament(tournamentId) {
-    setExpandedTournamentId((currentId) =>
-      currentId === tournamentId
-        ? null
-        : tournamentId
-    );
-  }
-
-  useEffect(() => {
-    async function loadTournaments() {
+  const loadAllTournaments = useCallback(
+    async ({ silent = false } = {}) => {
       try {
         const { data } = await api.get(
           '/public/tournaments'
@@ -1577,51 +1174,95 @@ export default function HomePage() {
 
         setTournaments(details);
       } catch (error) {
-        notify(getApiErrorDetails(error));
+        if (!silent) notify(getApiErrorDetails(error));
       } finally {
         setIsLoading(false);
       }
-    }
+    },
+    [notify]
+  );
 
-    loadTournaments();
-  }, [notify]);
+  // Refresco puntual de UN torneo (lo usa el stream en vivo de cada
+  // torneo): no vuelve a pedir la lista completa, solo ese detalle.
+  const loadTournamentDetail = useCallback(
+    async (tournamentId) => {
+      try {
+        const { data } = await api.get(
+          `/public/tournaments/${tournamentId}`
+        );
+
+        setTournaments((current) =>
+          current.map((entry) =>
+            entry.tournament.id === tournamentId
+              ? data.data
+              : entry
+          )
+        );
+      } catch {
+        // Silencioso: si falla, el próximo evento en vivo o el sondeo de
+        // respaldo lo vuelven a intentar.
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    loadAllTournaments();
+  }, [loadAllTournaments]);
 
   /*
   |--------------------------------------------------------------------------
-  | Actualización automática
+  | Actualización en vivo
+  |
+  | Un stream por torneo (mismo canal que ya usa PublicTournamentPage), así
+  | que cualquier cambio del back para ese torneo -partido, like, equipo,
+  | jugador- refresca ese torneo casi al instante. El sondeo cada 4s queda
+  | como respaldo rápido: por si el stream tarda en conectar o se corta en
+  | silencio (algunos túneles/proxies intermedios bufferean SSE), y para
+  | detectar torneos nuevos que todavía no tienen stream abierto.
   |--------------------------------------------------------------------------
   */
 
+  const tournamentIdsKey = useMemo(
+    () =>
+      tournaments
+        .map((entry) => entry.tournament.id)
+        .sort((left, right) => left - right)
+        .join(','),
+    [tournaments]
+  );
+
   useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const { data } = await api.get(
-          '/public/tournaments'
-        );
+    if (!tournamentIdsKey) return undefined;
 
-        const tournamentList =
-          data.data.tournaments;
+    const tournamentIds = tournamentIdsKey
+      .split(',')
+      .map(Number);
 
-        const details = await Promise.all(
-          tournamentList.map(
-            async (tournament) => {
-              const response = await api.get(
-                `/public/tournaments/${tournament.id}`
-              );
+    const streams = tournamentIds.map((tournamentId) => {
+      const stream = new EventSource(
+        `${api.defaults.baseURL}/public/tournaments/${tournamentId}/events`
+      );
 
-              return response.data.data;
-            }
-          )
-        );
+      stream.addEventListener('match.updated', () =>
+        loadTournamentDetail(tournamentId)
+      );
 
-        setTournaments(details);
-      } catch {
-        // No mostramos error en cada actualización automática.
-      }
-    }, 10000);
+      return stream;
+    });
+
+    return () => {
+      streams.forEach((stream) => stream.close());
+    };
+  }, [tournamentIdsKey, loadTournamentDetail]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadAllTournaments({ silent: true });
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [loadAllTournaments]);
 
   const normalizedSearch =
     searchQuery.trim().toLowerCase();
@@ -1809,15 +1450,6 @@ export default function HomePage() {
                         index % 2 === 0
                           ? 'emerald'
                           : 'cyan'
-                      }
-                      isExpanded={
-                        expandedTournamentId ===
-                        tournamentId
-                      }
-                      onToggle={() =>
-                        toggleTournament(
-                          tournamentId
-                        )
                       }
                       onSelectTeam={(
                         row,

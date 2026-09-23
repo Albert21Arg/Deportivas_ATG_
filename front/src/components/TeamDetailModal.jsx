@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { EXPIRED_CLASS, isLogoHidden, isTeamExpired, PLAYER_EXPIRED_CLASS } from '../utils/team-expiry.js';
 import api from '../services/api.js';
 import PlayerCardModal from './PlayerCardModal.jsx';
+import TeamLikeButton from './TeamLikeButton.jsx';
 
 const formStyles = {
   G: 'bg-emerald-500 text-slate-950',
@@ -75,6 +76,9 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
         playerExpired: player.playerExpired,
         showName: player.showName,
         fixedOvr: player.fixedOvr,
+        likesTotal: player.likesTotal,
+        likesOvrBonus: player.likesOvrBonus,
+        teamLikeBonus: player.teamLikeBonus,
       },
       team: row.team,
       goals: player.goals,
@@ -136,6 +140,10 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
             Posición #{row.position} · {row.points} puntos
           </p>
+
+          <div className="mt-3 flex justify-center">
+            <TeamLikeButton teamId={row.team.id} />
+          </div>
 
           <div className="mt-5 sm:mt-6">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">

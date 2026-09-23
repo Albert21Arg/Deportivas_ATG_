@@ -826,7 +826,7 @@ function MatchEventsPanel({
 
         {isPlayerPickerOpen && (
           <div
-            className="fixed inset-0 z-[70] flex items-end justify-center bg-slate-950/80 px-3 py-3 backdrop-blur-sm sm:items-center sm:px-4 sm:py-6"
+            className="fixed inset-0 z-[70] flex bg-slate-950/80 backdrop-blur-sm"
             role="presentation"
             onMouseDown={(event) => {
               if (event.target === event.currentTarget) {
@@ -835,7 +835,7 @@ function MatchEventsPanel({
             }}
           >
             <section
-              className="flex max-h-[85vh] w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-white dark:bg-slate-900 shadow-2xl"
+              className="flex h-full w-full flex-col overflow-hidden bg-white dark:bg-slate-900 shadow-2xl"
               role="dialog"
               aria-modal="true"
               aria-labelledby="player-picker-title"
@@ -3621,7 +3621,7 @@ export default function MatchesPage() {
                 {liveMatches.length === 0 ? (
                   <EmptySection message="No hay partidos en vivo en este momento." />
                 ) : (
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-3">
                     {liveMatches.map(
                       (match) => (
                         <MatchCard
