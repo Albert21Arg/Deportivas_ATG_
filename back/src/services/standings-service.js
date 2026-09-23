@@ -1,4 +1,7 @@
 import * as standingsRepository from '../repositories/standings-repository.js';
+import { TEAM_LIKES } from '../config/team-likes.js';
+import { getLikeBonusesForPlayers } from './player-like-service.js';
+import { getLeaderTeamIds } from './team-like-service.js';
 import { countBillableCardsByPlayer } from '../utils/card-sanctions.js';
 import { HttpError } from '../utils/http-error.js';
 import { withExpiryFlags, withPlayerExpiryFlags } from '../utils/team-expiry.js';
@@ -166,7 +169,11 @@ async function buildPlayerStatRows(tournamentId) {
   const playerIds = [...new Set([...goalsByPlayer.keys(), ...cardsByPlayer.keys()])];
   if (!playerIds.length) return [];
 
-  const players = await standingsRepository.findPlayersWithTeams(playerIds);
+  const [players, likeBonusByPlayer, leaderTeamIds] = await Promise.all([
+    standingsRepository.findPlayersWithTeams(playerIds),
+    getLikeBonusesForPlayers(playerIds),
+    getLeaderTeamIds(standings.map((row) => row.team.id)),
+  ]);
   const playersById = new Map(players.map((player) => [player.id, player]));
   const standingsByTeam = new Map(standings.map((row) => [row.team.id, row]));
   const goalkeeperPositionByPlayer = new Map(goalkeepers.map((row) => [row.player.id, row.position]));
@@ -195,6 +202,9 @@ async function buildPlayerStatRows(tournamentId) {
           showName: player?.showName ?? true,
           fixedOvr: player?.fixedOvr ?? null,
           isGoalkeeper,
+          likesTotal: likeBonusByPlayer.get(playerId)?.total ?? 0,
+          likesOvrBonus: likeBonusByPlayer.get(playerId)?.ovrBonus ?? 0,
+          teamLikeBonus: leaderTeamIds.has(team?.id) ? TEAM_LIKES.bonusOvr : 0,
         },
         team?.teamExpired
       ),
@@ -253,13 +263,25 @@ export async function getGoalkeepers(tournamentId) {
   if (!assignments.length) return [];
 
   const standingsByTeam = new Map(standings.map((row) => [row.team.id, row]));
+  const [likeBonusByPlayer, leaderTeamIds] = await Promise.all([
+    getLikeBonusesForPlayers(assignments.map(({ player }) => player.id)),
+    getLeaderTeamIds(standings.map((row) => row.team.id)),
+  ]);
 
   const rows = assignments
     .map(({ teamId, player }) => {
       const standingRow = standingsByTeam.get(teamId);
       if (!standingRow || standingRow.played <= 0) return null;
       return {
-        player: withPlayerExpiryFlags(player, standingRow.team?.teamExpired),
+        player: withPlayerExpiryFlags(
+          {
+            ...player,
+            likesTotal: likeBonusByPlayer.get(player.id)?.total ?? 0,
+            likesOvrBonus: likeBonusByPlayer.get(player.id)?.ovrBonus ?? 0,
+            teamLikeBonus: leaderTeamIds.has(teamId) ? TEAM_LIKES.bonusOvr : 0,
+          },
+          standingRow.team?.teamExpired
+        ),
         team: standingRow.team,
         matchesPlayed: standingRow.played,
         goalsConceded: standingRow.goalsAgainst,

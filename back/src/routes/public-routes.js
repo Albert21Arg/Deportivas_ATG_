@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 
 import { detailController, historyController, likeController, listController, unlikeController, visitController } from '../controllers/public-controller.js';
+import { bonusesController, likeController as likePlayerController, unlikeController as unlikePlayerController } from '../controllers/player-like-controller.js';
+import { likeController as likeTeamController, totalsController as teamTotalsController, unlikeController as unlikeTeamController } from '../controllers/team-like-controller.js';
 import { activeController } from '../controllers/announcement-controller.js';
 import { activeController as activeFloatingBubblesController } from '../controllers/floating-bubble-controller.js';
 import { activeController as activeSiteSettingsController } from '../controllers/site-setting-controller.js';
@@ -9,13 +11,13 @@ import { streamController } from '../controllers/realtime-controller.js';
 
 const router = Router();
 
-// Además del límite de 1 like por IP/torneo cada 24h (que vive en
-// tournament-like-service.js), esto frena ráfagas automatizadas: incluso
-// probando IDs de torneo distintos, la misma IP no puede golpear el
-// endpoint más de unas pocas veces por minuto.
+// Además del límite de 1 like activo por IP/torneo|equipo|jugador (que vive
+// en cada *-like-service.js), esto solo frena ráfagas automatizadas: un
+// humano dando like y quitándolo las veces que quiera (aunque sea rápido)
+// no debería toparse con esto, así que el límite es generoso.
 const likeLimiter = rateLimit({
   windowMs: 60 * 1000,
-  limit: 5,
+  limit: 60,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
   message: {
@@ -31,6 +33,12 @@ router.post('/tournaments/:id/like', likeLimiter, likeController);
 router.delete('/tournaments/:id/like', likeLimiter, unlikeController);
 router.get('/tournaments/:id/history', historyController);
 router.get('/tournaments/:id/events', streamController);
+router.get('/players/likes', bonusesController);
+router.post('/players/:id/like', likeLimiter, likePlayerController);
+router.delete('/players/:id/like', likeLimiter, unlikePlayerController);
+router.get('/teams/likes', teamTotalsController);
+router.post('/teams/:id/like', likeLimiter, likeTeamController);
+router.delete('/teams/:id/like', likeLimiter, unlikeTeamController);
 router.get('/announcements/active', activeController);
 router.get('/floating-bubbles', activeFloatingBubblesController);
 router.get('/site-settings', activeSiteSettingsController);

@@ -130,6 +130,17 @@ model Team {
   knockoutAwayTies      KnockoutTie[]    @relation("KnockoutAwayTeam")
   knockoutWinnerTies    KnockoutTie[]    @relation("KnockoutWinnerTeam")
   dt                    User?
+  likes                 TeamLike[]
+}
+
+model TeamLike {
+  id        Int      @id @default(autoincrement())
+  teamId    Int
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  ipAddress String
+  createdAt DateTime @default(now())
+
+  @@index([teamId, ipAddress, createdAt])
 }
 
 model Player {
@@ -150,6 +161,17 @@ model Player {
   updatedAt               DateTime     @updatedAt
   teams                   PlayerTeam[]
   matchEvents             MatchEvent[]
+  likes                   PlayerLike[]
+}
+
+model PlayerLike {
+  id        Int      @id @default(autoincrement())
+  playerId  Int
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  ipAddress String
+  createdAt DateTime @default(now())
+
+  @@index([playerId, ipAddress, createdAt])
 }
 
 model PlayerTeam {

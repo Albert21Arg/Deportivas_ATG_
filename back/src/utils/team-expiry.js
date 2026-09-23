@@ -18,16 +18,24 @@ export function withExpiryFlags(team) {
   return { ...rest, teamExpired, logoExpired };
 }
 
-// El pago del EQUIPO es lo que manda: si el equipo está al día, sus
-// jugadores se muestran normal sin importar si tienen o no un pago
-// individual propio. Si el equipo está moroso, un jugador solo se libra
-// del bloqueo (foto y nombre visibles en todos lados) pagando aparte un
-// paidUntil propio todavía vigente; sin eso, queda expirado igual que su
-// equipo.
+// Si el jugador NUNCA tuvo un paidUntil propio, depende del pago del
+// EQUIPO: equipo al día lo muestra, equipo moroso lo oculta.
+//
+// Si el jugador SÍ tiene (o tuvo) un paidUntil propio, ese es el que manda
+// para él, sin importar si el equipo está al día: mientras esté vigente lo
+// libra del bloqueo aunque el equipo esté moroso, pero si ya venció lo deja
+// oculto aunque el equipo esté al día (un pago individual viejo no se da
+// por bueno solo porque el equipo pagó por su cuenta después). La única
+// forma de "refrescarlo" es que el admin vuelva a aplicarle una fecha
+// vigente (p.ej. con "aplicar esta fecha a todos los jugadores del
+// equipo" al actualizar el pago del equipo).
 export function withPlayerExpiryFlags(player, teamExpired = false) {
   if (!player) return player;
   const { paidUntil, ...rest } = player;
-  const hasIndividualPayment = Boolean(paidUntil) && !isPast(paidUntil);
-  const playerExpired = Boolean(teamExpired) && !hasIndividualPayment;
+  const hasOwnPaidUntil = Boolean(paidUntil);
+  const ownPaymentExpired = hasOwnPaidUntil && isPast(paidUntil);
+  const playerExpired = hasOwnPaidUntil
+    ? ownPaymentExpired
+    : Boolean(teamExpired);
   return { ...rest, playerExpired };
 }

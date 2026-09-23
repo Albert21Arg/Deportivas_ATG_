@@ -1,6 +1,7 @@
 import { LIKES } from '../config/likes.js';
 import * as likeRepository from '../repositories/tournament-like-repository.js';
 import * as tournamentRepository from '../repositories/tournament-repository.js';
+import { publish } from './realtime-service.js';
 import { HttpError } from '../utils/http-error.js';
 
 export async function likeTournament(tournamentId, ipAddress) {
@@ -15,6 +16,7 @@ export async function likeTournament(tournamentId, ipAddress) {
 
   await likeRepository.create(tournamentId, ipAddress);
   const total = await likeRepository.countTotal(tournamentId);
+  publish(tournamentId, { type: 'tournament.liked' });
   return { total };
 }
 
@@ -30,6 +32,7 @@ export async function unlikeTournament(tournamentId, ipAddress) {
   if (!removed) throw new HttpError(404, 'No tenés un like reciente para quitar en este torneo');
 
   const total = await likeRepository.countTotal(tournamentId);
+  publish(tournamentId, { type: 'tournament.unliked' });
   return { total };
 }
 

@@ -1,7 +1,10 @@
 import * as publicRepository from '../repositories/public-repository.js';
 import { expireOverdue } from '../repositories/tournament-repository.js';
 import { getGoalkeepers, getPlayerStatMaps, getStandings, getStandingsByPot, getTopCards, getTopScorers } from './standings-service.js';
+import { getLikeBonusesForPlayers, getTopLikedPlayerId } from './player-like-service.js';
 import { getLikeScoresForTournaments } from './tournament-like-service.js';
+import { getLeaderTeamIds, getTopLikedTeamId } from './team-like-service.js';
+import { TEAM_LIKES } from '../config/team-likes.js';
 import { HttpError } from '../utils/http-error.js';
 import { withExpiryFlags, withPlayerExpiryFlags } from '../utils/team-expiry.js';
 
@@ -80,6 +83,17 @@ export async function getPublicTournament(id) {
   const goalkeeperPositionByPlayer = new Map(goalkeepers.map((row) => [row.player.id, row.position]));
   const standingsByTeam = new Map(standings.map((row) => [row.team.id, row]));
 
+  // Todo el roster (no solo goleadores/arqueros) puede recibir likes, así
+  // que se piden en bloque para todos los jugadores del torneo.
+  const rosterPlayerIds = tournamentPlayers.flatMap(({ team }) => team.players.map(({ player }) => player.id));
+  const tournamentTeamIds = standings.map((row) => row.team.id);
+  const [likeBonusByPlayer, leaderTeamIds, topLikedTeamId, topLikedPlayerId] = await Promise.all([
+    getLikeBonusesForPlayers(rosterPlayerIds),
+    getLeaderTeamIds(tournamentTeamIds),
+    getTopLikedTeamId(tournamentTeamIds),
+    getTopLikedPlayerId(rosterPlayerIds),
+  ]);
+
   // Cada jugador del roster lleva las mismas cifras que usa la tarjeta de
   // goleador (goles, tarjetas, partidos, posición), así la tarjeta se puede
   // abrir también desde la lista de jugadores de un equipo.
@@ -104,6 +118,9 @@ export async function getPublicTournament(id) {
             // Igual que goles/partidos: si es arquero, la posición "dorada"
             // es siempre la de valla menos vencida, no la de goleadores.
             position: isGoalkeeper ? (goalkeeperPositionByPlayer.get(player.id) ?? null) : (positionByPlayer.get(player.id) ?? null),
+            likesTotal: likeBonusByPlayer.get(player.id)?.total ?? 0,
+            likesOvrBonus: likeBonusByPlayer.get(player.id)?.ovrBonus ?? 0,
+            teamLikeBonus: leaderTeamIds.has(team.id) ? TEAM_LIKES.bonusOvr : 0,
             ...cards,
           },
           teamStandingRow?.team?.teamExpired
@@ -123,6 +140,25 @@ export async function getPublicTournament(id) {
 
     if (recentFormByTeam[match.homeTeam.id].length < 3) recentFormByTeam[match.homeTeam.id].push(homeResult);
     if (recentFormByTeam[match.awayTeam.id].length < 3) recentFormByTeam[match.awayTeam.id].push(awayResult);
+  }
+
+  // Destacados de likes: el equipo y el jugador de ESTE torneo con más
+  // likes, para mostrarlos arriba de posiciones/próximos partidos. Se
+  // buscan en los datos ya armados (standings/playersByTeam) para no
+  // duplicar el shape que ya espera el frontend.
+  const topLikedTeam = topLikedTeamId
+    ? { team: standingsByTeam.get(topLikedTeamId.teamId)?.team ?? null, total: topLikedTeamId.total }
+    : null;
+
+  let topLikedPlayer = null;
+  if (topLikedPlayerId) {
+    for (const [teamId, players] of playersByTeam) {
+      const found = players.find((player) => player.id === topLikedPlayerId.playerId);
+      if (found) {
+        topLikedPlayer = { player: found, team: standingsByTeam.get(teamId)?.team ?? null, total: topLikedPlayerId.total };
+        break;
+      }
+    }
   }
 
   return {
@@ -145,6 +181,8 @@ export async function getPublicTournament(id) {
     recentFormByTeam,
     groups: groups.map(withPublicGroup),
     ties: ties.map(withPublicTie),
+    topLikedTeam,
+    topLikedPlayer,
   };
 }
 
