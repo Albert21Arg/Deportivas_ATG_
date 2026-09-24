@@ -132,7 +132,7 @@ function TeamLogo({
 
   return (
     <img
-      className={`${size} shrink-0 object-contain ${className} ${expiredClass}`}
+      className={`${size} shrink-0 object-contain drop-shadow-[0_4px_10px_rgba(15,23,42,0.16)] transition-transform duration-200 group-hover:scale-105 ${className} ${expiredClass}`}
       src={team.logo}
       alt={expired ? '' : `Escudo de ${team.name}`}
     />
@@ -235,7 +235,7 @@ function MatchRow({ match, onClick }) {
         <div className="mt-2 flex min-w-0 items-center sm:mt-2.5">
           <TeamLogo
             team={match.homeTeam}
-            size="h-7 w-7 sm:h-9 sm:w-9"
+            size="h-12 w-12 sm:h-16 sm:w-16"
           />
 
           <span className="ml-1.5 min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-700 dark:text-slate-300 sm:ml-2 sm:max-w-none sm:text-base">
@@ -264,7 +264,7 @@ function MatchRow({ match, onClick }) {
 
           <TeamLogo
             team={match.awayTeam}
-            size="h-7 w-7 sm:h-9 sm:w-9"
+            size="h-12 w-12 sm:h-16 sm:w-16"
             className="ml-1.5 sm:ml-2"
           />
         </div>
@@ -367,10 +367,10 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
 
         <div className="flex items-center justify-center gap-2 sm:gap-8">
           <div className="flex w-[105px] min-w-0 flex-col items-center text-center sm:w-[180px]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.07] dark:bg-white/[0.035] sm:h-24 sm:w-24">
+            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.07] dark:bg-white/[0.035] sm:h-36 sm:w-36">
               <TeamLogo
                 team={match.homeTeam}
-                size="h-14 w-14 sm:h-20 sm:w-20"
+                size="h-24 w-24 sm:h-32 sm:w-32"
               />
             </div>
 
@@ -398,10 +398,10 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
           </div>
 
           <div className="flex w-[105px] min-w-0 flex-col items-center text-center sm:w-[180px]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.07] dark:bg-white/[0.035] sm:h-24 sm:w-24">
+            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.07] dark:bg-white/[0.035] sm:h-36 sm:w-36">
               <TeamLogo
                 team={match.awayTeam}
-                size="h-14 w-14 sm:h-20 sm:w-20"
+                size="h-24 w-24 sm:h-32 sm:w-32"
               />
             </div>
 
@@ -506,11 +506,11 @@ function HistoryMatchCard({ match, onClick }) {
       </div>
 
       <div className="flex items-center justify-center">
-        <div className="flex w-[90px] min-w-0 flex-col items-center text-center sm:w-[150px]">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.025] sm:h-20 sm:w-20">
+        <div className="flex w-[120px] min-w-0 flex-col items-center text-center sm:w-[190px]">
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.025] sm:h-20 sm:w-20">
             <TeamLogo
               team={match.homeTeam}
-              size="h-14 w-14 sm:h-20 sm:w-20"
+              size="h-24 w-24 sm:h-32 sm:w-32"
             />
           </div>
 
@@ -533,11 +533,11 @@ function HistoryMatchCard({ match, onClick }) {
           </span>
         </div>
 
-        <div className="flex w-[90px] min-w-0 flex-col items-center text-center sm:w-[150px]">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.025] sm:h-20 sm:w-20">
+        <div className="flex w-[120px] min-w-0 flex-col items-center text-center sm:w-[190px]">
+          <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 dark:border-white/[0.05] dark:bg-white/[0.025] sm:h-20 sm:w-20">
             <TeamLogo
               team={match.awayTeam}
-              size="h-14 w-14 sm:h-20 sm:w-20"
+              size="h-24 w-24 sm:h-32 sm:w-32"
             />
           </div>
 
@@ -688,7 +688,7 @@ function MatchDetailModal({
           <div className="w-[120px] min-w-0 text-center sm:w-[165px]">
             <TeamLogo
               team={match.homeTeam}
-              size="h-24 w-24 sm:h-32 sm:w-32"
+              size="h-40 w-40 sm:h-48 sm:w-48"
               className="mx-auto"
             />
 
@@ -752,7 +752,7 @@ function MatchDetailModal({
           <div className="w-[120px] min-w-0 text-center sm:w-[165px]">
             <TeamLogo
               team={match.awayTeam}
-              size="h-24 w-24 sm:h-32 sm:w-32"
+              size="h-40 w-40 sm:h-48 sm:w-48"
               className="mx-auto"
             />
 
@@ -1753,7 +1753,7 @@ export default function PublicTournamentPage() {
               >
                 <TeamLogo
                   team={data.topLikedTeam.team}
-                  size="h-12 w-12 sm:h-14 sm:w-14"
+                  size="h-16 w-16 sm:h-18 sm:w-18"
                 />
 
                 <div className="min-w-0 flex-1">
@@ -2002,7 +2002,7 @@ export default function PublicTournamentPage() {
                               <div className="relative shrink-0">
                                 <TeamLogo
                                   team={row.team}
-                                  size="h-11 w-11"
+                                  size="h-14 w-14"
                                 />
 
                                 {isLeader && (
@@ -2245,7 +2245,7 @@ export default function PublicTournamentPage() {
                               <div className="relative shrink-0">
                                 <TeamLogo
                                   team={row.team}
-                                  size="h-9 w-9"
+                                  size="h-12 w-12"
                                 />
 
                                 {isLeader && (
