@@ -113,6 +113,36 @@ export function validateFinish(request, _response, next) {
   }
 }
 
+function parseMinutes(value, field, { max = 60 } = {}) {
+  const minutes = Number(value);
+  if (!Number.isInteger(minutes) || minutes < 1 || minutes > max) {
+    throw new HttpError(422, `${field} debe ser un entero entre 1 y ${max}`);
+  }
+  return minutes;
+}
+
+export function validateStart(request, _response, next) {
+  try {
+    request.validatedBody = {
+      halfDurationMinutes: parseMinutes(request.body?.halfDurationMinutes, 'halfDurationMinutes', { max: 60 }),
+    };
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export function validateExtraTime(request, _response, next) {
+  try {
+    request.validatedBody = {
+      minutes: parseMinutes(request.body?.minutes, 'minutes', { max: 15 }),
+    };
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
 export function parseMatchId(request, _response, next) {
   const id = Number(request.params.id);
   if (!Number.isInteger(id) || id <= 0) return next(new HttpError(400, 'Identificador de partido no válido'));

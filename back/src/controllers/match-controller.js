@@ -1,4 +1,12 @@
-import { addEvent, changeStatus, createMatch, deleteEvent, deleteFixtures, generateFixtures, listMatches, registerResult, updateLiveScore, updateMatch } from '../services/match-service.js';
+import { addEvent, addExtraTime, changeStatus, createMatch, deleteEvent, deleteFixtures, generateFixtures, getLiveMatchForUser, listMatches, registerResult, startMatch, startNextPeriod, updateLiveScore, updateMatch } from '../services/match-service.js';
+
+export async function liveController(request, response, next) {
+  try {
+    return response.json({ success: true, data: { match: await getLiveMatchForUser(request.user) } });
+  } catch (error) {
+    return next(error);
+  }
+}
 
 export async function listController(request, response, next) {
   try {
@@ -45,6 +53,30 @@ export async function updateController(request, response, next) {
 export async function resultController(request, response, next) {
   try {
     return response.json({ success: true, data: { match: await registerResult(request.matchId, request.validatedBody, request.user) } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function startController(request, response, next) {
+  try {
+    return response.json({ success: true, data: { match: await startMatch(request.matchId, request.validatedBody.halfDurationMinutes) } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function nextPeriodController(request, response, next) {
+  try {
+    return response.json({ success: true, data: { match: await startNextPeriod(request.matchId) } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function extraTimeController(request, response, next) {
+  try {
+    return response.json({ success: true, data: { match: await addExtraTime(request.matchId, request.validatedBody.minutes) } });
   } catch (error) {
     return next(error);
   }

@@ -13,6 +13,10 @@ const matchSelect = {
   awayScore: true,
   homePenaltyScore: true,
   awayPenaltyScore: true,
+  halfDurationMinutes: true,
+  currentPeriod: true,
+  periodStartedAt: true,
+  extraMinutes: true,
   stage: true,
   groupId: true,
   tieId: true,
@@ -33,6 +37,29 @@ export function findByTournament(tournamentId) {
     where: { tournamentId },
     select: matchSelect,
     orderBy: [{ date: 'asc' }, { time: 'asc' }],
+  });
+}
+
+// Partido en vivo (si hay alguno) dentro del alcance del usuario: todos los
+// torneos si es SUPERADMIN, solo los que administra si es ADMIN. Se usa para
+// el botón flotante "LIVE" del panel de administración.
+export function findLiveForUser(user) {
+  const tournamentFilter = user.role === 'SUPERADMIN'
+    ? {}
+    : { admins: { some: { userId: user.id } } };
+
+  return prisma.match.findFirst({
+    where: { status: 'STARTED', tournament: tournamentFilter },
+    select: {
+      id: true,
+      tournamentId: true,
+      homeScore: true,
+      awayScore: true,
+      homeTeam: { select: { name: true } },
+      awayTeam: { select: { name: true } },
+      tournament: { select: { name: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
   });
 }
 

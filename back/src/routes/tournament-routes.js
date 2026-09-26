@@ -9,6 +9,7 @@ import playerRoutes from './player-routes.js';
 import {
   championController,
   createController,
+  deleteController,
   getController,
   listController,
   moveController,
@@ -45,6 +46,7 @@ router.use('/:id/groups', groupRoutes);
 router.use('/:id/bracket', bracketRoutes);
 router.get('/:id', parseTournamentId, requireTournamentAccess, getController);
 router.put('/:id', authorize('SUPERADMIN'), parseTournamentId, validateUpdateTournament, updateController);
+router.delete('/:id', authorize('SUPERADMIN'), parseTournamentId, deleteController);
 router.patch('/:id/mode', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateUpdateTournamentMode, updateModeController);
 router.patch('/:id/player-registration-deadline', parseTournamentId, requireTournamentAccess, requireActiveTournament, validateUpdatePlayerRegistrationDeadline, updateRegistrationDeadlineController);
 router.patch('/:id/status', authorize('SUPERADMIN'), parseTournamentId, validateStatus, statusController);

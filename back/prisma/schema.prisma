@@ -3,7 +3,6 @@ generator client {
   binaryTargets = ["native", "windows", "darwin-arm64"]
 }
 
-
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -33,41 +32,45 @@ model User {
 }
 
 model Tournament {
-  id               Int              @id @default(autoincrement())
-  name             String
-  description      String?
-  logo             String?
-  status           String           @default("ACTIVE")
-  expiresAt        DateTime?
-  pricePerTeam     Int?
-  position         Int              @default(0)
-  mode             String           @default("ROUND_ROBIN")
-  hasThirdPlace    Boolean          @default(false)
-  blueCardEnabled  Boolean          @default(true)
-  awayGoalsRule    Boolean          @default(false)
-  championTeamId   Int?
-  runnerUpTeamId   Int?
-  thirdPlaceTeamId Int?
-  championLabel    String?
-  finishedAt       DateTime?
+  id                         Int              @id @default(autoincrement())
+  name                       String
+  description                String?
+  logo                       String?
+  status                     String           @default("ACTIVE")
+  // Cuándo pasó a INACTIVE por última vez (manual o por expiresAt vencido).
+  // null mientras está ACTIVE. Se usa para saber si ya lleva más de 15 días
+  // desactivado y el superadmin puede eliminarlo definitivamente.
+  deactivatedAt              DateTime?
+  expiresAt                  DateTime?
+  pricePerTeam               Int?
+  position                   Int              @default(0)
+  mode                       String           @default("ROUND_ROBIN")
+  hasThirdPlace              Boolean          @default(false)
+  blueCardEnabled            Boolean          @default(true)
+  awayGoalsRule              Boolean          @default(false)
+  championTeamId             Int?
+  runnerUpTeamId             Int?
+  thirdPlaceTeamId           Int?
+  championLabel              String?
+  finishedAt                 DateTime?
   // Fecha límite para que los DT de los equipos de este torneo inscriban
   // jugadores. Solo restringe al rol DT; admin/superadmin no se ven
   // afectados. null = sin límite.
   playerRegistrationDeadline DateTime?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  admins           UserTournament[]
-  teams            TournamentTeam[]
-  matches          Match[]
-  groups           Group[]
-  ties             KnockoutTie[]
-  captions         TableCaption[]
-  announcements    Announcement[]
-  views            TournamentView[]
-  likes            TournamentLike[]
-  championTeam     Team?            @relation("TournamentChampion", fields: [championTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  runnerUpTeam     Team?            @relation("TournamentRunnerUp", fields: [runnerUpTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  thirdPlaceTeam   Team?            @relation("TournamentThirdPlace", fields: [thirdPlaceTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+  admins                     UserTournament[]
+  teams                      TournamentTeam[]
+  matches                    Match[]
+  groups                     Group[]
+  ties                       KnockoutTie[]
+  captions                   TableCaption[]
+  announcements              Announcement[]
+  views                      TournamentView[]
+  likes                      TournamentLike[]
+  championTeam               Team?            @relation("TournamentChampion", fields: [championTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  runnerUpTeam               Team?            @relation("TournamentRunnerUp", fields: [runnerUpTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  thirdPlaceTeam             Team?            @relation("TournamentThirdPlace", fields: [thirdPlaceTeamId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([status])
   @@index([position])
@@ -209,30 +212,38 @@ model TournamentTeam {
 }
 
 model Match {
-  id               Int          @id @default(autoincrement())
-  tournamentId     Int
-  homeTeamId       Int
-  awayTeamId       Int
-  date             DateTime
-  time             String
-  status           String       @default("SCHEDULED")
-  streamUrl        String?
-  homeScore        Int?
-  awayScore        Int?
-  homePenaltyScore Int?
-  awayPenaltyScore Int?
-  stage            String?
-  groupId          Int?
-  tieId            Int?
-  leg              Int?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
-  tournament       Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  homeTeam         Team         @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  awayTeam         Team         @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  group            Group?       @relation(fields: [groupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  tie              KnockoutTie? @relation(fields: [tieId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  events           MatchEvent[]
+  id                  Int          @id @default(autoincrement())
+  tournamentId        Int
+  homeTeamId          Int
+  awayTeamId          Int
+  date                DateTime
+  time                String
+  status              String       @default("SCHEDULED")
+  streamUrl           String?
+  homeScore           Int?
+  awayScore           Int?
+  homePenaltyScore    Int?
+  awayPenaltyScore    Int?
+  // Cronómetro: duración de cada tiempo en minutos (se pide al iniciar el
+  // partido), tiempo en curso (1 o 2), cuándo arrancó ese tiempo y cuántos
+  // minutos de descuento/tiempo extra se le agregaron a ese tiempo. Todo
+  // null hasta que el partido se inicia por primera vez.
+  halfDurationMinutes Int?
+  currentPeriod       Int?
+  periodStartedAt     DateTime?
+  extraMinutes        Int          @default(0)
+  stage               String?
+  groupId             Int?
+  tieId               Int?
+  leg                 Int?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  tournament          Tournament   @relation(fields: [tournamentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  homeTeam            Team         @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  awayTeam            Team         @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  group               Group?       @relation(fields: [groupId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  tie                 KnockoutTie? @relation(fields: [tieId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  events              MatchEvent[]
 
   @@index([tournamentId, date, time])
   @@index([status])

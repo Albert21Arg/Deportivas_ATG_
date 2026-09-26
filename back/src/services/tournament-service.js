@@ -63,8 +63,34 @@ export async function setChampion(id, { championTeamId, runnerUpTeamId, thirdPla
 }
 
 export async function updateTournamentStatus(id, status) {
-  await getTournament(id);
-  return withPaymentInfo(await tournamentRepository.update(id, { status }));
+  const tournament = await getTournament(id);
+  const data = { status };
+  // deactivatedAt marca desde cuándo lleva inactivo (para el borrado a los
+  // 15 días); se limpia si vuelve a activarse, así una reactivación reinicia
+  // el conteo si se desactiva de nuevo más adelante.
+  if (status === 'INACTIVE' && tournament.status !== 'INACTIVE') {
+    data.deactivatedAt = new Date();
+  } else if (status === 'ACTIVE') {
+    data.deactivatedAt = null;
+  }
+  return withPaymentInfo(await tournamentRepository.update(id, data));
+}
+
+const DELETE_ELIGIBLE_AFTER_MS = 15 * 24 * 60 * 60 * 1000;
+
+export async function deleteTournament(id) {
+  const tournament = await getTournament(id);
+
+  if (tournament.status !== 'INACTIVE' || !tournament.deactivatedAt) {
+    throw new HttpError(409, 'Solo puedes eliminar torneos desactivados hace más de 15 días');
+  }
+
+  const inactiveSince = new Date(tournament.deactivatedAt).getTime();
+  if (Date.now() - inactiveSince < DELETE_ELIGIBLE_AFTER_MS) {
+    throw new HttpError(409, 'Solo puedes eliminar torneos desactivados hace más de 15 días');
+  }
+
+  await tournamentRepository.deleteWithRelations(id);
 }
 
 // Sube o baja un torneo un puesto en el orden de la portada, intercambiando

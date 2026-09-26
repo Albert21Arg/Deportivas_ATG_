@@ -6,6 +6,7 @@ const tournamentSelect = {
   description: true,
   logo: true,
   status: true,
+  deactivatedAt: true,
   expiresAt: true,
   playerRegistrationDeadline: true,
   pricePerTeam: true,
@@ -89,7 +90,7 @@ export async function teamsBelongToTournament(tournamentId, teamIds) {
 export async function expireOverdue() {
   await prisma.tournament.updateMany({
     where: { status: 'ACTIVE', expiresAt: { lt: new Date() } },
-    data: { status: 'INACTIVE' },
+    data: { status: 'INACTIVE', deactivatedAt: new Date() },
   });
 }
 
@@ -112,5 +113,32 @@ export async function swapPositions(idA, positionA, idB, positionB) {
   await prisma.$transaction([
     prisma.tournament.update({ where: { id: idA }, data: { position: positionB } }),
     prisma.tournament.update({ where: { id: idB }, data: { position: positionA } }),
+  ]);
+}
+
+// Borrado definitivo de un torneo y todo lo que le pertenece exclusivamente
+// (partidos, eventos, grupos, llaves, frases de tabla, anuncios propios,
+// visitas, likes, inscripciones de equipos y administradores). NO borra
+// equipos ni jugadores: esos son entidades propias que pueden pertenecer a
+// otros torneos, solo se les quita la inscripción a este.
+//
+// Varias de estas relaciones son "Restrict" en el schema (UserTournament,
+// TournamentTeam, Match) así que hay que vaciarlas a mano antes de borrar el
+// torneo; el resto son "Cascade" pero se borran igual de forma explícita
+// para no depender de que SQLite tenga el enforcement de FK activo.
+export async function deleteWithRelations(id) {
+  await prisma.$transaction([
+    prisma.matchEvent.deleteMany({ where: { match: { tournamentId: id } } }),
+    prisma.match.deleteMany({ where: { tournamentId: id } }),
+    prisma.groupTeam.deleteMany({ where: { group: { tournamentId: id } } }),
+    prisma.group.deleteMany({ where: { tournamentId: id } }),
+    prisma.knockoutTie.deleteMany({ where: { tournamentId: id } }),
+    prisma.tableCaption.deleteMany({ where: { tournamentId: id } }),
+    prisma.announcement.deleteMany({ where: { tournamentId: id } }),
+    prisma.tournamentView.deleteMany({ where: { tournamentId: id } }),
+    prisma.tournamentLike.deleteMany({ where: { tournamentId: id } }),
+    prisma.tournamentTeam.deleteMany({ where: { tournamentId: id } }),
+    prisma.userTournament.deleteMany({ where: { tournamentId: id } }),
+    prisma.tournament.delete({ where: { id } }),
   ]);
 }

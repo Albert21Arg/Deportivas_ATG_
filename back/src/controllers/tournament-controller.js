@@ -1,5 +1,6 @@
 import {
   createTournament,
+  deleteTournament,
   getTournament,
   listTournaments,
   moveTournament,
@@ -68,6 +69,15 @@ export async function statusController(request, response, next) {
   try {
     const tournament = await updateTournamentStatus(request.tournamentId, request.validatedBody.status);
     return response.json({ success: true, data: { tournament } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function deleteController(request, response, next) {
+  try {
+    await deleteTournament(request.tournamentId);
+    return response.status(204).send();
   } catch (error) {
     return next(error);
   }

@@ -10,6 +10,10 @@ async function getMatch(id) {
   return match;
 }
 
+export function getLiveMatchForUser(user) {
+  return matchRepository.findLiveForUser(user);
+}
+
 // Para llaves de eliminación: si el resultado (o el global a doble partido)
 // va a quedar empatado, exige una tanda de penales con un ganador claro.
 // Si el partido ya tenía penales guardados y no llegan unos nuevos, los
@@ -254,6 +258,54 @@ export async function changeStatus(id, status, penalties) {
   );
   publish(updated.tournamentId, updated);
   if (status === 'FINISHED' && updated.tieId) await advanceFromMatch(updated);
+  return updated;
+}
+
+// Inicia el partido y arranca el cronómetro del primer tiempo con la
+// duración que definió el admin en ese momento (no hay un valor por
+// defecto: cada torneo/categoría puede jugar tiempos de distinta duración).
+export async function startMatch(id, halfDurationMinutes) {
+  const match = await getMatch(id);
+  if (match.status !== 'SCHEDULED') throw new HttpError(409, 'Solo puedes iniciar un partido programado');
+
+  const updated = await matchRepository.update(id, {
+    status: 'STARTED',
+    homeScore: 0,
+    awayScore: 0,
+    halfDurationMinutes,
+    currentPeriod: 1,
+    periodStartedAt: new Date(),
+    extraMinutes: 0,
+  });
+  publish(updated.tournamentId, updated);
+  return updated;
+}
+
+// Cierra el primer tiempo y arranca el segundo: reinicia el cronómetro de
+// ese tiempo (el tiempo extra del primer tiempo no se acarrea) desde cero.
+export async function startNextPeriod(id) {
+  const match = await getMatch(id);
+  if (match.status !== 'STARTED') throw new HttpError(409, 'Solo puedes cambiar de tiempo en un partido iniciado');
+  if ((match.currentPeriod ?? 1) !== 1) throw new HttpError(409, 'El partido ya está en el segundo tiempo');
+
+  const updated = await matchRepository.update(id, {
+    currentPeriod: 2,
+    periodStartedAt: new Date(),
+    extraMinutes: 0,
+  });
+  publish(updated.tournamentId, updated);
+  return updated;
+}
+
+// Suma minutos de tiempo extra/descuento al tiempo que está en curso.
+export async function addExtraTime(id, minutes) {
+  const match = await getMatch(id);
+  if (match.status !== 'STARTED') throw new HttpError(409, 'Solo puedes agregar tiempo extra en un partido iniciado');
+
+  const updated = await matchRepository.update(id, {
+    extraMinutes: (match.extraMinutes ?? 0) + minutes,
+  });
+  publish(updated.tournamentId, updated);
   return updated;
 }
 
