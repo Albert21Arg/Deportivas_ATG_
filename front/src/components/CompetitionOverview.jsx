@@ -77,7 +77,7 @@ function TeamCrest({ team, size = 'h-6 w-6' }) {
   );
 }
 
-function BracketSlot({ team, score, penaltyScore, variant, isFinal }) {
+function BracketSlot({ team, score, penaltyScore, variant, isFinal, onSelectTeam }) {
   return (
     <div
       className={`flex h-full items-center gap-1 px-1 text-[10px] font-bold sm:gap-2 sm:px-2.5 sm:text-[11px] ${
@@ -88,8 +88,24 @@ function BracketSlot({ team, score, penaltyScore, variant, isFinal }) {
             : 'text-slate-700 dark:text-slate-300'
       }`}
     >
-      <TeamCrest team={team} size={isFinal ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-5 w-5 sm:h-6 sm:w-6'} />
-      <span className="min-w-0 flex-1 truncate">{team?.name ?? 'Por definir'}</span>
+      {team && onSelectTeam ? (
+        <button
+          type="button"
+          className="flex min-w-0 flex-1 items-center gap-1 truncate text-left sm:gap-2"
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelectTeam(team);
+          }}
+        >
+          <TeamCrest team={team} size={isFinal ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-5 w-5 sm:h-6 sm:w-6'} />
+          <span className="min-w-0 flex-1 truncate">{team.name}</span>
+        </button>
+      ) : (
+        <>
+          <TeamCrest team={team} size={isFinal ? 'h-6 w-6 sm:h-7 sm:w-7' : 'h-5 w-5 sm:h-6 sm:w-6'} />
+          <span className="min-w-0 flex-1 truncate">{team?.name ?? 'Por definir'}</span>
+        </>
+      )}
       {isFinal && variant === 'winner' && (
         <span className="shrink-0 text-xs" aria-label="Campeón">
           👑
@@ -186,7 +202,7 @@ function resolveTieOutcome(tie) {
 // partido (ida y vuelta), muestra el global (suma de ambos partidos, según
 // quién hizo de local en cada uno) en la caja principal, y una fila con
 // el resultado y la fecha de cada partido por separado debajo.
-function BracketTieBlock({ tie, isFinal = false, onSelectMatch }) {
+function BracketTieBlock({ tie, isFinal = false, onSelectMatch, onSelectTeam }) {
   const {
     isTwoLeg,
     homeId,
@@ -226,6 +242,7 @@ function BracketTieBlock({ tie, isFinal = false, onSelectMatch }) {
             penaltyScore={homePenaltyScore}
             variant={variantFor(homeId)}
             isFinal={isFinal}
+            onSelectTeam={onSelectTeam}
           />
         </div>
         <div className="flex-1 border-t border-slate-200 dark:border-white/[0.06]">
@@ -235,6 +252,7 @@ function BracketTieBlock({ tie, isFinal = false, onSelectMatch }) {
             penaltyScore={awayPenaltyScore}
             variant={variantFor(awayId)}
             isFinal={isFinal}
+            onSelectTeam={onSelectTeam}
           />
         </div>
       </article>
@@ -309,7 +327,7 @@ function BracketConnectors({ fromCount, totalHeight, isLastRound, mirrored }) {
   );
 }
 
-function BracketRoundColumn({ round, side, totalHeight, tieHeight, onSelectMatch }) {
+function BracketRoundColumn({ round, side, totalHeight, tieHeight, onSelectMatch, onSelectTeam }) {
   const half = round.ties.length / 2;
   const ties = side === 'left' ? round.ties.slice(0, half) : round.ties.slice(half);
   const label = compactStageLabels[round.stage] ?? round.stage;
@@ -330,7 +348,7 @@ function BracketRoundColumn({ round, side, totalHeight, tieHeight, onSelectMatch
           key={tie.id}
           style={{ top: centerY(index, half, totalHeight) - tieHeight / 2, height: tieHeight }}
         >
-          <BracketTieBlock tie={tie} onSelectMatch={onSelectMatch} />
+          <BracketTieBlock tie={tie} onSelectMatch={onSelectMatch} onSelectTeam={onSelectTeam} />
         </div>
       ))}
     </div>
@@ -340,7 +358,7 @@ function BracketRoundColumn({ round, side, totalHeight, tieHeight, onSelectMatch
 // Un lado completo del árbol (izquierdo o derecho): rondas + gutters con
 // líneas conectoras, en el orden correcto para que la ronda más cercana a
 // la Final quede pegada al centro y la más externa quede en el borde.
-function BracketTreeSide({ rounds, side, totalHeight, tieHeight, onSelectMatch }) {
+function BracketTreeSide({ rounds, side, totalHeight, tieHeight, onSelectMatch, onSelectTeam }) {
   const roundIndices = rounds.map((_, index) => index);
   const orderedIndices = side === 'left' ? roundIndices : [...roundIndices].reverse();
 
@@ -358,6 +376,7 @@ function BracketTreeSide({ rounds, side, totalHeight, tieHeight, onSelectMatch }
             totalHeight={totalHeight}
             tieHeight={tieHeight}
             onSelectMatch={onSelectMatch}
+            onSelectTeam={onSelectTeam}
           />
         );
         const connectors = (
@@ -427,7 +446,7 @@ function ChampionModal({ team, championLabel, onClose }) {
   );
 }
 
-function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
+function BracketOverview({ ties = [], championLabel, onSelectMatch, onSelectTeam }) {
   const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
   const finalTie = ties.find((tie) => tie.stage === 'FINAL');
   const thirdPlaceTie = ties.find((tie) => tie.stage === 'THIRD_PLACE');
@@ -489,6 +508,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
               totalHeight={totalHeight}
               tieHeight={tieHeight}
               onSelectMatch={onSelectMatch}
+              onSelectTeam={onSelectTeam}
             />
           )}
 
@@ -497,7 +517,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
 
             {showFinal ? (
               <div className="w-[140px] sm:w-[190px]" style={{ height: tieHeight }}>
-                <BracketTieBlock tie={finalTie} isFinal onSelectMatch={onSelectMatch} />
+                <BracketTieBlock tie={finalTie} isFinal onSelectMatch={onSelectMatch} onSelectTeam={onSelectTeam} />
               </div>
             ) : (
               <div
@@ -543,7 +563,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
                   3.º y 4.º puesto
                 </p>
                 <div style={{ height: tieHeight }}>
-                  <BracketTieBlock tie={thirdPlaceTie} onSelectMatch={onSelectMatch} />
+                  <BracketTieBlock tie={thirdPlaceTie} onSelectMatch={onSelectMatch} onSelectTeam={onSelectTeam} />
                 </div>
               </div>
             )}
@@ -556,6 +576,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
               totalHeight={totalHeight}
               tieHeight={tieHeight}
               onSelectMatch={onSelectMatch}
+              onSelectTeam={onSelectTeam}
             />
           )}
         </div>
@@ -571,13 +592,13 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch }) {
   );
 }
 
-export default function CompetitionOverview({ mode, groups, ties, championLabel, onSelectMatch }) {
+export default function CompetitionOverview({ mode, groups, ties, championLabel, onSelectMatch, onSelectTeam }) {
   if (mode === 'GROUP_STAGE') {
     return <GroupsOverview groups={groups} />;
   }
 
   if (mode === 'KNOCKOUT_SINGLE' || mode === 'KNOCKOUT_TWO_LEG') {
-    return <BracketOverview ties={ties} championLabel={championLabel} onSelectMatch={onSelectMatch} />;
+    return <BracketOverview ties={ties} championLabel={championLabel} onSelectMatch={onSelectMatch} onSelectTeam={onSelectTeam} />;
   }
 
   return null;

@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNotifications } from "../context/NotificationContext.jsx";
 import ConfirmActionModal from "../components/ConfirmActionModal.jsx";
 import GenerateFixtureModal from "../components/GenerateFixtureModal.jsx";
+import StartMatchModal from "../components/StartMatchModal.jsx";
 import DashboardNavbar from "../components/DashboardNavbar.jsx";
 import FutbolIcon from "../components/FutbolIcon.jsx";
 import api from "../services/api.js";
 import { getApiErrorDetails } from "../utils/api-error.js";
+import { getMatchClock } from "../utils/match-clock.js";
 
 const emptyForm = {
   homeTeamId: "",
@@ -824,7 +827,7 @@ function MatchEventsPanel({
           </span>
         </button>
 
-        {isPlayerPickerOpen && (
+        {isPlayerPickerOpen && createPortal(
           <div
             className="fixed inset-0 z-[70] flex bg-slate-950/80 backdrop-blur-sm"
             role="presentation"
@@ -924,7 +927,8 @@ function MatchEventsPanel({
                 )}
               </div>
             </section>
-          </div>
+          </div>,
+          document.body
         )}
 
         <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
@@ -1021,6 +1025,36 @@ function MatchEventsPanel({
 }
 
 /* ================================================================
+   CRONÓMETRO DEL PARTIDO
+   ----------------------------------------------------------------
+   Se re-renderiza solo (setInterval) cada segundo mientras el partido
+   está en vivo, para que el minuto avance sin depender de que llegue un
+   evento nuevo del partido.
+================================================================ */
+
+function LiveMatchClock({ match, className = '' }) {
+  const [, forceTick] = useState(0);
+
+  useEffect(() => {
+    if (match.status !== 'STARTED') return undefined;
+    const interval = setInterval(() => forceTick((n) => n + 1), 1000);
+    return () => clearInterval(interval);
+  }, [match.status, match.periodStartedAt, match.currentPeriod, match.halfDurationMinutes]);
+
+  const clock = getMatchClock(match);
+  if (!clock) return null;
+
+  return (
+    <span className={className}>
+      {clock.label}
+      <span className="ml-1 text-slate-500">
+        {clock.period === 1 ? '1T' : '2T'}
+      </span>
+    </span>
+  );
+}
+
+/* ================================================================
    MATCH CARD PREMIUM
 ================================================================ */
 
@@ -1031,6 +1065,8 @@ function MatchCard({
   startEditing,
   registerResult,
   changeStatus,
+  startNextPeriod,
+  addExtraTime,
   updateStreamUrl,
   tournament,
 }) {
@@ -1143,6 +1179,13 @@ function MatchCard({
                       ? "Partido aplazado"
                       : "Próximo partido"}
               </span>
+
+              {isLive && (
+                <LiveMatchClock
+                  match={match}
+                  className="rounded-md bg-red-500/10 px-1.5 py-0.5 text-[10px] font-black text-red-600 dark:text-red-400"
+                />
+              )}
             </div>
 
             <div className="mt-1.5 flex items-center gap-2 text-[10px] text-slate-500">
@@ -1457,6 +1500,38 @@ function MatchCard({
                   ? "Enlace en vivo"
                   : "Agregar enlace"}
               </button>
+            )}
+
+            {isLive && (match.currentPeriod ?? 1) === 1 && (
+              <button
+                className="rounded-lg border border-emerald-500/60 bg-emerald-500/10 px-3 py-2 text-[9px] font-bold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-500/20"
+                onClick={() =>
+                  startNextPeriod(match)
+                }
+                type="button"
+              >
+                ⏭️ Segundo tiempo
+              </button>
+            )}
+
+            {isLive && (
+              <div className="col-span-2 flex items-center justify-center gap-1.5 sm:col-span-1">
+                <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">
+                  + tiempo:
+                </span>
+                {[1, 2, 5].map((minutes) => (
+                  <button
+                    key={minutes}
+                    className="rounded-lg border border-slate-200 dark:border-white/[0.08] px-2 py-1.5 text-[9px] font-bold text-slate-700 dark:text-slate-300 transition hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-300"
+                    onClick={() =>
+                      addExtraTime(match, minutes)
+                    }
+                    type="button"
+                  >
+                    +{minutes}&apos;
+                  </button>
+                ))}
+              </div>
             )}
 
             {match.status !== "STARTED" && (
@@ -2066,6 +2141,9 @@ export default function MatchesPage() {
 
   const [confirmation, setConfirmation] =
     useState(null);
+
+  const [startingMatch, setStartingMatch] = useState(null);
+  const [isStartingMatch, setIsStartingMatch] = useState(false);
 
   const [penaltyShootout, setPenaltyShootout] =
     useState(null);
@@ -2852,6 +2930,11 @@ export default function MatchesPage() {
       return;
     }
 
+    if (action === "start") {
+      setStartingMatch(match);
+      return;
+    }
+
     try {
       const { data } = await api.patch(
         `/matches/${match.id}/${action}`,
@@ -2867,14 +2950,6 @@ export default function MatchesPage() {
         ),
       );
 
-      if (action === "start") {
-        setOpenSections((current) => ({
-          ...current,
-          live: true,
-          pending: false,
-        }));
-      }
-
       notify({
         type: "success",
         title:
@@ -2883,6 +2958,100 @@ export default function MatchesPage() {
             : "Partido actualizado",
         message:
           "El estado del partido fue actualizado.",
+      });
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    }
+  }
+
+  async function confirmStartMatch(halfDurationMinutes) {
+    if (!startingMatch) return;
+
+    setIsStartingMatch(true);
+
+    try {
+      const { data } = await api.patch(
+        `/matches/${startingMatch.id}/start`,
+        { halfDurationMinutes },
+      );
+
+      setMatches((current) =>
+        sortMatches(
+          current.map((item) =>
+            item.id === startingMatch.id
+              ? data.data.match
+              : item,
+          ),
+        ),
+      );
+
+      setOpenSections((current) => ({
+        ...current,
+        live: true,
+        pending: false,
+      }));
+
+      notify({
+        type: "success",
+        title: "Partido iniciado",
+        message: `Cada tiempo dura ${halfDurationMinutes} minutos.`,
+      });
+
+      setStartingMatch(null);
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsStartingMatch(false);
+    }
+  }
+
+  async function startNextPeriod(match) {
+    try {
+      const { data } = await api.patch(
+        `/matches/${match.id}/next-period`,
+      );
+
+      setMatches((current) =>
+        sortMatches(
+          current.map((item) =>
+            item.id === match.id
+              ? data.data.match
+              : item,
+          ),
+        ),
+      );
+
+      notify({
+        type: "success",
+        title: "Segundo tiempo iniciado",
+        message: "El cronómetro se reinició para el segundo tiempo.",
+      });
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    }
+  }
+
+  async function addExtraTime(match, minutes) {
+    try {
+      const { data } = await api.patch(
+        `/matches/${match.id}/extra-time`,
+        { minutes },
+      );
+
+      setMatches((current) =>
+        sortMatches(
+          current.map((item) =>
+            item.id === match.id
+              ? data.data.match
+              : item,
+          ),
+        ),
+      );
+
+      notify({
+        type: "success",
+        title: "Tiempo extra agregado",
+        message: `+${minutes} minuto${minutes === 1 ? "" : "s"} de tiempo extra.`,
       });
     } catch (error) {
       notify(getApiErrorDetails(error));
@@ -3640,6 +3809,12 @@ export default function MatchesPage() {
                           changeStatus={
                             changeStatus
                           }
+                          startNextPeriod={
+                            startNextPeriod
+                          }
+                          addExtraTime={
+                            addExtraTime
+                          }
                           updateStreamUrl={
                             updateStreamUrl
                           }
@@ -3692,6 +3867,12 @@ export default function MatchesPage() {
                           }
                           changeStatus={
                             changeStatus
+                          }
+                          startNextPeriod={
+                            startNextPeriod
+                          }
+                          addExtraTime={
+                            addExtraTime
                           }
                           updateStreamUrl={
                             updateStreamUrl
@@ -3748,6 +3929,12 @@ export default function MatchesPage() {
                           changeStatus={
                             changeStatus
                           }
+                          startNextPeriod={
+                            startNextPeriod
+                          }
+                          addExtraTime={
+                            addExtraTime
+                          }
                           updateStreamUrl={
                             updateStreamUrl
                           }
@@ -3803,6 +3990,12 @@ export default function MatchesPage() {
                           changeStatus={
                             changeStatus
                           }
+                          startNextPeriod={
+                            startNextPeriod
+                          }
+                          addExtraTime={
+                            addExtraTime
+                          }
                           updateStreamUrl={
                             updateStreamUrl
                           }
@@ -3857,6 +4050,12 @@ export default function MatchesPage() {
                           }
                           changeStatus={
                             changeStatus
+                          }
+                          startNextPeriod={
+                            startNextPeriod
+                          }
+                          addExtraTime={
+                            addExtraTime
                           }
                           updateStreamUrl={
                             updateStreamUrl
@@ -4192,6 +4391,13 @@ export default function MatchesPage() {
           setIsConfirmingDeleteFixtures(false)
         }
         onConfirm={deleteFixtures}
+      />
+
+      <StartMatchModal
+        match={startingMatch}
+        isLoading={isStartingMatch}
+        onCancel={() => setStartingMatch(null)}
+        onConfirm={confirmStartMatch}
       />
     </main>
   );

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
+import { getMatchClock } from '../utils/match-clock.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
@@ -300,6 +301,14 @@ function LiveMatchCard({
 }) {
   const isCyan = accent === 'cyan';
 
+  const [, forceTick] = useState(0);
+
+  useEffect(() => {
+    if (match?.status !== 'STARTED') return undefined;
+    const interval = setInterval(() => forceTick((n) => n + 1), 1000);
+    return () => clearInterval(interval);
+  }, [match?.status, match?.periodStartedAt, match?.currentPeriod, match?.halfDurationMinutes]);
+
   if (!match) return null;
 
   const homeTeam = getHomeTeam(match);
@@ -321,12 +330,7 @@ function LiveMatchCard({
   const homeScore = getScore(match, 'home');
   const awayScore = getScore(match, 'away');
 
-  const minute =
-    match.minute ??
-    match.elapsed ??
-    match.currentMinute ??
-    match.matchMinute ??
-    null;
+  const clock = getMatchClock(match);
 
   return (
     <div
@@ -377,7 +381,7 @@ function LiveMatchCard({
           </p>
         </div>
 
-        {minute !== null && (
+        {clock && (
           <span
             className={`
               text-[9px] font-bold
@@ -387,7 +391,7 @@ function LiveMatchCard({
               }
             `}
           >
-            {minute}'
+            {clock.label}
           </span>
         )}
       </div>

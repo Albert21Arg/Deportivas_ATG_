@@ -7,6 +7,7 @@ import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import DashboardNavbar from '../components/DashboardNavbar.jsx';
 import TournamentViewsModal from '../components/TournamentViewsModal.jsx';
+import ConfirmActionModal from '../components/ConfirmActionModal.jsx';
 
 const emptyForm = {
   name: '',
@@ -111,6 +112,8 @@ export default function TournamentsPage() {
   }
   const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
   const [viewsModalTournament, setViewsModalTournament] = useState(null);
+  const [deletingTournament, setDeletingTournament] = useState(null);
+  const [isDeletingTournament, setIsDeletingTournament] = useState(false);
 
   useEffect(() => {
     async function loadTournaments() {
@@ -444,6 +447,53 @@ export default function TournamentsPage() {
     }
   }
 
+  const DELETE_ELIGIBLE_AFTER_DAYS = 15;
+
+  function getDeletionEligibility(tournament) {
+    if (tournament.status !== 'INACTIVE' || !tournament.deactivatedAt) {
+      return { eligible: false, daysRemaining: null };
+    }
+
+    const inactiveDays =
+      (Date.now() - new Date(tournament.deactivatedAt).getTime()) /
+      (24 * 60 * 60 * 1000);
+
+    if (inactiveDays >= DELETE_ELIGIBLE_AFTER_DAYS) {
+      return { eligible: true, daysRemaining: 0 };
+    }
+
+    return {
+      eligible: false,
+      daysRemaining: Math.ceil(DELETE_ELIGIBLE_AFTER_DAYS - inactiveDays),
+    };
+  }
+
+  async function confirmDeleteTournament() {
+    if (!deletingTournament) return;
+
+    setIsDeletingTournament(true);
+
+    try {
+      await api.delete(`/tournaments/${deletingTournament.id}`);
+
+      setTournaments((current) =>
+        current.filter((item) => item.id !== deletingTournament.id)
+      );
+
+      notify({
+        type: 'success',
+        title: 'Torneo eliminado',
+        message: `"${deletingTournament.name}" se eliminó definitivamente.`,
+      });
+
+      setDeletingTournament(null);
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsDeletingTournament(false);
+    }
+  }
+
   const isSuperAdmin = user.role === 'SUPERADMIN';
 
   const activeTournaments = tournaments.filter(
@@ -764,6 +814,7 @@ export default function TournamentsPage() {
 
               {filteredTournaments.map((tournament) => {
                 const isActive = tournament.status === 'ACTIVE';
+                const deletion = getDeletionEligibility(tournament);
                 // Subir/Bajar reordena la posición real en la portada, así que
                 // se calcula sobre la lista completa, no sobre la filtrada.
                 const index = tournaments.findIndex((item) => item.id === tournament.id);
@@ -1020,6 +1071,25 @@ export default function TournamentsPage() {
                                 >
                                   👁️ Ver visitas
                                 </button>
+
+                                {!isActive && (
+                                  <button
+                                    className="col-span-2 min-h-10 rounded-lg border border-red-400/15 bg-red-400/[0.03] px-2 py-2 text-[11px] font-semibold text-red-600 dark:text-red-400/90 transition hover:border-red-400/30 hover:bg-red-400/[0.08] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-red-400/15 disabled:hover:bg-red-400/[0.03] sm:rounded-xl sm:px-3 sm:py-2.5 sm:text-xs"
+                                    onClick={() => setDeletingTournament(tournament)}
+                                    disabled={!deletion.eligible}
+                                    type="button"
+                                    title={
+                                      deletion.eligible
+                                        ? undefined
+                                        : `Podrás eliminarlo en ${deletion.daysRemaining} día${deletion.daysRemaining === 1 ? '' : 's'}`
+                                    }
+                                  >
+                                    🗑️{' '}
+                                    {deletion.eligible
+                                      ? 'Eliminar torneo'
+                                      : `Eliminar (en ${deletion.daysRemaining} día${deletion.daysRemaining === 1 ? '' : 's'})`}
+                                  </button>
+                                )}
 
                               </div>
                             )}
@@ -1701,6 +1771,20 @@ export default function TournamentsPage() {
           onClose={() => setViewsModalTournament(null)}
         />
       )}
+
+      <ConfirmActionModal
+        isOpen={Boolean(deletingTournament)}
+        title="¿Eliminar este torneo?"
+        message={
+          deletingTournament
+            ? `Se eliminará "${deletingTournament.name}" de forma permanente, junto con sus partidos, grupos, llaves y estadísticas. Los equipos y jugadores no se eliminan, solo quedan desinscritos de este torneo. Esta acción no se puede deshacer.`
+            : ''
+        }
+        confirmLabel="Sí, eliminar definitivamente"
+        isLoading={isDeletingTournament}
+        onCancel={() => setDeletingTournament(null)}
+        onConfirm={confirmDeleteTournament}
+      />
 
       {/* =========================================================
           MOBILE FAB (acceso rápido para crear torneo sin volver arriba)

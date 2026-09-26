@@ -27,6 +27,8 @@ import BracketPage from '../pages/BracketPage.jsx';
 import TournamentWorkspacePage from '../pages/TournamentWorkspacePage.jsx';
 import FloatingBubbles from '../components/FloatingBubbles.jsx';
 import FaviconLoader from '../components/FaviconLoader.jsx';
+import ModalScrollLock from '../components/ModalScrollLock.jsx';
+import LiveMatchButton from '../components/LiveMatchButton.jsx';
 
 export default function AppRoutes() {
   return (
@@ -35,6 +37,8 @@ export default function AppRoutes() {
         <NotificationProvider>
           <AuthProvider>
             <FaviconLoader />
+            <ModalScrollLock />
+            <LiveMatchButton />
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />

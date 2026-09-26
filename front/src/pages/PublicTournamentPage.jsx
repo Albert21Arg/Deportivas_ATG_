@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
+import { getMatchClock } from '../utils/match-clock.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
@@ -199,6 +200,32 @@ function RecentForm({ results = [] }) {
 
 /*
 |--------------------------------------------------------------------------
+| Cronómetro de partido en vivo
+|--------------------------------------------------------------------------
+*/
+
+function LiveMatchClock({ match, className = '' }) {
+  const [, forceTick] = useState(0);
+
+  useEffect(() => {
+    if (match.status !== 'STARTED') return undefined;
+    const interval = setInterval(() => forceTick((n) => n + 1), 1000);
+    return () => clearInterval(interval);
+  }, [match.status, match.periodStartedAt, match.currentPeriod, match.halfDurationMinutes]);
+
+  const clock = getMatchClock(match);
+  if (!clock) return null;
+
+  return (
+    <span className={className}>
+      {clock.label}
+      <span className="ml-1 opacity-70">{clock.period === 1 ? '1T' : '2T'}</span>
+    </span>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
 | Próximos partidos
 |--------------------------------------------------------------------------
 */
@@ -270,21 +297,30 @@ function MatchRow({ match, onClick }) {
         </div>
       </div>
 
-      <span
-        className={`
-          ml-1 shrink-0 rounded-full px-2 py-1
-          text-[9px]
-          sm:ml-4 sm:px-3 sm:text-xs
-          ${
-            match.status === 'STARTED'
-              ? 'border border-emerald-400/20 bg-emerald-400/10 font-bold text-emerald-700 dark:text-emerald-300'
-              : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-          }
-        `}
-      >
-        {match.status === 'STARTED'
-          ? '● EN VIVO'
-          : statusLabel}
+      <span className="ml-1 flex shrink-0 flex-col items-end gap-1 sm:ml-4">
+        <span
+          className={`
+            rounded-full px-2 py-1
+            text-[9px]
+            sm:px-3 sm:text-xs
+            ${
+              match.status === 'STARTED'
+                ? 'border border-emerald-400/20 bg-emerald-400/10 font-bold text-emerald-700 dark:text-emerald-300'
+                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+            }
+          `}
+        >
+          {match.status === 'STARTED'
+            ? '● EN VIVO'
+            : statusLabel}
+        </span>
+
+        {match.status === 'STARTED' && (
+          <LiveMatchClock
+            match={match}
+            className="text-[9px] font-black text-red-600 dark:text-red-400 sm:text-xs"
+          />
+        )}
       </span>
     </button>
   );
@@ -384,9 +420,16 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
           </div>
 
           <div className="flex shrink-0 flex-col items-center">
-            <span className="text-[9px] font-black uppercase tracking-[0.16em] text-red-600 dark:text-red-400 sm:text-xs">
-              EN VIVO
-            </span>
+            <LiveMatchClock
+              match={match}
+              className="text-[9px] font-black uppercase tracking-[0.16em] text-red-600 dark:text-red-400 sm:text-xs"
+            />
+
+            {!getMatchClock(match) && (
+              <span className="text-[9px] font-black uppercase tracking-[0.16em] text-red-600 dark:text-red-400 sm:text-xs">
+                EN VIVO
+              </span>
+            )}
 
             <span className="mt-1 text-sm font-black text-slate-600 sm:text-lg">
               -
@@ -605,31 +648,41 @@ function MatchDetailModal({
 
   if (!match) return null;
 
+  const isLive = match.status === 'STARTED';
+
   return (
     <div
-      className="
-        fixed inset-0 z-[60]
+      className={`
+        fixed inset-0
         flex items-end justify-center
         bg-slate-950/80
-        px-2 py-2
-        sm:items-center sm:px-5 sm:py-8
-      "
+        ${
+          isLive
+            ? 'z-[2147483647] p-0'
+            : 'z-[60] px-2 py-2 sm:items-center sm:px-5 sm:py-8'
+        }
+      `}
       role="presentation"
-      onMouseDown={onClose}
+      onMouseDown={isLive ? undefined : onClose}
     >
       <section
-        className="
-          max-h-[94vh] w-full max-w-lg
-          overflow-y-auto
-          rounded-2xl
-          border border-slate-200
-          bg-white
-          shadow-2xl shadow-black/10
-          dark:border-slate-700
-          dark:bg-slate-900
-          dark:shadow-black/40
-          sm:max-h-[92vh]
-        "
+        className={
+          isLive
+            ? 'flex h-full max-h-full w-full max-w-full flex-col overflow-hidden border-0 bg-white shadow-none dark:bg-slate-900'
+            : `
+                flex max-h-[94vh] w-full max-w-lg
+                flex-col
+                overflow-hidden
+                rounded-2xl
+                border border-slate-200
+                bg-white
+                shadow-2xl shadow-black/10
+                dark:border-slate-700
+                dark:bg-slate-900
+                dark:shadow-black/40
+                sm:max-h-[92vh]
+              `
+        }
         role="dialog"
         aria-modal="true"
         aria-labelledby="match-detail-title"
@@ -637,7 +690,7 @@ function MatchDetailModal({
       >
         <div
           className="
-            flex items-start justify-between gap-3
+            flex shrink-0 items-start justify-between gap-3
             border-b border-slate-200
             px-3 py-3
             dark:border-slate-800
@@ -680,7 +733,7 @@ function MatchDetailModal({
 
         <div
           className="
-            flex items-start justify-center
+            flex shrink-0 items-start justify-center
             px-1 py-5
             sm:px-6 sm:py-7
           "
@@ -781,7 +834,7 @@ function MatchDetailModal({
         </div>
 
         {match.status === 'STARTED' && match.streamUrl && (
-          <div className="px-3 pb-4 sm:px-6 sm:pb-6">
+          <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
             <a
               href={match.streamUrl}
               target="_blank"
@@ -794,12 +847,13 @@ function MatchDetailModal({
         )}
 
         {(match.status === 'STARTED' || match.status === 'FINISHED') && (
-          <div className="border-t border-slate-200 px-3 py-3 dark:border-slate-800 sm:px-6 sm:py-4">
-            <div className="mb-3 flex items-center justify-between">
+          <div className="flex min-h-0 flex-1 flex-col border-t border-slate-200 px-3 py-3 dark:border-slate-800 sm:px-6 sm:py-4">
+            <div className="mb-3 flex shrink-0 items-center justify-between">
               {match.status === 'STARTED' ? (
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 sm:gap-2 sm:text-xs">
                   <span className="h-2 w-2 animate-pulse rounded-full bg-red-400" />
                   EN VIVO
+                  <LiveMatchClock match={match} className="normal-case" />
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-500 sm:gap-2 sm:text-xs">
@@ -816,7 +870,8 @@ function MatchDetailModal({
               ref={eventsContainerRef}
               className="
                 scroll-invisible
-                max-h-[180px]
+                min-h-[120px]
+                flex-1
                 space-y-2
                 overflow-y-auto
                 pr-1
@@ -2454,6 +2509,19 @@ export default function PublicTournamentPage() {
                     data.tournament.championLabel
                   }
                   onSelectMatch={setSelectedMatch}
+                  onSelectTeam={(team) => {
+                    const row = data.standings.find(
+                      (item) => item.team.id === team.id
+                    );
+
+                    if (row) {
+                      setSelectedTeam({
+                        row,
+                        recentForm:
+                          data.recentFormByTeam?.[row.team.id] ?? [],
+                      });
+                    }
+                  }}
                 />
               </div>
             </div>
