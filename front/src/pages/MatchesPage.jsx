@@ -3107,6 +3107,7 @@ export default function MatchesPage() {
     );
 
   const canCorrectFinished =
+    user.role === "ADMIN" ||
     user.role === "SUPERADMIN";
 
   /* ==============================================================
