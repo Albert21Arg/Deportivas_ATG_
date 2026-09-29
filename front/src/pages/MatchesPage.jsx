@@ -70,6 +70,39 @@ function formatMatchDate(value) {
   }).format(new Date(Date.UTC(year, month - 1, day, 12)));
 }
 
+// "Fecha N" automática, igual que en la página pública del torneo: cada día
+// con partidos de liga/grupos (programados, en juego o finalizados) es una
+// fecha, numerada en orden cronológico. Las eliminatorias no se numeran.
+function buildRoundNumbers(matches) {
+  const dates = [
+    ...new Set(
+      matches
+        .filter(
+          (match) =>
+            !match.tieId &&
+            ["SCHEDULED", "STARTED", "FINISHED"].includes(match.status),
+        )
+        .map((match) => dateValue(match.date))
+        .filter(Boolean),
+    ),
+  ].sort();
+
+  return new Map(dates.map((date, index) => [date, index + 1]));
+}
+
+// Agrupa partidos ya ordenados por día, manteniendo ese orden.
+function groupMatchesByDay(matches) {
+  const groups = new Map();
+
+  matches.forEach((match) => {
+    const date = dateValue(match.date);
+    if (!groups.has(date)) groups.set(date, []);
+    groups.get(date).push(match);
+  });
+
+  return [...groups.entries()];
+}
+
 function getMatchTimestamp(match) {
   const date = dateValue(match.date);
   const time = timeValue(match.time);
@@ -623,11 +656,11 @@ function MatchEventsPanel({
     <div className="mt-4 space-y-2.5 border-t border-slate-200 dark:border-white/[0.05] pt-3.5 sm:space-y-3 sm:pt-4">
       {!isLiveVariant && (
         <div className="rounded-xl border border-cyan-400/10 bg-cyan-400/[0.035] p-2.5 sm:p-3">
-          <p className="text-[9px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300">
             Goleadores y tarjetas
           </p>
 
-          <p className="mt-1 text-[9px] leading-4 text-slate-500">
+          <p className="mt-1 text-[11px] leading-4 text-slate-500">
             Registra aquí quién anotó y qué tarjetas hubo en este
             partido finalizado. Esto no cambia el marcador final.
           </p>
@@ -646,7 +679,7 @@ function MatchEventsPanel({
           }`}
         >
           <button
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-bold transition sm:h-16 ${
               type === "GOAL"
                 ? "bg-emerald-400 text-slate-950 dark:text-slate-950"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -663,7 +696,7 @@ function MatchEventsPanel({
           </button>
 
           <button
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-bold transition sm:h-16 ${
               type === "OWN_GOAL"
                 ? "bg-orange-400 text-slate-950 dark:text-slate-950"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -686,7 +719,7 @@ function MatchEventsPanel({
           </button>
 
           <button
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-bold transition sm:h-16 ${
               type === "YELLOW_CARD"
                 ? "bg-amber-400 text-slate-950 dark:text-slate-950"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -703,7 +736,7 @@ function MatchEventsPanel({
           </button>
 
           <button
-            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
+            className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-bold transition sm:h-16 ${
               type === "RED_CARD"
                 ? "bg-red-500 text-slate-900 dark:text-white"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -721,7 +754,7 @@ function MatchEventsPanel({
 
           {blueCardEnabled && (
             <button
-              className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[9px] font-bold transition sm:h-16 ${
+              className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-lg text-[11px] font-bold transition sm:h-16 ${
                 type === "BLUE_CARD"
                   ? "bg-blue-500 text-slate-900 dark:text-white"
                   : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 hover:dark:bg-slate-700"
@@ -740,7 +773,7 @@ function MatchEventsPanel({
         </div>
 
         {isOwnGoal && (
-          <p className="mt-1.5 text-[9px] leading-4 text-orange-700 dark:text-orange-300">
+          <p className="mt-1.5 text-[11px] leading-4 text-orange-700 dark:text-orange-300">
             Autogol: el jugador debe pertenecer a{" "}
             {rivalTeamName}.
           </p>
@@ -859,7 +892,7 @@ function MatchEventsPanel({
                   </span>
 
                   <div className="min-w-0">
-                    <p className="text-[8px] font-bold uppercase tracking-[0.14em] text-slate-500">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
                       Seleccionar jugador
                     </p>
 
@@ -993,7 +1026,7 @@ function MatchEventsPanel({
             </span>
 
             <button
-              className="shrink-0 text-[9px] text-red-700 dark:text-red-300 transition hover:text-red-700 hover:dark:text-red-200"
+              className="shrink-0 text-[11px] text-red-700 dark:text-red-300 transition hover:text-red-700 hover:dark:text-red-200"
               type="button"
               onClick={() =>
                 setEventToRemove(event)
@@ -1058,6 +1091,14 @@ function LiveMatchClock({ match, className = '' }) {
    MATCH CARD PREMIUM
 ================================================================ */
 
+// Botones de acción de la tarjeta: 44px de alto en celular (tamaño mínimo
+// cómodo para el dedo), más compactos desde tablet.
+const actionButtonClass =
+  "min-h-11 rounded-lg px-3 text-xs transition sm:min-h-9 sm:text-[11px]";
+
+const menuItemClass =
+  "min-h-11 w-full rounded-lg px-3 text-left text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/[0.04] sm:min-h-9 sm:text-xs";
+
 function MatchCard({
   match,
   isAdmin,
@@ -1084,6 +1125,9 @@ function MatchCard({
   const [showFinishedEvents, setShowFinishedEvents] =
     useState(false);
 
+  const [showMoreActions, setShowMoreActions] =
+    useState(false);
+
   const isFinished = match.status === "FINISHED";
   const isLive = match.status === "STARTED";
   const isPostponed = match.status === "POSTPONED";
@@ -1107,7 +1151,9 @@ function MatchCard({
 
   return (
     <article
+      id={`match-${match.id}`}
       className={`
+        scroll-mt-40
         group relative overflow-hidden
         rounded-2xl
         border
@@ -1165,12 +1211,12 @@ function MatchCard({
               {isLive ? (
                 <LiveIcon />
               ) : (
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/[0.035] text-[9px]">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-slate-100 dark:bg-white/[0.035] text-[11px]">
                   ⚽
                 </span>
               )}
 
-              <span className="truncate text-[8px] font-bold uppercase tracking-[0.16em] text-slate-500">
+              <span className="truncate text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
                 {isLive
                   ? "Partido en vivo"
                   : isFinished
@@ -1205,7 +1251,7 @@ function MatchCard({
             className={`
               shrink-0 rounded-full border
               px-2.5 py-1.5
-              text-[8px] font-bold
+              text-[10px] font-bold
               ${statusStyles[match.status] ??
               "border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"}
             `}
@@ -1268,7 +1314,7 @@ function MatchCard({
           <div className="flex flex-col items-center justify-center">
             {isLive ? (
               <>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
                   LIVE
                 </span>
 
@@ -1278,13 +1324,13 @@ function MatchCard({
                   </span>
                 </div>
 
-                <span className="text-[8px] font-bold text-slate-600">
+                <span className="text-[10px] font-bold text-slate-600">
                   EN JUEGO
                 </span>
               </>
             ) : isFinished ? (
               <>
-                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-600">
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
                   FINAL
                 </span>
 
@@ -1294,13 +1340,13 @@ function MatchCard({
                   </span>
                 </div>
 
-                <span className="text-[8px] font-bold text-slate-600">
+                <span className="text-[10px] font-bold text-slate-600">
                   RESULTADO
                 </span>
               </>
             ) : isPostponed ? (
               <>
-                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-400">
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-400">
                   PAUSA
                 </span>
 
@@ -1310,13 +1356,13 @@ function MatchCard({
                   </span>
                 </div>
 
-                <span className="text-[8px] font-bold text-slate-600">
+                <span className="text-[10px] font-bold text-slate-600">
                   PENDIENTE
                 </span>
               </>
             ) : (
               <>
-                <span className="text-[8px] font-bold uppercase tracking-[0.18em] text-slate-700">
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-700">
                   VS
                 </span>
 
@@ -1326,7 +1372,7 @@ function MatchCard({
                   </span>
                 </div>
 
-                <span className="text-[8px] font-bold text-slate-700">
+                <span className="text-[10px] font-bold text-slate-700">
                   PRÓXIMO
                 </span>
               </>
@@ -1382,7 +1428,7 @@ function MatchCard({
         {/* FINISHED RESULT */}
         {isFinished && hasCurrentScore && (
           <div className="mt-4 flex justify-center">
-            <div className="rounded-full border border-emerald-400/10 bg-emerald-400/[0.035] px-3 py-1.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-300">
+            <div className="rounded-full border border-emerald-400/10 bg-emerald-400/[0.035] px-3 py-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300">
               Resultado final{" "}
               <span className="mx-1.5 text-slate-700">
                 •
@@ -1404,7 +1450,7 @@ function MatchCard({
         {isFinished && isAdmin && (
           <div className="mt-4">
             <button
-              className="w-full rounded-lg border border-cyan-400/15 bg-cyan-400/[0.04] px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/[0.08]"
+              className="min-h-11 w-full rounded-lg border border-cyan-400/15 bg-cyan-400/[0.04] px-3 py-2 sm:min-h-0 text-[11px] font-bold uppercase tracking-wider text-slate-900 dark:text-cyan-300 transition hover:bg-cyan-400/[0.08]"
               onClick={() =>
                 setShowFinishedEvents(
                   (current) => !current,
@@ -1432,11 +1478,11 @@ function MatchCard({
         {/* POSTPONED INFO */}
         {isPostponed && (
           <div className="mt-4 rounded-xl border border-amber-400/10 bg-amber-400/[0.035] px-3 py-2.5 text-center">
-            <p className="text-[9px] font-semibold text-amber-700 dark:text-amber-200">
+            <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-200">
               Este partido está aplazado
             </p>
 
-            <p className="mt-0.5 text-[8px] text-slate-600">
+            <p className="mt-0.5 text-[10px] text-slate-600">
               Puedes reprogramarlo cuando tengas nueva fecha.
             </p>
           </div>
@@ -1454,142 +1500,159 @@ function MatchCard({
         )}
       </div>
 
-      {/* ACTIONS */}
+      {/* ACTIONS
+          Solo la acción principal según el estado queda a la vista (en
+          celular, botones de 44px de alto); lo demás va en "⋯ Más", con
+          lo destructivo al final para no tocarlo por error. */}
       {isAdmin && canEdit && (
         <div className="border-t border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-black/10 p-2.5">
-          <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-center">
+          <div className="flex flex-wrap gap-1.5 sm:justify-center">
             {match.status === "SCHEDULED" && (
               <button
-                className="rounded-lg bg-red-500 px-3 py-2 text-[9px] font-bold text-slate-900 dark:text-white transition hover:bg-red-400"
-                onClick={() =>
-                  changeStatus(match, "start")
-                }
+                className={`${actionButtonClass} flex-1 bg-red-500 font-bold text-white hover:bg-red-400`}
+                onClick={() => changeStatus(match, "start")}
                 type="button"
               >
                 🔴 Iniciar
               </button>
             )}
 
-            {match.status === "STARTED" && (
+            {isLive && (
               <button
-                className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400"
-                onClick={() =>
-                  changeStatus(match, "finish")
-                }
+                className={`${actionButtonClass} flex-1 bg-emerald-500 font-bold text-slate-950 hover:bg-emerald-400`}
+                onClick={() => changeStatus(match, "finish")}
                 type="button"
               >
                 Finalizar
               </button>
             )}
 
-            {match.status === "STARTED" && (
-              <button
-                className={`rounded-lg border px-3 py-2 text-[9px] font-semibold transition ${
-                  match.streamUrl
-                    ? "border-red-400/40 bg-red-500/10 text-red-700 dark:text-red-300 hover:bg-red-500/20"
-                    : "border-slate-200 dark:border-white/[0.08] text-slate-700 dark:text-slate-300 hover:border-slate-400 hover:dark:border-slate-500 hover:text-slate-900 hover:dark:text-white"
-                }`}
-                onClick={() => {
-                  setStreamDraft(match.streamUrl ?? "");
-                  setIsEditingStream((current) => !current);
-                }}
-                type="button"
-              >
-                🔗{" "}
-                {match.streamUrl
-                  ? "Enlace en vivo"
-                  : "Agregar enlace"}
-              </button>
-            )}
-
             {isLive && (match.currentPeriod ?? 1) === 1 && (
               <button
-                className="rounded-lg border border-emerald-500/60 bg-emerald-500/10 px-3 py-2 text-[9px] font-bold text-emerald-700 dark:text-emerald-300 transition hover:bg-emerald-500/20"
-                onClick={() =>
-                  startNextPeriod(match)
-                }
+                className={`${actionButtonClass} flex-1 border border-emerald-500/60 bg-emerald-500/10 font-bold text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-300`}
+                onClick={() => startNextPeriod(match)}
                 type="button"
               >
                 ⏭️ Segundo tiempo
               </button>
             )}
 
-            {isLive && (
-              <div className="col-span-2 flex items-center justify-center gap-1.5 sm:col-span-1">
-                <span className="text-[9px] font-semibold text-slate-500 dark:text-slate-400">
-                  + tiempo:
-                </span>
-                {[1, 2, 5].map((minutes) => (
-                  <button
-                    key={minutes}
-                    className="rounded-lg border border-slate-200 dark:border-white/[0.08] px-2 py-1.5 text-[9px] font-bold text-slate-700 dark:text-slate-300 transition hover:border-amber-400 hover:text-amber-600 dark:hover:text-amber-300"
-                    onClick={() =>
-                      addExtraTime(match, minutes)
-                    }
-                    type="button"
-                  >
-                    +{minutes}&apos;
-                  </button>
-                ))}
-              </div>
+            {isPostponed && (
+              <button
+                className={`${actionButtonClass} flex-1 border border-amber-500/50 bg-amber-500/10 font-bold text-amber-700 hover:bg-amber-500/20 dark:text-amber-200`}
+                onClick={() => startEditing(match)}
+                type="button"
+              >
+                ✏️ Re-programar
+              </button>
             )}
 
-            {match.status !== "STARTED" && (
-              <>
-                <button
-                  className="rounded-lg border border-slate-200 dark:border-white/[0.08] px-3 py-2 text-[9px] font-semibold text-slate-700 dark:text-slate-300 transition hover:border-slate-400 hover:dark:border-slate-500 hover:text-slate-900 hover:dark:text-white"
-                  onClick={() =>
-                    startEditing(match)
-                  }
-                  type="button"
-                >
-                  ✏️{" "}
-                  {match.status === "POSTPONED"
-                    ? "Re-programar"
-                    : "Editar"}
-                </button>
-
-                <button
-                  className="rounded-lg bg-emerald-500 px-3 py-2 text-[9px] font-bold text-slate-950 dark:text-slate-950 transition hover:bg-emerald-400"
-                  onClick={
-                    handleRegisterResult
-                  }
-                  type="button"
-                >
-                  🏁{" "}
-                  {match.status === "FINISHED"
-                    ? "Corregir"
-                    : "Resultado"}
-                </button>
-              </>
+            {(match.status === "SCHEDULED" || isFinished) && (
+              <button
+                className={`${actionButtonClass} flex-1 bg-emerald-500 font-bold text-slate-950 hover:bg-emerald-400`}
+                onClick={handleRegisterResult}
+                type="button"
+              >
+                🏁 {isFinished ? "Corregir" : "Resultado"}
+              </button>
             )}
 
-            {match.status !== "FINISHED" &&
-              match.status !== "POSTPONED" && (
+            <button
+              className={`${actionButtonClass} shrink-0 border border-slate-300 font-bold text-slate-700 hover:border-slate-400 dark:border-white/[0.1] dark:text-slate-300`}
+              onClick={() => setShowMoreActions((current) => !current)}
+              type="button"
+              aria-expanded={showMoreActions}
+              aria-label="Más acciones"
+            >
+              ⋯ Más
+            </button>
+          </div>
+
+          {isLive && (
+            <div className="mt-2 flex items-center justify-center gap-1.5">
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                + tiempo:
+              </span>
+              {[1, 2, 5].map((minutes) => (
                 <button
-                  className="rounded-lg border border-amber-800/60 px-3 py-2 text-[9px] font-semibold text-amber-700 dark:text-amber-200 transition hover:border-amber-500 hover:bg-amber-500/10"
-                  onClick={() =>
-                    changeStatus(
-                      match,
-                      "postpone",
-                    )
-                  }
+                  key={minutes}
+                  className="min-h-11 min-w-11 rounded-lg border border-slate-200 px-2 text-xs font-bold text-slate-700 transition hover:border-amber-400 hover:text-amber-600 dark:border-white/[0.08] dark:text-slate-300 dark:hover:text-amber-300 sm:min-h-9 sm:min-w-9"
+                  onClick={() => addExtraTime(match, minutes)}
+                  type="button"
+                >
+                  +{minutes}&apos;
+                </button>
+              ))}
+            </div>
+          )}
+
+          {showMoreActions && (
+            <div className="mt-2 grid gap-1.5 rounded-xl border border-slate-200 bg-white p-1.5 dark:border-white/[0.06] dark:bg-[#080d14]">
+              {isLive && (
+                <button
+                  className={menuItemClass}
+                  onClick={() => {
+                    setStreamDraft(match.streamUrl ?? "");
+                    setIsEditingStream((current) => !current);
+                    setShowMoreActions(false);
+                  }}
+                  type="button"
+                >
+                  🔗 {match.streamUrl ? "Editar enlace en vivo" : "Agregar enlace en vivo"}
+                </button>
+              )}
+
+              {!isLive && !isPostponed && (
+                <button
+                  className={menuItemClass}
+                  onClick={() => {
+                    setShowMoreActions(false);
+                    startEditing(match);
+                  }}
+                  type="button"
+                >
+                  ✏️ Editar partido
+                </button>
+              )}
+
+              {isPostponed && (
+                <button
+                  className={menuItemClass}
+                  onClick={() => {
+                    setShowMoreActions(false);
+                    handleRegisterResult();
+                  }}
+                  type="button"
+                >
+                  🏁 Registrar resultado
+                </button>
+              )}
+
+              {!isFinished && !isPostponed && (
+                <button
+                  className={`${menuItemClass} text-amber-700 dark:text-amber-200`}
+                  onClick={() => {
+                    setShowMoreActions(false);
+                    changeStatus(match, "postpone");
+                  }}
                   type="button"
                 >
                   ⏸️ Aplazar
                 </button>
               )}
 
-            <button
-              className="rounded-lg border border-red-900/60 px-3 py-2 text-[9px] font-semibold text-red-700 dark:text-red-300 transition hover:border-red-500 hover:bg-red-500/10"
-              onClick={() =>
-                changeStatus(match, "cancel")
-              }
-              type="button"
-            >
-              ✕ Cancelar
-            </button>
-          </div>
+              <button
+                className={`${menuItemClass} mt-1 border-t border-slate-200 text-red-700 dark:border-white/[0.06] dark:text-red-300`}
+                onClick={() => {
+                  setShowMoreActions(false);
+                  changeStatus(match, "cancel");
+                }}
+                type="button"
+              >
+                ✕ Cancelar partido
+              </button>
+            </div>
+          )}
 
           {isEditingStream && (
             <div className="mt-2 flex flex-col gap-1.5 sm:flex-row">
@@ -1650,10 +1713,13 @@ function MatchAccordion({
   isOpen,
   onToggle,
   children,
+  id,
 }) {
   return (
     <section
+      id={id}
       className="
+        scroll-mt-40
         overflow-hidden
         rounded-2xl
         border border-slate-200 dark:border-white/[0.07]
@@ -1698,7 +1764,7 @@ function MatchAccordion({
                 {title}
               </h3>
 
-              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-slate-800/70 px-1.5 text-[8px] font-bold text-slate-500 dark:text-slate-400 sm:text-[9px]">
+              <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-slate-200 dark:border-white/[0.05] bg-slate-100 dark:bg-slate-800/70 px-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 sm:text-[11px]">
                 {count}
               </span>
             </div>
@@ -1756,6 +1822,133 @@ function MatchAccordion({
 }
 
 /* ================================================================
+   DATE ACCORDION (una fecha dentro de "Partidos finalizados")
+================================================================ */
+
+function DateAccordion({
+  roundNumber,
+  date,
+  count,
+  isOpen,
+  onToggle,
+  children,
+}) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50/60 dark:border-white/[0.06] dark:bg-white/[0.015]">
+      <button
+        className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.03] sm:px-4 sm:py-3"
+        onClick={onToggle}
+        type="button"
+        aria-expanded={isOpen}
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+          <span className="truncate text-[11px] font-bold uppercase tracking-[0.12em] text-emerald-700 dark:text-emerald-300 sm:text-xs">
+            {roundNumber ? `Fecha ${roundNumber}` : formatMatchDate(date)}
+          </span>
+          {roundNumber && (
+            <span className="truncate text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">
+              · {formatMatchDate(date)}
+            </span>
+          )}
+          <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white px-1.5 text-[11px] font-bold text-slate-500 dark:border-white/[0.05] dark:bg-slate-800/70 dark:text-slate-400">
+            {count}
+          </span>
+        </div>
+
+        <span
+          className={`text-xs text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+        >
+          ↓
+        </span>
+      </button>
+
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-slate-200 p-2.5 dark:border-white/[0.05] sm:p-3">
+            {children}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ================================================================
+   FINISHED MATCH ROW (celular: una línea por partido; al tocarla se
+   despliega la tarjeta completa con goleadores, tarjetas y acciones)
+================================================================ */
+
+function FinishedMatchRow({ match, isExpanded, onToggle, children }) {
+  const hasPenalties =
+    match.homePenaltyScore != null && match.awayPenaltyScore != null;
+
+  return (
+    <div>
+      <button
+        className={`grid min-h-12 w-full grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition ${
+          isExpanded
+            ? "border-emerald-400/40 bg-emerald-400/[0.06]"
+            : "border-slate-200 bg-white hover:border-slate-300 dark:border-white/[0.06] dark:bg-[#0b111a]"
+        }`}
+        onClick={onToggle}
+        type="button"
+        aria-expanded={isExpanded}
+      >
+        <span className="flex min-w-0 items-center justify-end gap-2">
+          <span className="truncate text-right text-[13px] font-semibold text-slate-800 dark:text-slate-100">
+            {match.homeTeam.name}
+          </span>
+          <span className="shrink-0"><TeamLogo team={match.homeTeam} size="small" /></span>
+        </span>
+
+        <span className="flex flex-col items-center">
+          <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-sm font-black tabular-nums text-emerald-700 dark:bg-white/[0.05] dark:text-emerald-300">
+            {match.homeScore ?? 0} - {match.awayScore ?? 0}
+          </span>
+          {hasPenalties && (
+            <span className="mt-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+              P({match.homePenaltyScore}-{match.awayPenaltyScore})
+            </span>
+          )}
+        </span>
+
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="shrink-0"><TeamLogo team={match.awayTeam} size="small" /></span>
+          <span className="truncate text-[13px] font-semibold text-slate-800 dark:text-slate-100">
+            {match.awayTeam.name}
+          </span>
+        </span>
+      </button>
+
+      {isExpanded && <div className="mt-1.5">{children}</div>}
+    </div>
+  );
+}
+
+// true en pantallas de celular (menos de 640px, el breakpoint "sm" de
+// Tailwind). Se actualiza si se gira el teléfono o se cambia el tamaño.
+function useIsMobile() {
+  const query = "(max-width: 639px)";
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(query);
+    const onChange = (event) => setIsMobile(event.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  return isMobile;
+}
+
+/* ================================================================
    EMPTY SECTION
 ================================================================ */
 
@@ -1806,7 +1999,7 @@ function StatCard({
         </span>
       </div>
 
-      <p className="relative mt-3 text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600">
+      <p className="relative mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-600">
         {label}
       </p>
     </div>
@@ -1934,7 +2127,7 @@ function PenaltyShootoutModal({
                 Definición por penales
               </h2>
 
-              <p className="mt-0.5 text-[9px] leading-4 text-slate-500 sm:text-[10px]">
+              <p className="mt-0.5 text-[11px] leading-4 text-slate-500 sm:text-[10px]">
                 El partido {homeScore}-
                 {awayScore} queda empatado.
               </p>
@@ -1954,7 +2147,7 @@ function PenaltyShootoutModal({
               </p>
             </div>
 
-            <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 sm:text-[10px]">
+            <span className="text-[11px] font-black uppercase tracking-widest text-slate-600 sm:text-[10px]">
               Penales
             </span>
 
@@ -2063,7 +2256,7 @@ function PenaltyShootoutModal({
                   </span>
 
                   <button
-                    className="shrink-0 text-[9px] text-red-700 dark:text-red-300 transition hover:text-red-700 hover:dark:text-red-200"
+                    className="shrink-0 text-[11px] text-red-700 dark:text-red-300 transition hover:text-red-700 hover:dark:text-red-200"
                     type="button"
                     onClick={() =>
                       removeEntry(entry.id)
@@ -2189,6 +2382,30 @@ export default function MatchesPage() {
       finished: false,
       cancelled: false,
     });
+
+  // Fechas desplegadas dentro de "Próximos" y "Finalizados". Solo se
+  // guarda lo que el usuario cambió ("pending:AAAA-MM-DD" -> true/false);
+  // si no tocó una fecha, vale lo que diga su valor por defecto (en
+  // Próximos, la fecha más cercana abierta; en Finalizados, todas cerradas).
+  const [dateToggles, setDateToggles] = useState({});
+
+  // Partido finalizado desplegado en la vista de filas (celular).
+  const [expandedMatchId, setExpandedMatchId] = useState(null);
+  const isMobile = useIsMobile();
+
+  function isDateOpen(section, date, defaultOpen = false) {
+    if (matchSearch.trim()) return true;
+    const key = `${section}:${date}`;
+    return key in dateToggles ? dateToggles[key] : defaultOpen;
+  }
+
+  function toggleDate(section, date, defaultOpen = false) {
+    const key = `${section}:${date}`;
+    setDateToggles((current) => ({
+      ...current,
+      [key]: !(key in current ? current[key] : defaultOpen),
+    }));
+  }
 
   const [matchSearch, setMatchSearch] = useState("");
 
@@ -3180,6 +3397,23 @@ export default function MatchesPage() {
     [filteredMatches],
   );
 
+  // Numeración sobre TODOS los partidos del torneo (no solo los que pasan
+  // el buscador), para que "Fecha N" no cambie al filtrar.
+  const roundNumbers = useMemo(
+    () => buildRoundNumbers(matches),
+    [matches],
+  );
+
+  const finishedMatchesByDate = useMemo(
+    () => groupMatchesByDay(finishedMatches),
+    [finishedMatches],
+  );
+
+  const pendingMatchesByDate = useMemo(
+    () => groupMatchesByDay(pendingMatches),
+    [pendingMatches],
+  );
+
   const cancelledMatches = useMemo(
     () =>
       filteredMatches
@@ -3217,6 +3451,47 @@ export default function MatchesPage() {
       ).length,
     [matches],
   );
+
+  // Para la barra fija de celular: todos los partidos en juego del torneo
+  // (sin importar la búsqueda); se muestra el primero.
+  const allLiveMatches = matches.filter((match) => match.status === "STARTED");
+  const currentLiveMatch = allLiveMatches[0] ?? null;
+
+  const sectionShortcuts = [
+    { key: "live", label: "En vivo", count: liveMatches.length, className: "border-red-400/40 bg-red-500/10 text-red-700 dark:text-red-300" },
+    { key: "pending", label: "Próximos", count: pendingMatches.length, className: "border-blue-400/30 bg-blue-500/[0.06] text-blue-700 dark:text-blue-300" },
+    { key: "postponed", label: "Aplazados", count: postponedMatches.length, className: "border-amber-400/30 bg-amber-500/[0.06] text-amber-700 dark:text-amber-300" },
+    { key: "finished", label: "Finalizados", count: finishedMatches.length, className: "border-emerald-400/30 bg-emerald-500/[0.06] text-emerald-700 dark:text-emerald-300" },
+    { key: "cancelled", label: "Cancelados", count: cancelledMatches.length, className: "border-slate-300 bg-white text-slate-600 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-slate-300" },
+  ];
+
+  function jumpToSection(section, targetId = `matches-${section}`) {
+    setOpenSections((current) => ({ ...current, [section]: true }));
+    // Espera a que la sección se despliegue antes de desplazar.
+    requestAnimationFrame(() => {
+      document
+        .getElementById(targetId)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function renderMatchCard(match) {
+    return (
+      <MatchCard
+        key={match.id}
+        match={match}
+        isAdmin={isAdmin}
+        canCorrectFinished={canCorrectFinished}
+        startEditing={startEditing}
+        registerResult={registerResult}
+        changeStatus={changeStatus}
+        startNextPeriod={startNextPeriod}
+        addExtraTime={addExtraTime}
+        updateStreamUrl={updateStreamUrl}
+        tournament={selectedTournament}
+      />
+    );
+  }
 
   /* ==============================================================
      RENDER
@@ -3267,7 +3542,7 @@ export default function MatchesPage() {
           <div className="relative p-5 sm:p-7 lg:p-8">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="min-w-0">
-                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.05] px-2.5 py-1.5 text-[8px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.05] px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   Gestión deportiva
                 </div>
@@ -3326,7 +3601,7 @@ export default function MatchesPage() {
               </div>
 
               <div className="min-w-0">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-400">
                   Competición
                 </p>
 
@@ -3403,7 +3678,7 @@ export default function MatchesPage() {
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-900 dark:text-cyan-400">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-slate-900 dark:text-cyan-400">
                       Automatización
                     </p>
 
@@ -3490,7 +3765,7 @@ export default function MatchesPage() {
               </div>
 
               <div className="min-w-0">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
                   Calendario
                 </p>
 
@@ -3531,7 +3806,7 @@ export default function MatchesPage() {
                   </div>
 
                   <div>
-                    <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-700 dark:text-blue-300">
                       Calendario
                     </p>
 
@@ -3672,7 +3947,7 @@ export default function MatchesPage() {
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
 
-                <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400">
                   Centro de partidos
                 </p>
               </div>
@@ -3688,7 +3963,7 @@ export default function MatchesPage() {
 
             {!isLoading && (
               <div className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-white/[0.02] px-3 py-2 text-right">
-                <p className="text-[8px] font-bold uppercase tracking-wider text-slate-600">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-600">
                   Total
                 </p>
 
@@ -3716,6 +3991,31 @@ export default function MatchesPage() {
                   aria-label="Buscar partido por equipo"
                 />
               </div>
+
+              {/* Accesos rápidos: abren la sección y saltan a ella. */}
+              <nav
+                className="scroll-invisible -mx-4 mt-2 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+                aria-label="Ir a una sección de partidos"
+              >
+                {sectionShortcuts
+                  .filter((section) => section.count > 0)
+                  .map((section) => (
+                    <button
+                      key={section.key}
+                      className={`flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-semibold transition ${section.className}`}
+                      onClick={() => jumpToSection(section.key)}
+                      type="button"
+                    >
+                      {section.key === "live" && (
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                      )}
+                      {section.label}
+                      <span className="rounded-full bg-black/[0.06] px-1.5 text-[10px] font-bold dark:bg-white/[0.08]">
+                        {section.count}
+                      </span>
+                    </button>
+                  ))}
+              </nav>
             </div>
           )}
 
@@ -3778,6 +4078,7 @@ export default function MatchesPage() {
               ================================================== */}
 
               <MatchAccordion
+                id="matches-live"
                 title="Partidos en vivo"
                 description="Encuentros que se están jugando en este momento"
                 icon="🔴"
@@ -3834,6 +4135,7 @@ export default function MatchesPage() {
               ================================================== */}
 
               <MatchAccordion
+                id="matches-pending"
                 title="Próximos partidos"
                 description="Encuentros programados que aún no comienzan"
                 icon="📅"
@@ -3850,38 +4152,25 @@ export default function MatchesPage() {
                 0 ? (
                   <EmptySection message="No hay partidos pendientes." />
                 ) : (
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {pendingMatches.map(
-                      (match) => (
-                        <MatchCard
-                          key={match.id}
-                          match={match}
-                          isAdmin={isAdmin}
-                          canCorrectFinished={
-                            canCorrectFinished
+                  <div className="space-y-2.5">
+                    {pendingMatchesByDate.map(
+                      ([date, dateMatches], index) => (
+                        <DateAccordion
+                          key={date}
+                          date={date}
+                          roundNumber={roundNumbers.get(date)}
+                          count={dateMatches.length}
+                          // La fecha más cercana arranca abierta: es la
+                          // que el admin necesita tener a mano.
+                          isOpen={isDateOpen("pending", date, index === 0)}
+                          onToggle={() =>
+                            toggleDate("pending", date, index === 0)
                           }
-                          startEditing={
-                            startEditing
-                          }
-                          registerResult={
-                            registerResult
-                          }
-                          changeStatus={
-                            changeStatus
-                          }
-                          startNextPeriod={
-                            startNextPeriod
-                          }
-                          addExtraTime={
-                            addExtraTime
-                          }
-                          updateStreamUrl={
-                            updateStreamUrl
-                          }
-                          tournament={
-                            selectedTournament
-                          }
-                        />
+                        >
+                          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                            {dateMatches.map(renderMatchCard)}
+                          </div>
+                        </DateAccordion>
                       ),
                     )}
                   </div>
@@ -3893,6 +4182,7 @@ export default function MatchesPage() {
               ================================================== */}
 
               <MatchAccordion
+                id="matches-postponed"
                 title="Partidos aplazados"
                 description="Encuentros pendientes de nueva programación"
                 icon="⏸️"
@@ -3954,6 +4244,7 @@ export default function MatchesPage() {
               ================================================== */}
 
               <MatchAccordion
+                id="matches-finished"
                 title="Partidos finalizados"
                 description="Resultados registrados, mostrando los más recientes primero"
                 icon="🏁"
@@ -3972,38 +4263,44 @@ export default function MatchesPage() {
                 0 ? (
                   <EmptySection message="No hay partidos finalizados." />
                 ) : (
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {finishedMatches.map(
-                      (match) => (
-                        <MatchCard
-                          key={match.id}
-                          match={match}
-                          isAdmin={isAdmin}
-                          canCorrectFinished={
-                            canCorrectFinished
+                  <div className="space-y-2.5">
+                    {finishedMatchesByDate.map(
+                      ([date, dateMatches]) => (
+                        <DateAccordion
+                          key={date}
+                          date={date}
+                          roundNumber={roundNumbers.get(date)}
+                          count={dateMatches.length}
+                          // Con una búsqueda activa se despliegan solas
+                          // para ver de una vez los partidos encontrados.
+                          isOpen={isDateOpen("finished", date)}
+                          onToggle={() =>
+                            toggleDate("finished", date)
                           }
-                          startEditing={
-                            startEditing
-                          }
-                          registerResult={
-                            registerResult
-                          }
-                          changeStatus={
-                            changeStatus
-                          }
-                          startNextPeriod={
-                            startNextPeriod
-                          }
-                          addExtraTime={
-                            addExtraTime
-                          }
-                          updateStreamUrl={
-                            updateStreamUrl
-                          }
-                          tournament={
-                            selectedTournament
-                          }
-                        />
+                        >
+                          {isMobile ? (
+                            <div className="grid gap-1.5">
+                              {dateMatches.map((match) => (
+                                <FinishedMatchRow
+                                  key={match.id}
+                                  match={match}
+                                  isExpanded={expandedMatchId === match.id}
+                                  onToggle={() =>
+                                    setExpandedMatchId((current) =>
+                                      current === match.id ? null : match.id,
+                                    )
+                                  }
+                                >
+                                  {renderMatchCard(match)}
+                                </FinishedMatchRow>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                              {dateMatches.map(renderMatchCard)}
+                            </div>
+                          )}
+                        </DateAccordion>
                       ),
                     )}
                   </div>
@@ -4015,6 +4312,7 @@ export default function MatchesPage() {
               ================================================== */}
 
               <MatchAccordion
+                id="matches-cancelled"
                 title="Partidos cancelados"
                 description="Encuentros que no se disputarán"
                 icon="✕"
@@ -4073,7 +4371,47 @@ export default function MatchesPage() {
             </div>
           )}
         </section>
+
+        {/* Espacio para que la barra de "en vivo" no tape el final. */}
+        {currentLiveMatch && <div className="h-20 sm:hidden" />}
       </section>
+
+      {/* ==========================================================
+          BARRA "EN VIVO" (celular): marcador a mano y acceso directo
+          a la tarjeta del partido para registrar goles y tarjetas.
+      ========================================================== */}
+
+      {currentLiveMatch && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-emerald-400/30 bg-white/95 px-3 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur dark:bg-[#070b12]/95 sm:hidden">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500" />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-bold text-slate-900 dark:text-white">
+                {currentLiveMatch.homeTeam.name}{" "}
+                <span className="tabular-nums text-emerald-600 dark:text-emerald-400">
+                  {currentLiveMatch.homeScore ?? 0} - {currentLiveMatch.awayScore ?? 0}
+                </span>{" "}
+                {currentLiveMatch.awayTeam.name}
+              </p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <LiveMatchClock match={currentLiveMatch} />
+                {allLiveMatches.length > 1 && ` · ${allLiveMatches.length} partidos en vivo`}
+              </p>
+            </div>
+            <button
+              className="min-h-11 shrink-0 rounded-xl bg-emerald-500 px-3.5 text-xs font-bold text-slate-950 transition hover:bg-emerald-400"
+              onClick={() => {
+                // Si la búsqueda ocultara el partido, se limpia primero.
+                setMatchSearch("");
+                jumpToSection("live", `match-${currentLiveMatch.id}`);
+              }}
+              type="button"
+            >
+              Ir al partido
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ==========================================================
           CONFIRMATION MODAL
@@ -4125,7 +4463,7 @@ export default function MatchesPage() {
 
                   {confirmation.type ===
                     "result" && (
-                    <p className="mt-0.5 text-[9px] text-slate-500 sm:text-[10px]">
+                    <p className="mt-0.5 text-[11px] text-slate-500 sm:text-[10px]">
                       Puedes modificar el marcador
                       antes de confirmar.
                     </p>
@@ -4229,7 +4567,7 @@ export default function MatchesPage() {
                     </div>
                   </div>
 
-                  <p className="mt-3 text-[9px] leading-5 text-slate-600 sm:text-[10px]">
+                  <p className="mt-3 text-[11px] leading-5 text-slate-600 sm:text-[10px]">
                     Al confirmar, el resultado se
                     guardará y afectará la tabla de
                     posiciones.

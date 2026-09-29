@@ -100,3 +100,15 @@ body {
 :root:not(.dark) .lm-ready button[class~="bg-black/30"] { background-color: rgba(0, 0, 0, 0.3) !important; }
 :root:not(.dark) .lm-ready button[class~="bg-black/40"] { background-color: rgba(0, 0, 0, 0.4) !important; }
 :root:not(.dark) .lm-ready button[class~="bg-black/75"] { background-color: rgba(0, 0, 0, 0.75) !important; }
+
+/* iOS Safari hace zoom automático al enfocar un campo con letra menor a
+   16px (y la página queda descuadrada). En pantallas de celular todos los
+   campos de texto usan 16px; en tablet/escritorio se respeta el tamaño de
+   cada componente. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

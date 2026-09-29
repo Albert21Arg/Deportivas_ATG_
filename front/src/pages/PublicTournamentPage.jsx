@@ -94,6 +94,78 @@ function groupMatchesByDate(matches, direction = 'asc') {
     .sort(([left], [right]) => sign * left.localeCompare(right));
 }
 
+// "Fecha N" automática: cada día con partidos de liga/grupos es una fecha,
+// numerada en orden cronológico desde el primer día jugado del torneo (se
+// cuentan juntos los próximos y los ya jugados para que el número sea el
+// mismo en las dos listas). Los partidos de eliminatoria no se numeran.
+function buildRoundNumbers(matches, knockoutMatchIds) {
+  const dates = [
+    ...new Set(
+      matches
+        .filter((match) => !knockoutMatchIds.has(match.id))
+        .map((match) => dateValue(match.date))
+    ),
+  ].sort();
+
+  return new Map(dates.map((date, index) => [date, index + 1]));
+}
+
+// Una fecha como acordeón: cerrado al entrar, se despliega al hacerle clic.
+function MatchDateAccordion({
+  date,
+  roundNumber,
+  count,
+  isOpen,
+  onToggle,
+  className,
+  dotClassName,
+  children,
+}) {
+  return (
+    <section className="min-w-0">
+      <h3>
+        <button
+          className={`flex w-full items-center gap-2 border-b border-slate-200 text-left font-bold uppercase tracking-[0.14em] transition hover:opacity-80 dark:border-white/[0.05] ${className}`}
+          onClick={onToggle}
+          type="button"
+          aria-expanded={isOpen}
+        >
+          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotClassName}`} />
+          <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-2">
+            {roundNumber ? (
+              <>
+                <span>Fecha {roundNumber}</span>
+                <span className="font-semibold normal-case tracking-normal text-slate-500 dark:text-slate-400">
+                  · {formatDate(date)}
+                </span>
+              </>
+            ) : (
+              formatDate(date)
+            )}
+          </span>
+          <span className="shrink-0 rounded-full bg-slate-200/70 px-1.5 py-0.5 text-[9px] tracking-normal text-slate-500 dark:bg-white/[0.06] dark:text-slate-400">
+            {count}
+          </span>
+          <span
+            className={`shrink-0 text-slate-400 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
+            aria-hidden="true"
+          >
+            ↓
+          </span>
+        </button>
+      </h3>
+
+      <div
+        className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+          isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">{children}</div>
+      </div>
+    </section>
+  );
+}
+
 function mediaUrl(path) {
   if (!path) return null;
 
@@ -1384,6 +1456,19 @@ export default function PublicTournamentPage() {
 
   const [openSection, setOpenSection] = useState(null);
 
+  // Fechas desplegadas en "Próximos partidos" / "Historial" (claves
+  // "upcoming:AAAA-MM-DD" e "history:AAAA-MM-DD"); todas cerradas al entrar.
+  const [openDates, setOpenDates] = useState(() => new Set());
+
+  function toggleDate(key) {
+    setOpenDates((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [featuredPlayerRow, setFeaturedPlayerRow] = useState(null);
@@ -1427,6 +1512,15 @@ export default function PublicTournamentPage() {
 
   useEffect(() => {
     loadTournament();
+
+    // El historial se pide una vez al entrar para que la numeración
+    // "Fecha N" de los próximos partidos cuente también los ya jugados.
+    api
+      .get(`/public/tournaments/${id}/history`)
+      .then(({ data: response }) => {
+        if (!historyLoadedRef.current) setHistory(response.data.matches);
+      })
+      .catch(() => {});
 
     const stream = new EventSource(
       `${api.defaults.baseURL}/public/tournaments/${id}/events`
@@ -1477,7 +1571,7 @@ export default function PublicTournamentPage() {
   async function toggleHistory() {
     if (
       openSection !== 'history' &&
-      history.length === 0
+      !historyLoadedRef.current
     ) {
       await loadHistory();
     }
@@ -1569,6 +1663,15 @@ export default function PublicTournamentPage() {
 
   const competitionMode =
     data.tournament.mode ?? 'ROUND_ROBIN';
+
+  const roundNumbers = buildRoundNumbers(
+    [...data.upcomingMatches, ...history],
+    new Set(
+      (data.ties ?? []).flatMap((tie) =>
+        (tie.matches ?? []).map((match) => match.id)
+      )
+    )
+  );
 
   const liveMatch =
     data.upcomingMatches?.find(
@@ -2551,17 +2654,21 @@ export default function PublicTournamentPage() {
                   No hay próximos partidos.
                 </p>
               ) : (
-                <div className="space-y-4 py-2">
+                <div className="space-y-1 py-2">
                   {groupMatchesByDate(
                     data.upcomingMatches
                   ).map(([date, matches]) => (
-                    <section key={date} className="min-w-0">
-                      <h3 className="mb-1.5 flex items-center gap-2 border-b border-slate-200 pb-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600 dark:border-white/[0.05] dark:text-emerald-300 sm:mb-2 sm:pb-2 sm:text-xs">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                        {formatDate(date)}
-                      </h3>
-
-                      <div className="min-w-0">
+                    <MatchDateAccordion
+                      key={date}
+                      date={date}
+                      roundNumber={roundNumbers.get(date)}
+                      count={matches.length}
+                      isOpen={openDates.has(`upcoming:${date}`)}
+                      onToggle={() => toggleDate(`upcoming:${date}`)}
+                      className="py-1.5 text-[10px] text-emerald-600 dark:text-emerald-300 sm:py-2 sm:text-xs"
+                      dotClassName="bg-emerald-400"
+                    >
+                      <div className="min-w-0 pt-1.5 sm:pt-2">
                         {matches.map((match) => (
                           <MatchRow
                             key={match.id}
@@ -2572,7 +2679,7 @@ export default function PublicTournamentPage() {
                           />
                         ))}
                       </div>
-                    </section>
+                    </MatchDateAccordion>
                   ))}
                 </div>
               )}
@@ -2857,16 +2964,20 @@ export default function PublicTournamentPage() {
                   Aún no hay partidos jugados.
                 </p>
               ) : (
-                <div className="space-y-5">
+                <div className="space-y-2">
                   {groupMatchesByDate(history, 'desc').map(
                     ([date, matches]) => (
-                      <section key={date} className="min-w-0">
-                        <h3 className="mb-2 flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold uppercase tracking-[0.14em] text-blue-600 dark:border-white/[0.05] dark:text-blue-300 sm:mb-3 sm:text-sm">
-                          <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
-                          {formatDate(date)}
-                        </h3>
-
-                        <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      <MatchDateAccordion
+                        key={date}
+                        date={date}
+                        roundNumber={roundNumbers.get(date)}
+                        count={matches.length}
+                        isOpen={openDates.has(`history:${date}`)}
+                        onToggle={() => toggleDate(`history:${date}`)}
+                        className="py-2 text-xs text-blue-600 dark:text-blue-300 sm:text-sm"
+                        dotClassName="bg-blue-400"
+                      >
+                        <div className="grid min-w-0 gap-3 pt-2 sm:grid-cols-2 sm:pt-3 lg:grid-cols-3">
                           {matches.map((match) => (
                             <HistoryMatchCard
                               key={match.id}
@@ -2875,7 +2986,7 @@ export default function PublicTournamentPage() {
                             />
                           ))}
                         </div>
-                      </section>
+                      </MatchDateAccordion>
                     )
                   )}
                 </div>

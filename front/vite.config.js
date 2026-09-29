@@ -10,14 +10,12 @@ export default defineConfig({
 
     proxy: {
       '/api': {
-        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         target: 'https://v7n460l4-3000.use.devtunnels.ms',
         changeOrigin: true,
         secure: true,
       },
 
       '/uploads': {
-        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         target: 'https://v7n460l4-3000.use.devtunnels.ms',
         changeOrigin: true,
         secure: true,
