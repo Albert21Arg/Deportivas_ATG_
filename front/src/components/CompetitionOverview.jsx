@@ -1,4 +1,4 @@
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 
 import { EXPIRED_CLASS, isLogoHidden, isTeamExpired } from '../utils/team-expiry.js';
 
@@ -64,13 +64,13 @@ function centerY(index, count, totalHeight) {
   return (totalHeight / count) * (index + 0.5);
 }
 
-function TeamCrest({ team, size = 'h-6 w-6' }) {
+function TeamCrest({ team, size = 'h-6 w-6', initialsClass = 'text-[8px]' }) {
   const expired = isTeamExpired(team);
   return team?.logo && !isLogoHidden(team) ? (
     <img className={`${size} shrink-0 object-contain ${expired ? EXPIRED_CLASS : ''}`} src={team.logo} alt="" />
   ) : (
     <span
-      className={`${size} flex shrink-0 items-center justify-center text-[8px] font-black text-slate-500 ${expired ? EXPIRED_CLASS : ''}`}
+      className={`${size} flex shrink-0 items-center justify-center ${initialsClass} font-black text-slate-500 ${expired ? EXPIRED_CLASS : ''}`}
     >
       {expired ? '' : team?.name?.slice(0, 2).toUpperCase() ?? ''}
     </span>
@@ -355,17 +355,14 @@ function BracketRoundColumn({ round, side, totalHeight, tieHeight, onSelectMatch
   );
 }
 
-// Un lado completo del árbol (izquierdo o derecho): rondas + gutters con
-// líneas conectoras, en el orden correcto para que la ronda más cercana a
-// la Final quede pegada al centro y la más externa quede en el borde.
+// Una mitad del árbol (side = "left": primera mitad de las llaves de cada
+// ronda; "right": segunda mitad). Las dos se dibujan de izquierda a derecha,
+// una debajo de la otra, para que todo quepa a lo ancho sin scroll
+// horizontal; la Final va después de ambas.
 function BracketTreeSide({ rounds, side, totalHeight, tieHeight, onSelectMatch, onSelectTeam }) {
-  const roundIndices = rounds.map((_, index) => index);
-  const orderedIndices = side === 'left' ? roundIndices : [...roundIndices].reverse();
-
   return (
     <div className="flex shrink-0">
-      {orderedIndices.map((roundIndex) => {
-        const round = rounds[roundIndex];
+      {rounds.map((round, roundIndex) => {
         const half = round.ties.length / 2;
         const isLastRound = roundIndex === rounds.length - 1;
 
@@ -379,16 +376,16 @@ function BracketTreeSide({ rounds, side, totalHeight, tieHeight, onSelectMatch, 
             onSelectTeam={onSelectTeam}
           />
         );
-        const connectors = (
+        const connectors = isLastRound ? null : (
           <BracketConnectors
             fromCount={half}
             totalHeight={totalHeight}
-            isLastRound={isLastRound}
-            mirrored={side === 'right'}
+            isLastRound={false}
+            mirrored={false}
           />
         );
 
-        return <Fragment key={round.stage}>{side === 'left' ? <>{column}{connectors}</> : <>{connectors}{column}</>}</Fragment>;
+        return <Fragment key={round.stage}>{column}{connectors}</Fragment>;
       })}
     </div>
   );
@@ -446,9 +443,111 @@ function ChampionModal({ team, championLabel, onClose }) {
   );
 }
 
+// Final + trofeo + campeón. Se muestra al pie del cuadro mientras falte
+// algún finalista, y dentro del modal de la Final cuando ya están los dos.
+function FinalShowcase({ finalTie, showFinal, tieHeight, championTeam, championLabel, onOpenChampion, onSelectMatch, onSelectTeam, large = false }) {
+  const tieWidth = large ? 'w-[260px] sm:w-[320px]' : 'w-[140px] sm:w-[190px]';
+
+  return (
+    <>
+            <span className="text-sm font-black uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 sm:text-base">Final</span>
+
+            {showFinal ? (
+              <div className={tieWidth} style={{ height: tieHeight }}>
+                <BracketTieBlock tie={finalTie} isFinal onSelectMatch={onSelectMatch} onSelectTeam={onSelectTeam} />
+              </div>
+            ) : (
+              <div
+                className={`flex ${tieWidth} items-center justify-center rounded-lg border border-dashed border-slate-200 text-[10px] text-slate-600 dark:border-white/[0.08]`}
+                style={{ height: tieHeight }}
+              >
+                Por definir
+              </div>
+            )}
+
+            {championTeam ? (
+              <button
+                type="button"
+                className="relative rounded-full transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
+                onClick={onOpenChampion}
+                aria-label={`Ver campeón: ${championTeam.name}`}
+              >
+                <TeamCrest team={championTeam} size="h-14 w-14 sm:h-16 sm:w-16" initialsClass="rounded-full bg-emerald-400/10 text-lg text-emerald-600 dark:text-emerald-200" />
+                <span
+                  className="absolute -right-2 -top-2 text-xl drop-shadow-[0_0_10px_rgba(245,215,138,.6)] sm:-right-2.5 sm:-top-2.5 sm:text-2xl"
+                  aria-hidden="true"
+                  title="Campeón"
+                >
+                  🏆
+                </span>
+              </button>
+            ) : (
+              <span className="text-4xl drop-shadow-[0_0_18px_rgba(245,215,138,.3)] sm:text-5xl" aria-hidden="true">
+                🏆
+              </span>
+            )}
+
+            <div className="text-center">
+              <p className="text-xl font-black uppercase tracking-[0.08em] text-emerald-600 drop-shadow-[0_0_14px_rgba(52,211,153,.5)] dark:text-emerald-200 sm:text-2xl">
+                Campeón{championLabel ? ` ${championLabel}` : ''}
+              </p>
+              <p className="mt-1 text-sm font-black text-amber-600 dark:text-amber-300 sm:text-base">{championTeam?.name ?? 'Por definir'}</p>
+            </div>
+
+    </>
+  );
+}
+
+// Modal de la Final (pantalla completa, como los demás de la página
+// pública): la llave de la final con el trofeo y el campeón.
+function FinalModal({ open, onClose, ...showcase }) {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[57] flex bg-slate-950/90" role="presentation" onMouseDown={onClose}>
+      <section
+        className="relative flex h-[100dvh] w-full flex-col overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-[#05090e]"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Final del torneo"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <div className="sticky top-0 z-10 flex justify-end border-b border-slate-200/70 bg-white/90 px-3 py-2 backdrop-blur dark:border-white/[0.06] dark:bg-slate-900/90">
+          <button
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl text-slate-600 shadow-sm transition hover:bg-slate-100 dark:border-white/[0.08] dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar final"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-amber-400/[0.10] to-transparent" />
+
+        <div className="relative flex flex-1 flex-col items-center justify-center gap-3 px-4 py-8 sm:gap-4">
+          <FinalShowcase {...showcase} large />
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function BracketOverview({ ties = [], championLabel, onSelectMatch, onSelectTeam }) {
   const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
+  const [isFinalModalOpen, setIsFinalModalOpen] = useState(false);
+  const finalAutoOpenedRef = useRef(false);
   const finalTie = ties.find((tie) => tie.stage === 'FINAL');
+  const bothFinalists = Boolean(finalTie?.homeTeamId && finalTie?.awayTeamId);
+
+  // Al tener ya los dos finalistas, la Final se abre sola una vez al ver el
+  // cuadro; después se puede volver a abrir con su botón.
+  useEffect(() => {
+    if (bothFinalists && !finalAutoOpenedRef.current) {
+      finalAutoOpenedRef.current = true;
+      setIsFinalModalOpen(true);
+    }
+  }, [bothFinalists]);
   const thirdPlaceTie = ties.find((tie) => tie.stage === 'THIRD_PLACE');
   const leftTies = ties.filter((tie) => tie.stage !== 'FINAL' && tie.stage !== 'THIRD_PLACE');
 
@@ -500,7 +599,7 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch, onSelectTeam
       <div className="pointer-events-none absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-emerald-500/[0.08] to-transparent" />
 
       <div className="scroll-invisible relative overflow-x-auto pb-2">
-        <div className="flex min-w-max items-center justify-center">
+        <div className="flex flex-col items-start gap-6 sm:gap-8">
           {rounds.length > 0 && (
             <BracketTreeSide
               rounds={rounds}
@@ -512,50 +611,51 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch, onSelectTeam
             />
           )}
 
-          <div className="flex shrink-0 flex-col items-center gap-2 px-1 sm:gap-3 sm:px-4">
-            <span className="text-sm font-black uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 sm:text-base">Final</span>
+          {rounds.length > 0 && (
+            <>
+              <div className="h-px w-full bg-slate-200 dark:bg-white/[0.08]" />
+              <BracketTreeSide
+                rounds={rounds}
+                side="right"
+                totalHeight={totalHeight}
+                tieHeight={tieHeight}
+                onSelectMatch={onSelectMatch}
+                onSelectTeam={onSelectTeam}
+              />
+              <div className="h-px w-full bg-slate-200 dark:bg-white/[0.08]" />
+            </>
+          )}
 
-            {showFinal ? (
-              <div className="w-[140px] sm:w-[190px]" style={{ height: tieHeight }}>
-                <BracketTieBlock tie={finalTie} isFinal onSelectMatch={onSelectMatch} onSelectTeam={onSelectTeam} />
-              </div>
-            ) : (
-              <div
-                className="flex w-[140px] items-center justify-center rounded-lg border border-dashed border-slate-200 text-[10px] text-slate-600 dark:border-white/[0.08] sm:w-[190px]"
-                style={{ height: tieHeight }}
-              >
-                Por definir
-              </div>
-            )}
-
-            {championTeam ? (
+          <div className="flex w-full shrink-0 flex-col items-center gap-2 px-1 sm:gap-3 sm:px-4">
+            {bothFinalists ? (
+              // Con los dos finalistas definidos, la Final se ve en su modal.
               <button
                 type="button"
-                className="relative rounded-full transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60"
-                onClick={() => setIsChampionModalOpen(true)}
-                aria-label={`Ver campeón: ${championTeam.name}`}
+                className="group flex w-full max-w-sm flex-col items-center gap-2 rounded-2xl border border-amber-400/30 bg-gradient-to-b from-amber-400/[0.10] to-transparent px-4 py-4 text-center transition hover:border-amber-400/60"
+                onClick={() => setIsFinalModalOpen(true)}
               >
-                <TeamCrest team={championTeam} size="h-14 w-14 sm:h-16 sm:w-16" />
-                <span
-                  className="absolute -right-2 -top-2 text-xl drop-shadow-[0_0_10px_rgba(245,215,138,.6)] sm:-right-2.5 sm:-top-2.5 sm:text-2xl"
-                  aria-hidden="true"
-                  title="Campeón"
-                >
-                  🏆
+                <span className="text-sm font-black uppercase tracking-[0.14em] text-amber-600 dark:text-amber-300 sm:text-base">Final</span>
+                <span className="flex items-center gap-3">
+                  <TeamCrest team={finalTie.homeTeam} size="h-10 w-10 sm:h-12 sm:w-12" initialsClass="rounded-full bg-slate-500/10 text-xs" />
+                  <span className="text-xs font-black text-slate-500">VS</span>
+                  <TeamCrest team={finalTie.awayTeam} size="h-10 w-10 sm:h-12 sm:w-12" initialsClass="rounded-full bg-slate-500/10 text-xs" />
+                </span>
+                <span className="text-xs font-bold text-emerald-600 group-hover:underline dark:text-emerald-300">
+                  {championTeam ? `🏆 ${championTeam.name} · Ver la final` : 'Ver la final y el campeón →'}
                 </span>
               </button>
             ) : (
-              <span className="text-4xl drop-shadow-[0_0_18px_rgba(245,215,138,.3)] sm:text-5xl" aria-hidden="true">
-                🏆
-              </span>
+              <FinalShowcase
+                finalTie={finalTie}
+                showFinal={showFinal}
+                tieHeight={tieHeight}
+                championTeam={championTeam}
+                championLabel={championLabel}
+                onOpenChampion={() => setIsChampionModalOpen(true)}
+                onSelectMatch={onSelectMatch}
+                onSelectTeam={onSelectTeam}
+              />
             )}
-
-            <div className="text-center">
-              <p className="text-xl font-black uppercase tracking-[0.08em] text-emerald-600 drop-shadow-[0_0_14px_rgba(52,211,153,.5)] dark:text-emerald-200 sm:text-2xl">
-                Campeón{championLabel ? ` ${championLabel}` : ''}
-              </p>
-              <p className="mt-1 text-sm font-black text-amber-600 dark:text-amber-300 sm:text-base">{championTeam?.name ?? 'Por definir'}</p>
-            </div>
 
             {showThirdPlace && (
               <div className="mt-4 w-[130px] sm:w-[170px]">
@@ -568,20 +668,22 @@ function BracketOverview({ ties = [], championLabel, onSelectMatch, onSelectTeam
               </div>
             )}
           </div>
-
-          {rounds.length > 0 && (
-            <BracketTreeSide
-              rounds={rounds}
-              side="right"
-              totalHeight={totalHeight}
-              tieHeight={tieHeight}
-              onSelectMatch={onSelectMatch}
-              onSelectTeam={onSelectTeam}
-            />
-          )}
         </div>
       </div>
     </div>
+
+    <FinalModal
+      open={isFinalModalOpen}
+      onClose={() => setIsFinalModalOpen(false)}
+      finalTie={finalTie}
+      showFinal={showFinal}
+      tieHeight={tieHeight}
+      championTeam={championTeam}
+      championLabel={championLabel}
+      onOpenChampion={() => setIsChampionModalOpen(true)}
+      onSelectMatch={onSelectMatch}
+      onSelectTeam={onSelectTeam}
+    />
 
     <ChampionModal
       team={isChampionModalOpen ? championTeam : null}

@@ -11,7 +11,7 @@ import DashboardNavbar from "../components/DashboardNavbar.jsx";
 import FutbolIcon from "../components/FutbolIcon.jsx";
 import api from "../services/api.js";
 import { getApiErrorDetails } from "../utils/api-error.js";
-import { getMatchClock } from "../utils/match-clock.js";
+import { formatEventTime, getMatchClock } from "../utils/match-clock.js";
 
 const emptyForm = {
   homeTeamId: "",
@@ -517,10 +517,14 @@ function MatchEventsPanel({
   const [query, setQuery] = useState("");
   const [player, setPlayer] = useState(null);
   const [minute, setMinute] = useState("");
+  // Tiempo del evento al cargarlo en un partido ya finalizado ("1"/"2"/"").
+  // En vivo sale del cronómetro.
+  const [eventPeriod, setEventPeriod] = useState("");
   const [isPlayerPickerOpen, setIsPlayerPickerOpen] =
     useState(false);
 
   const [currentMatch, setCurrentMatch] = useState(match);
+  const [isSavingEvent, setIsSavingEvent] = useState(false);
   const [eventToRemove, setEventToRemove] = useState(null);
   const [isRemovingEvent, setIsRemovingEvent] = useState(false);
 
@@ -607,29 +611,44 @@ function MatchEventsPanel({
     );
   }
 
-  async function saveCard(event) {
-    event.preventDefault();
+  // El evento se registra apenas se elige el jugador (sin botón aparte).
+  // Minuto: el que se haya escrito; si no, en un partido en vivo, el del
+  // cronómetro en ese momento.
+  async function registerEvent(selectedPlayer) {
+    if (!selectedPlayer || isSavingEvent) return;
 
-    if (!player) return;
+    const clock = variant === "live" ? getMatchClock(match) : null;
+    const clockMinute = clock?.minute ?? null;
+    const period =
+      variant === "live"
+        ? clock?.period ?? undefined
+        : eventPeriod
+          ? Number(eventPeriod)
+          : undefined;
+
+    setPlayer(selectedPlayer);
+    setIsSavingEvent(true);
 
     try {
       const { data } = await api.post(
         `/matches/${match.id}/events`,
         {
           teamId: Number(teamId),
-          playerId: player.id,
+          playerId: selectedPlayer.id,
           type,
-          minute: minute || undefined,
+          minute: minute || clockMinute || undefined,
+          period,
         },
       );
 
       apply(data.data.match);
-
+    } catch (error) {
+      notify(getApiErrorDetails(error));
+    } finally {
+      setIsSavingEvent(false);
       setPlayer(null);
       setQuery("");
       setMinute("");
-    } catch (error) {
-      notify(getApiErrorDetails(error));
     }
   }
 
@@ -669,7 +688,7 @@ function MatchEventsPanel({
 
       <form
         className="rounded-xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-slate-950/30 p-2.5 sm:p-3"
-        onSubmit={saveCard}
+        onSubmit={(event) => event.preventDefault()}
       >
         <div
           className={`grid gap-1.5 ${
@@ -837,9 +856,47 @@ function MatchEventsPanel({
           </button>
         </div>
 
+        {!isLiveVariant && (
+          <div className="mt-2 grid grid-cols-[auto_1fr_1fr] items-center gap-1.5">
+            <span className="pr-1 text-[11px] font-semibold text-slate-500">Tiempo:</span>
+            {["1", "2"].map((value) => (
+              <button
+                key={value}
+                className={`h-10 rounded-lg border text-xs font-bold transition ${
+                  eventPeriod === value
+                    ? "border-emerald-400 bg-emerald-400/15 text-emerald-700 dark:text-emerald-300"
+                    : "border-slate-300 text-slate-500 hover:border-emerald-400/60 dark:border-slate-700"
+                }`}
+                type="button"
+                onClick={() => setEventPeriod((current) => (current === value ? "" : value))}
+                aria-pressed={eventPeriod === value}
+              >
+                {value === "1" ? "1er tiempo" : "2do tiempo"}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <input
+          className="mt-2 h-10 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-500 focus:border-emerald-400"
+          type="number"
+          min="0"
+          max="130"
+          placeholder={
+            isLiveVariant
+              ? "Minuto (opcional, si no se usa el del cronómetro)"
+              : "Minuto (opcional)"
+          }
+          value={minute}
+          onChange={(event) =>
+            setMinute(event.target.value)
+          }
+        />
+
         <button
-          className="mt-2 flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 text-left text-xs outline-none transition hover:border-emerald-400/50"
+          className="mt-2 flex h-11 w-full items-center justify-between gap-2 rounded-lg border border-emerald-400/40 bg-emerald-400/[0.06] px-3 text-left text-xs font-semibold outline-none transition hover:border-emerald-400 disabled:cursor-wait disabled:opacity-60"
           type="button"
+          disabled={isSavingEvent}
           onClick={() => {
             setQuery("");
             setIsPlayerPickerOpen(true);
@@ -849,10 +906,12 @@ function MatchEventsPanel({
             className={`min-w-0 truncate ${
               player
                 ? "text-slate-900 dark:text-white"
-                : "text-slate-600"
+                : "text-slate-600 dark:text-slate-300"
             }`}
           >
-            {player ? player.name : "Buscar jugador..."}
+            {isSavingEvent
+              ? `Registrando ${player?.name ?? ""}…`
+              : "Elegir jugador (se registra al tocarlo)"}
           </span>
 
           <span className="shrink-0 text-slate-500">
@@ -944,9 +1003,8 @@ function MatchEventsPanel({
                       key={item.id}
                       type="button"
                       onClick={() => {
-                        setPlayer(item);
-                        setQuery(item.name);
                         setIsPlayerPickerOpen(false);
+                        registerEvent(item);
                       }}
                       className={`block w-full truncate rounded-lg px-3 py-2.5 text-left text-xs transition ${
                         player?.id === item.id
@@ -964,26 +1022,6 @@ function MatchEventsPanel({
           document.body
         )}
 
-        <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
-          <input
-            className="h-10 min-w-0 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-2 text-xs text-slate-900 dark:text-white outline-none placeholder:text-slate-600 focus:border-emerald-400"
-            type="number"
-            min="0"
-            max="130"
-            placeholder="Minuto"
-            value={minute}
-            onChange={(event) =>
-              setMinute(event.target.value)
-            }
-          />
-
-          <button
-            className="rounded-lg bg-amber-400 px-3 text-[10px] font-bold text-slate-950 transition hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={!player}
-          >
-            Registrar
-          </button>
-        </div>
       </form>
 
       <div className="space-y-1.5">
@@ -1007,9 +1045,7 @@ function MatchEventsPanel({
             </span>
 
             <span className="shrink-0 text-slate-500">
-              {event.minute != null
-                ? `${event.minute}'`
-                : "—"}
+              {formatEventTime(event)}
             </span>
 
             <span
@@ -1081,7 +1117,11 @@ function LiveMatchClock({ match, className = '' }) {
     <span className={className}>
       {clock.label}
       <span className="ml-1 text-slate-500">
-        {clock.period === 1 ? '1T' : '2T'}
+        {clock.isHalftime
+          ? `· 2T en ${clock.minutesToSecondHalf}'`
+          : clock.isFullTime
+            ? `· se finaliza en ${clock.minutesToAutoFinish}'`
+            : clock.period === 1 ? '1T' : '2T'}
       </span>
     </span>
   );
@@ -1090,6 +1130,18 @@ function LiveMatchClock({ match, className = '' }) {
 /* ================================================================
    MATCH CARD PREMIUM
 ================================================================ */
+
+const ALL_SECTIONS_CLOSED = {
+  live: false,
+  pending: false,
+  postponed: false,
+  finished: false,
+  cancelled: false,
+};
+
+// Menú "⋯ Más": solo uno abierto a la vez en toda la página. Cada tarjeta
+// avisa cuando abre el suyo y las demás cierran el propio.
+const MORE_ACTIONS_EVENT = "match-more-actions-open";
 
 // Botones de acción de la tarjeta: 44px de alto en celular (tamaño mínimo
 // cómodo para el dedo), más compactos desde tablet.
@@ -1127,6 +1179,21 @@ function MatchCard({
 
   const [showMoreActions, setShowMoreActions] =
     useState(false);
+
+  useEffect(() => {
+    function closeIfOther(event) {
+      if (event.detail !== match.id) setShowMoreActions(false);
+    }
+    window.addEventListener(MORE_ACTIONS_EVENT, closeIfOther);
+    return () => window.removeEventListener(MORE_ACTIONS_EVENT, closeIfOther);
+  }, [match.id]);
+
+  function toggleMoreActions() {
+    if (!showMoreActions) {
+      window.dispatchEvent(new CustomEvent(MORE_ACTIONS_EVENT, { detail: match.id }));
+    }
+    setShowMoreActions(!showMoreActions);
+  }
 
   const isFinished = match.status === "FINISHED";
   const isLive = match.status === "STARTED";
@@ -1559,7 +1626,7 @@ function MatchCard({
 
             <button
               className={`${actionButtonClass} shrink-0 border border-slate-300 font-bold text-slate-700 hover:border-slate-400 dark:border-white/[0.1] dark:text-slate-300`}
-              onClick={() => setShowMoreActions((current) => !current)}
+              onClick={toggleMoreActions}
               type="button"
               aria-expanded={showMoreActions}
               aria-label="Más acciones"
@@ -2383,27 +2450,32 @@ export default function MatchesPage() {
       cancelled: false,
     });
 
-  // Fechas desplegadas dentro de "Próximos" y "Finalizados". Solo se
-  // guarda lo que el usuario cambió ("pending:AAAA-MM-DD" -> true/false);
-  // si no tocó una fecha, vale lo que diga su valor por defecto (en
-  // Próximos, la fecha más cercana abierta; en Finalizados, todas cerradas).
-  const [dateToggles, setDateToggles] = useState({});
+  // Fecha desplegada en cada sección ("pending" / "finished"): una a la vez,
+  // abrir otra cierra la anterior. Mientras el usuario no toque ninguna,
+  // vale el valor por defecto (en Próximos, la fecha más cercana abierta;
+  // en Finalizados, todas cerradas). null = el usuario las cerró todas.
+  const [openDateBySection, setOpenDateBySection] = useState({});
 
   // Partido finalizado desplegado en la vista de filas (celular).
   const [expandedMatchId, setExpandedMatchId] = useState(null);
   const isMobile = useIsMobile();
 
+  function isDateChosen(section, date, defaultOpen) {
+    const chosen = openDateBySection[section];
+    return chosen === undefined ? defaultOpen : chosen === date;
+  }
+
   function isDateOpen(section, date, defaultOpen = false) {
+    // Con una búsqueda activa se despliegan todas para ver los resultados.
     if (matchSearch.trim()) return true;
-    const key = `${section}:${date}`;
-    return key in dateToggles ? dateToggles[key] : defaultOpen;
+    return isDateChosen(section, date, defaultOpen);
   }
 
   function toggleDate(section, date, defaultOpen = false) {
-    const key = `${section}:${date}`;
-    setDateToggles((current) => ({
+    const isOpen = isDateChosen(section, date, defaultOpen);
+    setOpenDateBySection((current) => ({
       ...current,
-      [key]: !(key in current ? current[key] : defaultOpen),
+      [section]: isOpen ? null : date,
     }));
   }
 
@@ -2445,11 +2517,20 @@ export default function MatchesPage() {
      ACCORDION
   ============================================================== */
 
+  // Solo una sección abierta a la vez: abrir una cierra las demás
+  // (incluido "Generar fixture").
   function toggleSection(section) {
     setOpenSections((current) => ({
-      ...current,
+      ...ALL_SECTIONS_CLOSED,
       [section]: !current[section],
     }));
+    setIsFixtureSectionOpen(false);
+  }
+
+  function toggleFixtureSection() {
+    const opening = !isFixtureSectionOpen;
+    setIsFixtureSectionOpen(opening);
+    if (opening) setOpenSections(ALL_SECTIONS_CLOSED);
   }
 
   /* ==============================================================
@@ -2531,6 +2612,26 @@ export default function MatchesPage() {
 
     loadMatches();
   }, [notify, selectedTournamentId]);
+
+  // Mientras haya partidos en vivo se vuelven a pedir cada 20 s: el segundo
+  // tiempo arranca solo en el servidor al terminar el descanso, y así se
+  // refleja aquí (estado, botones) sin tener que recargar la página.
+  const hasLiveMatches = matches.some((match) => match.status === "STARTED");
+
+  useEffect(() => {
+    if (!selectedTournamentId || !hasLiveMatches) return undefined;
+
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await api.get(`/tournaments/${selectedTournamentId}/matches`);
+        setMatches(sortMatches(data.data.matches));
+      } catch {
+        // Si falla una actualización se reintenta en la siguiente vuelta.
+      }
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, [selectedTournamentId, hasLiveMatches]);
 
   /* ==============================================================
      FORM
@@ -3202,11 +3303,7 @@ export default function MatchesPage() {
         ),
       );
 
-      setOpenSections((current) => ({
-        ...current,
-        live: true,
-        pending: false,
-      }));
+      setOpenSections({ ...ALL_SECTIONS_CLOSED, live: true });
 
       notify({
         type: "success",
@@ -3466,7 +3563,8 @@ export default function MatchesPage() {
   ];
 
   function jumpToSection(section, targetId = `matches-${section}`) {
-    setOpenSections((current) => ({ ...current, [section]: true }));
+    setOpenSections({ ...ALL_SECTIONS_CLOSED, [section]: true });
+    setIsFixtureSectionOpen(false);
     // Espera a que la sección se despliegue antes de desplazar.
     requestAnimationFrame(() => {
       document
@@ -3664,11 +3762,7 @@ export default function MatchesPage() {
             <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-white/[0.06] bg-white dark:bg-[#0a1018]/90 shadow-xl shadow-black/10 sm:mt-5">
               <button
                 className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:px-5"
-                onClick={() =>
-                  setIsFixtureSectionOpen(
-                    (current) => !current,
-                  )
-                }
+                onClick={toggleFixtureSection}
                 type="button"
                 aria-expanded={isFixtureSectionOpen}
               >

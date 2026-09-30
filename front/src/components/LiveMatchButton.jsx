@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../services/api.js';
@@ -19,6 +19,7 @@ const POLL_INTERVAL_MS = 20000;
 export default function LiveMatchButton() {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [liveMatch, setLiveMatch] = useState(null);
   const intervalRef = useRef(null);
 
@@ -51,7 +52,13 @@ export default function LiveMatchButton() {
     };
   }, [canSeeLiveButton]);
 
-  if (!canSeeLiveButton || !liveMatch) return null;
+  // En la vista de partidos de un torneo (dashboard/matches?tournamentId=…)
+  // no se muestra: ahí ya están los partidos en vivo y sus controles.
+  const isOnTournamentMatches =
+    location.pathname.replace(/\/$/, '') === '/dashboard/matches' &&
+    new URLSearchParams(location.search).has('tournamentId');
+
+  if (!canSeeLiveButton || !liveMatch || isOnTournamentMatches) return null;
 
   return (
     <button

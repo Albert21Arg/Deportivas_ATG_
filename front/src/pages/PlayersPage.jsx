@@ -57,16 +57,12 @@ export default function PlayersPage() {
   const [expandedActionIds, setExpandedActionIds] = useState(() => new Set());
   const [showMobileFab, setShowMobileFab] = useState(false);
 
+  // Solo una fila con las acciones desplegadas a la vez: abrir otra cierra
+  // la anterior.
   function toggleActions(playerId) {
-    setExpandedActionIds((current) => {
-      const next = new Set(current);
-      if (next.has(playerId)) {
-        next.delete(playerId);
-      } else {
-        next.add(playerId);
-      }
-      return next;
-    });
+    setExpandedActionIds((current) =>
+      current.has(playerId) ? new Set() : new Set([playerId]),
+    );
   }
 
   // El botón flotante para crear jugador solo aparece cuando el usuario ya

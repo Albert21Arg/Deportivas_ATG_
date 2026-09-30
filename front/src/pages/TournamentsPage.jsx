@@ -99,16 +99,12 @@ export default function TournamentsPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Solo una fila con las acciones desplegadas a la vez: abrir otra cierra
+  // la anterior.
   function toggleActions(tournamentId) {
-    setExpandedActionIds((current) => {
-      const next = new Set(current);
-      if (next.has(tournamentId)) {
-        next.delete(tournamentId);
-      } else {
-        next.add(tournamentId);
-      }
-      return next;
-    });
+    setExpandedActionIds((current) =>
+      current.has(tournamentId) ? new Set() : new Set([tournamentId]),
+    );
   }
   const [isChampionModalOpen, setIsChampionModalOpen] = useState(false);
   const [viewsModalTournament, setViewsModalTournament] = useState(null);

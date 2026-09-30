@@ -94,20 +94,22 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/90 px-3 py-4 sm:px-5 sm:py-8 sm:bg-slate-950/85 sm:backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex bg-slate-950/90"
       role="presentation"
       onMouseDown={onClose}
     >
       <section
-        className="max-h-[94vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl shadow-black/10 dark:border-slate-700 dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 dark:shadow-black/30 sm:max-h-[92vh] sm:rounded-3xl sm:shadow-2xl sm:dark:shadow-black/40"
+        className="h-[100dvh] w-full overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950"
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-detail-modal-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="flex justify-end px-3 pt-3 sm:px-4 sm:pt-4">
+        {/* Barra fija: la X queda siempre visible aunque se baje por la
+            lista de jugadores, para cerrar en cualquier momento. */}
+        <div className="sticky top-0 z-10 flex justify-end border-b border-slate-200/70 bg-white/90 px-3 py-2 backdrop-blur dark:border-white/[0.06] dark:bg-slate-900/90 sm:px-4">
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-full text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-2xl text-slate-600 shadow-sm transition hover:bg-slate-100 hover:text-slate-900 dark:border-white/[0.08] dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
             type="button"
             onClick={onClose}
             aria-label="Cerrar detalle"
@@ -116,7 +118,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
           </button>
         </div>
 
-        <div className="px-4 pb-6 text-center sm:px-6 sm:pb-7">
+        <div className="mx-auto max-w-lg px-4 pb-10 pt-4 text-center sm:px-6">
           <div className="relative mx-auto w-fit">
             <TeamLogo team={row.team} size="h-24 w-24 sm:h-28 sm:w-28" />
 

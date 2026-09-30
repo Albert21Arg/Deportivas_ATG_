@@ -879,6 +879,14 @@ function TournamentCard({
         ${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]
       `}
     >
+      {/* Toda la tarjeta lleva al torneo: enlace que la cubre completa (así
+          también funciona "abrir en otra pestaña" y el teclado). El like y
+          el enlace de la transmisión en vivo quedan por encima. */}
+      <Link
+        className="absolute inset-0 z-[1] rounded-[inherit] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400"
+        to={`/tournaments/${tournament.tournament.id}`}
+        aria-label={`Ver torneo ${tournament.tournament.name}`}
+      />
       {/* ============================================================
           GLOWS DE LA TARJETA
       ============================================================ */}
@@ -1094,7 +1102,7 @@ function TournamentCard({
 
             {/* PARTIDO EN VIVO - ANCHO COMPLETO */}
             {liveMatch && (
-              <div className="col-span-1 w-full sm:col-span-12">
+              <div className="relative z-[2] col-span-1 w-full sm:col-span-12">
                 <LiveMatchCard
                   match={liveMatch}
                   accent={isCyan ? 'cyan' : 'emerald'}
@@ -1105,32 +1113,6 @@ function TournamentCard({
           </div>
         </div>
 
-      {/* Footer */}
-
-      <div className="relative border-t border-slate-200 px-3 py-3 dark:border-white/[0.05] sm:px-5 sm:py-4">
-        <Link
-          className={`
-              group/link flex min-h-11 w-full
-              items-center justify-center gap-2
-              rounded-xl
-              bg-gradient-to-r
-              ${colors.closedButton}
-              px-4 py-2.5
-              text-center text-xs font-black
-              text-slate-950 dark:text-slate-950
-              shadow-lg
-              transition-all duration-300
-              sm:py-3 sm:text-sm
-            `}
-          to={`/tournaments/${tournament.tournament.id}`}
-        >
-          Ver torneo y próximos partidos
-
-          <span className="transition-transform duration-300 group-hover/link:translate-x-1">
-            →
-          </span>
-        </Link>
-      </div>
     </article>
   );
 }

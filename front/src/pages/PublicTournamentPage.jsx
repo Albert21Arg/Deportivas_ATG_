@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 
 import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
-import { getMatchClock } from '../utils/match-clock.js';
+import { formatEventTime, getMatchClock } from '../utils/match-clock.js';
+import { buildRoundShareImage } from '../utils/round-share-image.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
@@ -119,13 +120,14 @@ function MatchDateAccordion({
   onToggle,
   className,
   dotClassName,
+  onShare,
   children,
 }) {
   return (
     <section className="min-w-0">
-      <h3>
+      <h3 className="flex items-center gap-1 border-b border-slate-200 dark:border-white/[0.05]">
         <button
-          className={`flex w-full items-center gap-2 border-b border-slate-200 text-left font-bold uppercase tracking-[0.14em] transition hover:opacity-80 dark:border-white/[0.05] ${className}`}
+          className={`flex min-w-0 flex-1 items-center gap-2 text-left font-bold uppercase tracking-[0.14em] transition hover:opacity-80 ${className}`}
           onClick={onToggle}
           type="button"
           aria-expanded={isOpen}
@@ -153,6 +155,23 @@ function MatchDateAccordion({
             ↓
           </span>
         </button>
+
+        {onShare && (
+          <button
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-300"
+            onClick={onShare}
+            type="button"
+            aria-label={`Compartir ${roundNumber ? `fecha ${roundNumber}` : formatDate(date)}`}
+            title="Compartir en redes"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
+            </svg>
+          </button>
+        )}
       </h3>
 
       <div
@@ -163,6 +182,156 @@ function MatchDateAccordion({
         <div className="min-h-0 overflow-hidden">{children}</div>
       </div>
     </section>
+  );
+}
+
+/*
+|--------------------------------------------------------------------------
+| Compartir una fecha (imagen con los partidos programados)
+|--------------------------------------------------------------------------
+| La imagen se genera al abrir la vista previa y el menú de compartir se
+| abre con un toque directo en "Compartir": los navegadores de celular
+| (sobre todo iPhone) solo permiten abrir ese menú en respuesta inmediata a
+| un toque, no después de esperar a que se genere la imagen.
+*/
+
+function ShareRoundModal({ round, tournament, onClose }) {
+  const [image, setImage] = useState(null);
+  const [error, setError] = useState(false);
+
+  const title = round.roundNumber ? `Fecha ${round.roundNumber}` : formatDate(round.date);
+  const pageUrl = `${window.location.origin}/tournaments/${tournament.id}`;
+  // El enlace lleva la fecha: así la vista previa de WhatsApp/Facebook
+  // muestra la imagen de esos partidos y la página abre directo esa fecha.
+  const shareUrl = `${pageUrl}?fecha=${dateValue(round.date)}`;
+  const fileName = `${round.roundNumber ? `fecha-${round.roundNumber}` : dateValue(round.date)}.png`;
+  const shareText = `⚽ ${tournament.name} — ${title}\n${formatDate(round.date)}\n${shareUrl}`;
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl = null;
+
+    buildRoundShareImage({
+      tournamentName: tournament.name,
+      title,
+      subtitle: formatDate(round.date),
+      matches: [...round.matches].sort((left, right) => String(left.time).localeCompare(String(right.time))),
+      formatTime,
+      hideLogo: (team) => !team?.logo || isLogoHidden(team),
+      footer: pageUrl.replace(/^https?:\/\//, ''),
+    })
+      .then((blob) => {
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setImage({ blob, url: objectUrl, file: new File([blob], fileName, { type: 'image/png' }) });
+      })
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
+
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [round, tournament.name, title, pageUrl, fileName]);
+
+  const canShareFile =
+    Boolean(image) && typeof navigator.canShare === 'function' && navigator.canShare({ files: [image.file] });
+
+  async function shareImage() {
+    try {
+      await navigator.share({ files: [image.file], title: `${tournament.name} — ${title}`, text: shareText });
+    } catch {
+      // El usuario cerró el menú de compartir: no hay nada que hacer.
+    }
+  }
+
+  function downloadImage() {
+    const link = document.createElement('a');
+    link.href = image.url;
+    link.download = fileName;
+    link.click();
+  }
+
+  function shareOnWhatsapp() {
+    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[70] flex bg-slate-950/80"
+      onClick={onClose}
+    >
+      <div
+        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white dark:bg-slate-900"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Compartir ${title}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/[0.06]">
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-slate-900 dark:text-white">Compartir {title}</p>
+            <p className="truncate text-xs text-slate-500 dark:text-slate-400">{formatDate(round.date)}</p>
+          </div>
+          <button
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+            onClick={onClose}
+            type="button"
+            aria-label="Cerrar"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto bg-slate-100 p-3 dark:bg-black/30">
+          {error ? (
+            <p className="py-10 text-center text-sm text-slate-500">No se pudo generar la imagen.</p>
+          ) : image ? (
+            <img className="mx-auto w-full max-w-md rounded-xl shadow-lg" src={image.url} alt={`Partidos de ${title}`} />
+          ) : (
+            <div className="flex flex-col items-center py-12 text-sm text-slate-500">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
+              <p className="mt-3">Generando imagen…</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mx-auto grid w-full max-w-md gap-2 border-t border-slate-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-white/[0.06]">
+          {canShareFile && (
+            <button
+              className="min-h-11 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-slate-950 transition hover:bg-emerald-400"
+              onClick={shareImage}
+              type="button"
+            >
+              Compartir imagen
+            </button>
+          )}
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-white/[0.1] dark:text-slate-200 dark:hover:bg-white/[0.04]"
+              onClick={downloadImage}
+              type="button"
+              disabled={!image}
+            >
+              Descargar
+            </button>
+            <button
+              className="min-h-11 rounded-xl border border-emerald-500/40 px-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-500/10 dark:text-emerald-300"
+              onClick={shareOnWhatsapp}
+              type="button"
+            >
+              WhatsApp (enlace)
+            </button>
+          </div>
+          {!canShareFile && image && (
+            <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
+              Para enviar la imagen desde el computador: descárgala y adjúntala en la red social.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -291,7 +460,9 @@ function LiveMatchClock({ match, className = '' }) {
   return (
     <span className={className}>
       {clock.label}
-      <span className="ml-1 opacity-70">{clock.period === 1 ? '1T' : '2T'}</span>
+      {!clock.isHalftime && !clock.isFullTime && (
+        <span className="ml-1 opacity-70">{clock.period === 1 ? '1T' : '2T'}</span>
+      )}
     </span>
   );
 }
@@ -302,99 +473,145 @@ function LiveMatchClock({ match, className = '' }) {
 |--------------------------------------------------------------------------
 */
 
-function MatchRow({ match, onClick }) {
-  const statusLabel =
-    match.status === 'STARTED'
-      ? 'En vivo'
-      : match.status === 'POSTPONED'
-        ? 'Aplazado'
-        : 'Programado';
+// Iniciales del equipo para la silueta de escudo (equipos sin escudo).
+function teamInitials(name) {
+  return String(name ?? '?')
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0].toUpperCase())
+    .join('') || '?';
+}
+
+// Escudo grande, sin recuadro, igual que en la imagen para compartir: si el
+// equipo no tiene escudo (o lo tiene oculto), silueta de escudo con iniciales.
+function ShowcaseLogo({ team, sizeClass }) {
+  const [failed, setFailed] = useState(false);
+
+  if (team?.logo && !isLogoHidden(team) && !failed) {
+    return (
+      <img
+        className={`${sizeClass} object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)] transition-transform duration-200 group-hover:scale-105`}
+        src={team.logo}
+        alt={`Escudo de ${team.name}`}
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+
+  return (
+    <svg
+      className={`${sizeClass} drop-shadow-[0_8px_16px_rgba(0,0,0,0.45)] transition-transform duration-200 group-hover:scale-105`}
+      viewBox="0 0 100 100"
+      role="img"
+      aria-label={`Sin escudo: ${team?.name ?? 'equipo'}`}
+    >
+      <defs>
+        <linearGradient id="shield-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(52,211,153,0.28)" />
+          <stop offset="100%" stopColor="rgba(15,23,42,0.55)" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M13 14 Q50 -2 87 14 L87 52 Q87 78 50 96 Q13 78 13 52 Z"
+        fill="url(#shield-fill)"
+        stroke="rgba(167,243,208,0.55)"
+        strokeWidth="3"
+      />
+      <text
+        x="50"
+        y="50"
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fill="#ecfdf5"
+        fontSize="30"
+        fontWeight="900"
+      >
+        {teamInitials(team?.name)}
+      </text>
+    </svg>
+  );
+}
+
+// Un partido dentro de la fecha: hora arriba, escudos grandes con "VS" (o
+// el marcador si está en vivo) y el nombre de cada equipo debajo. Al tocarlo
+// abre el detalle del partido.
+function ShowcaseMatch({ match, compact, onClick }) {
+  const isLive = match.status === 'STARTED';
+  const logoSize = compact ? 'h-14 w-14 sm:h-20 sm:w-20 lg:h-24 lg:w-24' : 'h-20 w-20 sm:h-28 sm:w-28';
+  const nameClass = compact ? 'text-[11px] sm:text-sm' : 'text-sm sm:text-base';
 
   return (
     <button
-      className="
-        group flex w-full min-w-0 items-center justify-between gap-2
-        border-b border-slate-100
-        py-3 text-left
-        transition-colors duration-200
-        hover:bg-slate-50
-        last:border-0
-        dark:border-white/[0.05]
-        dark:hover:bg-white/[0.025]
-        sm:gap-4 sm:py-4
-      "
+      className="group w-full min-w-0 rounded-xl px-1 py-2 text-center transition hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-400"
       type="button"
       onClick={onClick}
     >
-      <div className="min-w-0 flex-1">
-        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 sm:text-sm">
-          {formatTime(match.time)} · Colombia
-        </p>
+      {isLive ? (
+        <span className="flex items-center justify-center gap-1.5 text-[11px] font-black text-red-400 sm:text-xs">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+          EN VIVO
+          <LiveMatchClock match={match} className="text-red-300" />
+        </span>
+      ) : (
+        <span className={`block font-extrabold text-emerald-300 ${compact ? 'text-xs sm:text-base' : 'text-sm sm:text-lg'}`}>
+          {formatTime(match.time)}
+        </span>
+      )}
 
-        <div className="mt-2 flex min-w-0 items-center sm:mt-2.5">
-          <TeamLogo
-            team={match.homeTeam}
-            size="h-12 w-12 sm:h-16 sm:w-16"
-          />
-
-          <span className="ml-1.5 min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-700 dark:text-slate-300 sm:ml-2 sm:max-w-none sm:text-base">
+      <span className="mx-auto mt-2 grid max-w-[22rem] grid-cols-[1fr_auto_1fr] items-start gap-1">
+        <span className="flex min-w-0 flex-col items-center">
+          <ShowcaseLogo team={match.homeTeam} sizeClass={logoSize} />
+          <span className={`mt-1.5 line-clamp-2 break-words font-bold leading-tight text-white ${nameClass}`}>
             {match.homeTeam.name}
           </span>
-
-          <span
-            className={`
-              mx-1 shrink-0 text-[10px] font-black
-              sm:mx-2 sm:text-sm
-              ${
-                match.status === 'STARTED'
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-slate-600'
-              }
-            `}
-          >
-            {match.status === 'STARTED'
-              ? `${match.homeScore ?? 0} - ${match.awayScore ?? 0}`
-              : 'vs'}
-          </span>
-
-          <span className="min-w-0 max-w-[30%] truncate text-xs font-semibold text-slate-700 dark:text-slate-300 sm:max-w-none sm:text-base">
-            {match.awayTeam.name}
-          </span>
-
-          <TeamLogo
-            team={match.awayTeam}
-            size="h-12 w-12 sm:h-16 sm:w-16"
-            className="ml-1.5 sm:ml-2"
-          />
-        </div>
-      </div>
-
-      <span className="ml-1 flex shrink-0 flex-col items-end gap-1 sm:ml-4">
-        <span
-          className={`
-            rounded-full px-2 py-1
-            text-[9px]
-            sm:px-3 sm:text-xs
-            ${
-              match.status === 'STARTED'
-                ? 'border border-emerald-400/20 bg-emerald-400/10 font-bold text-emerald-700 dark:text-emerald-300'
-                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
-            }
-          `}
-        >
-          {match.status === 'STARTED'
-            ? '● EN VIVO'
-            : statusLabel}
         </span>
 
-        {match.status === 'STARTED' && (
-          <LiveMatchClock
-            match={match}
-            className="text-[9px] font-black text-red-600 dark:text-red-400 sm:text-xs"
-          />
-        )}
+        <span
+          className={`self-center font-black ${compact ? 'mt-[-1.25rem] text-xs sm:text-base' : 'mt-[-1.5rem] text-sm sm:text-xl'} ${
+            isLive ? 'text-emerald-300' : 'text-slate-400/80'
+          }`}
+        >
+          {isLive ? `${match.homeScore ?? 0}-${match.awayScore ?? 0}` : 'VS'}
+        </span>
+
+        <span className="flex min-w-0 flex-col items-center">
+          <ShowcaseLogo team={match.awayTeam} sizeClass={logoSize} />
+          <span className={`mt-1.5 line-clamp-2 break-words font-bold leading-tight text-white ${nameClass}`}>
+            {match.awayTeam.name}
+          </span>
+        </span>
       </span>
     </button>
+  );
+}
+
+// Partidos de una fecha con el mismo aspecto que la imagen para compartir:
+// fondo oscuro, 1 columna hasta 4 partidos y 2 columnas si hay más.
+function RoundShowcase({ matches, onSelect }) {
+  const twoColumns = matches.length > 4;
+
+  return (
+    <div className="relative mt-2 overflow-hidden rounded-2xl bg-gradient-to-b from-[#0b1220] to-[#042f2e] px-2 py-3 sm:px-4 sm:py-5">
+      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-emerald-400/20 blur-3xl" />
+
+      <div className={`relative grid gap-y-3 ${twoColumns ? 'grid-cols-2 gap-x-2 sm:gap-x-6' : 'grid-cols-1'}`}>
+        {matches.map((match, index) => (
+          <div key={match.id} className="min-w-0">
+            {index >= (twoColumns ? 2 : 1) && (
+              <div className="mx-auto mb-3 h-px w-3/5 bg-white/[0.08]" />
+            )}
+            <ShowcaseMatch
+              match={match}
+              compact={twoColumns}
+              onClick={() => onSelect(match)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -728,33 +945,13 @@ function MatchDetailModal({
         fixed inset-0
         flex items-end justify-center
         bg-slate-950/80
-        ${
-          isLive
-            ? 'z-[2147483647] p-0'
-            : 'z-[60] px-2 py-2 sm:items-center sm:px-5 sm:py-8'
-        }
+        ${isLive ? 'z-[2147483647]' : 'z-[60]'} p-0
       `}
       role="presentation"
       onMouseDown={isLive ? undefined : onClose}
     >
       <section
-        className={
-          isLive
-            ? 'flex h-full max-h-full w-full max-w-full flex-col overflow-hidden border-0 bg-white shadow-none dark:bg-slate-900'
-            : `
-                flex max-h-[94vh] w-full max-w-lg
-                flex-col
-                overflow-hidden
-                rounded-2xl
-                border border-slate-200
-                bg-white
-                shadow-2xl shadow-black/10
-                dark:border-slate-700
-                dark:bg-slate-900
-                dark:shadow-black/40
-                sm:max-h-[92vh]
-              `
-        }
+        className="flex h-[100dvh] w-full max-w-full flex-col overflow-hidden border-0 bg-white shadow-none dark:bg-slate-900"
         role="dialog"
         aria-modal="true"
         aria-labelledby="match-detail-title"
@@ -983,9 +1180,7 @@ function MatchDetailModal({
                         <EventIcon type={event.type} />
 
                         <span>
-                          {event.minute != null
-                            ? `${event.minute}'`
-                            : '—'}
+                          {formatEventTime(event)}
                         </span>
 
                         <span
@@ -1031,9 +1226,7 @@ function MatchDetailModal({
                         </span>
 
                         <span>
-                          {event.minute != null
-                            ? `${event.minute}'`
-                            : '—'}
+                          {formatEventTime(event)}
                         </span>
 
                         <EventIcon type={event.type} />
@@ -1043,9 +1236,7 @@ function MatchDetailModal({
                         <EventIcon type={event.type} />
 
                         <span>
-                          {event.minute != null
-                            ? `${event.minute}'`
-                            : '—'}
+                          {formatEventTime(event)}
                         </span>
 
                         <span
@@ -1320,22 +1511,18 @@ function SectionCard({
         <div
           className="
             fixed inset-0 z-[55]
-            flex items-center justify-center
+            flex
             bg-slate-950/80
-            px-2 py-3
-            backdrop-blur-sm
-            sm:px-5 sm:py-8
           "
           role="presentation"
           onMouseDown={onToggle}
         >
           <section
             className="
-              flex max-h-[94vh] w-full max-w-6xl flex-col
-              overflow-hidden rounded-2xl
-              border border-slate-200
-              bg-white shadow-2xl shadow-black/20
-              dark:border-slate-700 dark:bg-slate-900 dark:shadow-black/50
+              flex h-[100dvh] w-full flex-col
+              overflow-hidden
+              bg-white
+              dark:bg-slate-900
             "
             role="dialog"
             aria-modal="true"
@@ -1460,13 +1647,18 @@ export default function PublicTournamentPage() {
   // "upcoming:AAAA-MM-DD" e "history:AAAA-MM-DD"); todas cerradas al entrar.
   const [openDates, setOpenDates] = useState(() => new Set());
 
+  // Fecha que se está compartiendo como imagen ({ date, roundNumber, matches }).
+  const [shareRound, setShareRound] = useState(null);
+
+  // Enlace compartido de una fecha (/tournaments/:id?fecha=AAAA-MM-DD): al
+  // cargar, abre la sección donde está esa fecha y la despliega, una vez.
+  const [searchParams] = useSearchParams();
+  const sharedDate = searchParams.get('fecha');
+  const sharedDateHandledRef = useRef(false);
+
+  // Solo una fecha abierta a la vez: abrir otra cierra la anterior.
   function toggleDate(key) {
-    setOpenDates((current) => {
-      const next = new Set(current);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+    setOpenDates((current) => (current.has(key) ? new Set() : new Set([key])));
   }
 
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -1541,6 +1733,22 @@ export default function PublicTournamentPage() {
       clearInterval(interval);
     };
   }, [id, loadTournament]);
+
+  useEffect(() => {
+    if (!sharedDate || sharedDateHandledRef.current || !data) return;
+
+    const inUpcoming = data.upcomingMatches.some((match) => dateValue(match.date) === sharedDate);
+    const inHistory = history.some((match) => dateValue(match.date) === sharedDate);
+    if (!inUpcoming && !inHistory) return;
+
+    sharedDateHandledRef.current = true;
+    const section = inUpcoming ? 'upcoming' : 'history';
+    setOpenSection(section);
+    setOpenDates(new Set([`${section}:${sharedDate}`]));
+    requestAnimationFrame(() => {
+      sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [sharedDate, data, history]);
 
   // Contador de visitas (solo para el superadmin): se registra UNA vez por
   // carga de la página, no en cada refresco del polling/SSE de arriba (que
@@ -2031,7 +2239,7 @@ export default function PublicTournamentPage() {
             contentId="standings-content"
           >
             <div id="standings-content" className="w-full min-w-0">
-              <div className="scroll-invisible hidden max-h-[31rem] w-full overflow-y-auto sm:block">
+              <div className="scroll-invisible hidden w-full overflow-y-auto sm:block">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 backdrop-blur dark:border-white/[0.05] dark:bg-slate-950/95">
                     <tr className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
@@ -2294,7 +2502,7 @@ export default function PublicTournamentPage() {
                 </table>
               </div>
 
-              <div className="scroll-invisible max-h-[25rem] w-full overflow-y-auto sm:hidden">
+              <div className="scroll-invisible w-full overflow-y-auto sm:hidden">
                 <table className="w-full table-fixed text-xs">
                   <thead className="sticky top-0 z-20 border-b border-slate-200 bg-slate-50/95 backdrop-blur dark:border-white/[0.05] dark:bg-slate-900/95">
                     <tr className="text-[9px] font-bold uppercase tracking-[0.1em] text-slate-600">
@@ -2557,7 +2765,7 @@ export default function PublicTournamentPage() {
                   Los grupos aún no han sido generados.
                 </p>
               ) : (
-                <div className="scroll-invisible max-h-[31rem] w-full min-w-0 overflow-y-auto pr-1">
+                <div className="scroll-invisible w-full min-w-0 overflow-y-auto pr-1">
                   <div className="grid w-full min-w-0 grid-cols-1 gap-6">
                     {data.pots.map(({ pot, standings }) => (
                       <div
@@ -2603,7 +2811,7 @@ export default function PublicTournamentPage() {
               id="bracket-content"
               className="w-full min-w-0 p-3 sm:p-5 lg:p-6"
             >
-              <div className="scroll-invisible max-h-[38rem] w-full min-w-0 overflow-y-auto pr-1">
+              <div className="scroll-invisible w-full min-w-0 overflow-y-auto pr-1">
                 <CompetitionOverview
                   mode={competitionMode}
                   groups={data.groups}
@@ -2648,7 +2856,7 @@ export default function PublicTournamentPage() {
               Toca un partido para ver sus detalles.
             </p>
 
-            <div className="scroll-invisible max-h-[25rem] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 dark:border-white/[0.04] dark:bg-black/[0.12] sm:px-4">
+            <div className="scroll-invisible overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 dark:border-white/[0.04] dark:bg-black/[0.12] sm:px-4">
               {data.upcomingMatches.length === 0 ? (
                 <p className="py-8 text-center text-sm text-slate-500">
                   No hay próximos partidos.
@@ -2665,20 +2873,20 @@ export default function PublicTournamentPage() {
                       count={matches.length}
                       isOpen={openDates.has(`upcoming:${date}`)}
                       onToggle={() => toggleDate(`upcoming:${date}`)}
+                      onShare={() =>
+                        setShareRound({
+                          date,
+                          roundNumber: roundNumbers.get(date),
+                          matches,
+                        })
+                      }
                       className="py-1.5 text-[10px] text-emerald-600 dark:text-emerald-300 sm:py-2 sm:text-xs"
                       dotClassName="bg-emerald-400"
                     >
-                      <div className="min-w-0 pt-1.5 sm:pt-2">
-                        {matches.map((match) => (
-                          <MatchRow
-                            key={match.id}
-                            match={match}
-                            onClick={() =>
-                              setSelectedMatch(match)
-                            }
-                          />
-                        ))}
-                      </div>
+                      <RoundShowcase
+                        matches={matches}
+                        onSelect={setSelectedMatch}
+                      />
                     </MatchDateAccordion>
                   ))}
                 </div>
@@ -2708,7 +2916,7 @@ export default function PublicTournamentPage() {
               className={`
                 ${responsiveScorersTableClass}
                 scroll-invisible
-                max-h-[452px]
+
                 overflow-y-auto
                 rounded-xl
                 border border-slate-200 dark:border-white/[0.04]
@@ -2749,7 +2957,7 @@ export default function PublicTournamentPage() {
               className={`
                 ${responsiveScorersTableClass}
                 scroll-invisible
-                max-h-[452px]
+
                 overflow-y-auto
                 rounded-xl
                 border border-slate-200 dark:border-white/[0.04]
@@ -2820,7 +3028,7 @@ export default function PublicTournamentPage() {
                 className={`
                   ${responsiveScorersTableClass}
                   scroll-invisible
-                  max-h-[452px]
+
                   overflow-y-auto
                   p-1
                   sm:p-2
@@ -2868,7 +3076,7 @@ export default function PublicTournamentPage() {
                   className={`
                     ${responsiveScorersTableClass}
                     scroll-invisible
-                    max-h-[452px]
+
                     overflow-y-auto
                     p-1
                     sm:p-2
@@ -2916,7 +3124,7 @@ export default function PublicTournamentPage() {
                 className={`
                   ${responsiveScorersTableClass}
                   scroll-invisible
-                  max-h-[452px]
+
                   overflow-y-auto
                   p-1
                   sm:p-2
@@ -2958,7 +3166,7 @@ export default function PublicTournamentPage() {
               </p>
             )}
 
-            <div className="scroll-invisible max-h-[1536px] w-full min-w-0 overflow-y-auto overflow-x-hidden pr-1 sm:max-h-[762px] lg:max-h-[504px]">
+            <div className="scroll-invisible w-full min-w-0 overflow-y-auto overflow-x-hidden pr-1">
               {history.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500 dark:border-white/[0.07]">
                   Aún no hay partidos jugados.
@@ -2995,6 +3203,14 @@ export default function PublicTournamentPage() {
           </div>
         </SectionCard>
       </section>
+
+      {shareRound && (
+        <ShareRoundModal
+          round={shareRound}
+          tournament={{ id, name: data.tournament.name }}
+          onClose={() => setShareRound(null)}
+        />
+      )}
 
       <MatchDetailModal
         match={selectedMatch}

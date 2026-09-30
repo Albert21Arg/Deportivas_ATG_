@@ -40,6 +40,17 @@ export default function TeamsPage() {
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isAssignOpen, setIsAssignOpen] = useState(false);
+
+  // "Crear equipo" y "Asignar equipos" son acordeones: abrir uno cierra el otro.
+  function openCreatePanel() {
+    setIsCreateOpen(true);
+    setIsAssignOpen(false);
+  }
+
+  function openAssignPanel() {
+    setIsAssignOpen(true);
+    setIsCreateOpen(false);
+  }
   const [teamToRemove, setTeamToRemove] = useState(null);
   const [isRemovingTeam, setIsRemovingTeam] = useState(false);
   const [dtModalTeam, setDtModalTeam] = useState(null);
@@ -129,7 +140,7 @@ export default function TeamsPage() {
       applyPaidUntilToPlayers: false,
     });
 
-    setIsCreateOpen(true);
+    openCreatePanel();
 
     window.scrollTo({
       top: 0,
@@ -449,7 +460,7 @@ export default function TeamsPage() {
               <button
                 className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:min-h-[68px] sm:gap-4 sm:px-5 sm:py-4"
                 onClick={() =>
-                  setIsCreateOpen((current) => !current)
+                  isCreateOpen ? setIsCreateOpen(false) : openCreatePanel()
                 }
                 type="button"
                 aria-expanded={isCreateOpen}
@@ -627,7 +638,7 @@ export default function TeamsPage() {
               <button
                 className="flex min-h-16 w-full items-center justify-between gap-3 px-4 py-3.5 text-left transition hover:bg-slate-100 hover:dark:bg-white/[0.025] sm:min-h-[68px] sm:gap-4 sm:px-5 sm:py-4"
                 onClick={() =>
-                  setIsAssignOpen((current) => !current)
+                  isAssignOpen ? setIsAssignOpen(false) : openAssignPanel()
                 }
                 type="button"
                 aria-expanded={isAssignOpen}
@@ -943,7 +954,7 @@ export default function TeamsPage() {
               {isSuperAdmin && (
                 <button
                   className="mt-4 min-h-10 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] px-4 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 transition hover:bg-emerald-400/[0.10] sm:mt-5"
-                  onClick={() => setIsAssignOpen(true)}
+                  onClick={openAssignPanel}
                   type="button"
                 >
                   + Asociar primer equipo
@@ -1113,7 +1124,7 @@ export default function TeamsPage() {
         <button
           className="fixed bottom-5 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-2xl font-black text-slate-950 shadow-xl shadow-emerald-500/25 transition hover:bg-emerald-400 active:scale-95 sm:hidden"
           onClick={() => {
-            setIsCreateOpen(true);
+            openCreatePanel();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           type="button"
