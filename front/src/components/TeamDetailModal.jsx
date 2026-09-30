@@ -94,12 +94,12 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex bg-slate-950/90"
+      className="fixed inset-0 z-[60] flex bg-slate-950/90 md:items-center md:justify-center md:p-8 md:backdrop-blur-sm"
       role="presentation"
       onMouseDown={onClose}
     >
       <section
-        className="h-[100dvh] w-full overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950"
+        className="h-[100dvh] w-full overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-2xl md:border md:border-slate-200 md:shadow-2xl md:dark:border-slate-700"
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-detail-modal-title"

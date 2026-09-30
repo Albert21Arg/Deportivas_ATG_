@@ -504,9 +504,9 @@ function FinalModal({ open, onClose, ...showcase }) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[57] flex bg-slate-950/90" role="presentation" onMouseDown={onClose}>
+    <div className="fixed inset-0 z-[57] flex bg-slate-950/90 md:items-center md:justify-center md:p-8 md:backdrop-blur-sm" role="presentation" onMouseDown={onClose}>
       <section
-        className="relative flex h-[100dvh] w-full flex-col overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-[#05090e]"
+        className="relative flex h-[100dvh] w-full flex-col overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-[#05090e] md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-2xl md:border md:border-slate-200 md:shadow-2xl md:dark:border-slate-700"
         role="dialog"
         aria-modal="true"
         aria-label="Final del torneo"

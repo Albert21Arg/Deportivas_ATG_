@@ -9,3 +9,7 @@ dev.db
 
 #prisma
 schema.prisma
+
+# macOS metadata
+._*
+.DS_Store

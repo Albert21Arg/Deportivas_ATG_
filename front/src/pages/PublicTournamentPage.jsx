@@ -17,6 +17,7 @@ import {
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
 import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import FutbolIcon from '../components/FutbolIcon.jsx';
+import ShareImageModal from '../components/ShareImageModal.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
 import GoalkeepersTable from '../components/GoalkeepersTable.jsx';
 import PlayerCardModal from '../components/PlayerCardModal.jsx';
@@ -196,142 +197,31 @@ function MatchDateAccordion({
 */
 
 function ShareRoundModal({ round, tournament, onClose }) {
-  const [image, setImage] = useState(null);
-  const [error, setError] = useState(false);
-
   const title = round.roundNumber ? `Fecha ${round.roundNumber}` : formatDate(round.date);
   const pageUrl = `${window.location.origin}/tournaments/${tournament.id}`;
   // El enlace lleva la fecha: así la vista previa de WhatsApp/Facebook
   // muestra la imagen de esos partidos y la página abre directo esa fecha.
   const shareUrl = `${pageUrl}?fecha=${dateValue(round.date)}`;
-  const fileName = `${round.roundNumber ? `fecha-${round.roundNumber}` : dateValue(round.date)}.png`;
-  const shareText = `⚽ ${tournament.name} — ${title}\n${formatDate(round.date)}\n${shareUrl}`;
-
-  useEffect(() => {
-    let cancelled = false;
-    let objectUrl = null;
-
-    buildRoundShareImage({
-      tournamentName: tournament.name,
-      title,
-      subtitle: formatDate(round.date),
-      matches: [...round.matches].sort((left, right) => String(left.time).localeCompare(String(right.time))),
-      formatTime,
-      hideLogo: (team) => !team?.logo || isLogoHidden(team),
-      footer: pageUrl.replace(/^https?:\/\//, ''),
-    })
-      .then((blob) => {
-        if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
-        setImage({ blob, url: objectUrl, file: new File([blob], fileName, { type: 'image/png' }) });
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      });
-
-    return () => {
-      cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
-  }, [round, tournament.name, title, pageUrl, fileName]);
-
-  const canShareFile =
-    Boolean(image) && typeof navigator.canShare === 'function' && navigator.canShare({ files: [image.file] });
-
-  async function shareImage() {
-    try {
-      await navigator.share({ files: [image.file], title: `${tournament.name} — ${title}`, text: shareText });
-    } catch {
-      // El usuario cerró el menú de compartir: no hay nada que hacer.
-    }
-  }
-
-  function downloadImage() {
-    const link = document.createElement('a');
-    link.href = image.url;
-    link.download = fileName;
-    link.click();
-  }
-
-  function shareOnWhatsapp() {
-    window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank', 'noopener,noreferrer');
-  }
 
   return (
-    <div
-      className="fixed inset-0 z-[70] flex bg-slate-950/80"
-      onClick={onClose}
-    >
-      <div
-        className="flex h-[100dvh] w-full flex-col overflow-hidden bg-white dark:bg-slate-900"
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Compartir ${title}`}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/[0.06]">
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">Compartir {title}</p>
-            <p className="truncate text-xs text-slate-500 dark:text-slate-400">{formatDate(round.date)}</p>
-          </div>
-          <button
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 dark:hover:bg-white/[0.06]"
-            onClick={onClose}
-            type="button"
-            aria-label="Cerrar"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto bg-slate-100 p-3 dark:bg-black/30">
-          {error ? (
-            <p className="py-10 text-center text-sm text-slate-500">No se pudo generar la imagen.</p>
-          ) : image ? (
-            <img className="mx-auto w-full max-w-md rounded-xl shadow-lg" src={image.url} alt={`Partidos de ${title}`} />
-          ) : (
-            <div className="flex flex-col items-center py-12 text-sm text-slate-500">
-              <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-300 border-t-emerald-500" />
-              <p className="mt-3">Generando imagen…</p>
-            </div>
-          )}
-        </div>
-
-        <div className="mx-auto grid w-full max-w-md gap-2 border-t border-slate-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-white/[0.06]">
-          {canShareFile && (
-            <button
-              className="min-h-11 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-slate-950 transition hover:bg-emerald-400"
-              onClick={shareImage}
-              type="button"
-            >
-              Compartir imagen
-            </button>
-          )}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              className="min-h-11 rounded-xl border border-slate-300 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50 dark:border-white/[0.1] dark:text-slate-200 dark:hover:bg-white/[0.04]"
-              onClick={downloadImage}
-              type="button"
-              disabled={!image}
-            >
-              Descargar
-            </button>
-            <button
-              className="min-h-11 rounded-xl border border-emerald-500/40 px-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-500/10 dark:text-emerald-300"
-              onClick={shareOnWhatsapp}
-              type="button"
-            >
-              WhatsApp (enlace)
-            </button>
-          </div>
-          {!canShareFile && image && (
-            <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
-              Para enviar la imagen desde el computador: descárgala y adjúntala en la red social.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+    <ShareImageModal
+      title={`Compartir ${title}`}
+      subtitle={formatDate(round.date)}
+      fileName={`${round.roundNumber ? `fecha-${round.roundNumber}` : dateValue(round.date)}.png`}
+      shareText={`⚽ ${tournament.name} — ${title}\n${formatDate(round.date)}\n${shareUrl}`}
+      onClose={onClose}
+      buildImage={() =>
+        buildRoundShareImage({
+          tournamentName: tournament.name,
+          title,
+          subtitle: formatDate(round.date),
+          matches: [...round.matches].sort((left, right) => String(left.time).localeCompare(String(right.time))),
+          formatTime,
+          hideLogo: (team) => !team?.logo || isLogoHidden(team),
+          footer: pageUrl.replace(/^https?:\/\//, ''),
+        })
+      }
+    />
   );
 }
 
@@ -945,13 +835,13 @@ function MatchDetailModal({
         fixed inset-0
         flex items-end justify-center
         bg-slate-950/80
-        ${isLive ? 'z-[2147483647]' : 'z-[60]'} p-0
+        ${isLive ? 'z-[2147483647]' : 'z-[60] md:items-center md:justify-center md:p-8 md:backdrop-blur-sm'} p-0
       `}
       role="presentation"
       onMouseDown={isLive ? undefined : onClose}
     >
       <section
-        className="flex h-[100dvh] w-full max-w-full flex-col overflow-hidden border-0 bg-white shadow-none dark:bg-slate-900"
+        className={`flex h-[100dvh] w-full max-w-full flex-col overflow-hidden border-0 bg-white shadow-none dark:bg-slate-900 ${isLive ? '' : 'md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-2xl md:border md:border-slate-200 md:shadow-2xl md:dark:border-slate-700'}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="match-detail-title"
@@ -1513,6 +1403,7 @@ function SectionCard({
             fixed inset-0 z-[55]
             flex
             bg-slate-950/80
+            md:items-center md:justify-center md:p-8 md:backdrop-blur-sm
           "
           role="presentation"
           onMouseDown={onToggle}
@@ -1523,6 +1414,7 @@ function SectionCard({
               overflow-hidden
               bg-white
               dark:bg-slate-900
+              md:h-auto md:max-h-[90vh] md:max-w-6xl md:rounded-2xl md:border md:border-slate-200 md:shadow-2xl md:dark:border-slate-700
             "
             role="dialog"
             aria-modal="true"
@@ -1643,9 +1535,11 @@ export default function PublicTournamentPage() {
 
   const [openSection, setOpenSection] = useState(null);
 
-  // Fechas desplegadas en "Próximos partidos" / "Historial" (claves
-  // "upcoming:AAAA-MM-DD" e "history:AAAA-MM-DD"); todas cerradas al entrar.
-  const [openDates, setOpenDates] = useState(() => new Set());
+  // Fecha desplegada en "Próximos partidos" / "Historial" (clave
+  // "upcoming:AAAA-MM-DD" o "history:AAAA-MM-DD"), una sola a la vez.
+  // undefined = el visitante no ha tocado ninguna: queda abierta la próxima
+  // fecha (la primera de "Próximos partidos"); null = las cerró todas.
+  const [openDateKey, setOpenDateKey] = useState(undefined);
 
   // Fecha que se está compartiendo como imagen ({ date, roundNumber, matches }).
   const [shareRound, setShareRound] = useState(null);
@@ -1656,9 +1550,19 @@ export default function PublicTournamentPage() {
   const sharedDate = searchParams.get('fecha');
   const sharedDateHandledRef = useRef(false);
 
+  function firstUpcomingDateKey() {
+    const dates = (data?.upcomingMatches ?? []).map((match) => dateValue(match.date)).sort();
+    return dates.length ? `upcoming:${dates[0]}` : null;
+  }
+
+  function isDateOpen(key) {
+    const openKey = openDateKey === undefined ? firstUpcomingDateKey() : openDateKey;
+    return openKey === key;
+  }
+
   // Solo una fecha abierta a la vez: abrir otra cierra la anterior.
   function toggleDate(key) {
-    setOpenDates((current) => (current.has(key) ? new Set() : new Set([key])));
+    setOpenDateKey(isDateOpen(key) ? null : key);
   }
 
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -1744,7 +1648,7 @@ export default function PublicTournamentPage() {
     sharedDateHandledRef.current = true;
     const section = inUpcoming ? 'upcoming' : 'history';
     setOpenSection(section);
-    setOpenDates(new Set([`${section}:${sharedDate}`]));
+    setOpenDateKey(`${section}:${sharedDate}`);
     requestAnimationFrame(() => {
       sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -2871,7 +2775,7 @@ export default function PublicTournamentPage() {
                       date={date}
                       roundNumber={roundNumbers.get(date)}
                       count={matches.length}
-                      isOpen={openDates.has(`upcoming:${date}`)}
+                      isOpen={isDateOpen(`upcoming:${date}`)}
                       onToggle={() => toggleDate(`upcoming:${date}`)}
                       onShare={() =>
                         setShareRound({
@@ -3180,7 +3084,7 @@ export default function PublicTournamentPage() {
                         date={date}
                         roundNumber={roundNumbers.get(date)}
                         count={matches.length}
-                        isOpen={openDates.has(`history:${date}`)}
+                        isOpen={isDateOpen(`history:${date}`)}
                         onToggle={() => toggleDate(`history:${date}`)}
                         className="py-2 text-xs text-blue-600 dark:text-blue-300 sm:text-sm"
                         dotClassName="bg-blue-400"
