@@ -1,4 +1,5 @@
 import * as publicRepository from '../repositories/public-repository.js';
+import { formatDay, getRoundInfo, isValidDay } from '../services/round-image-service.js';
 
 // UA que usan los "crawlers" de vista previa de enlaces (no ejecutan JS, así
 // que la SPA de React no les sirve nada útil: hay que responder HTML estático
@@ -41,16 +42,33 @@ export async function renderTournamentPreview(request, response, next) {
     const matches = await publicRepository.findUpcomingMatches(tournamentId);
     const liveMatch = matches.find((match) => match.status === 'STARTED');
 
-    const title = liveMatch
+    let title = liveMatch
       ? `⚽ EN VIVO: ${liveMatch.homeTeam.name} ${liveMatch.homeScore ?? 0} - ${liveMatch.awayScore ?? 0} ${liveMatch.awayTeam.name}`
       : tournament.name;
 
-    const description = liveMatch
+    let description = liveMatch
       ? `${tournament.name} · Sigue el marcador en vivo.`
       : tournament.description || 'Resultados, calendario y tabla de posiciones.';
 
-    const pageUrl = `${request.protocol}://${request.get('host')}${request.originalUrl}`;
-    const image = tournament.logo || '';
+    const origin = `${request.protocol}://${request.get('host')}`;
+    const pageUrl = `${origin}${request.originalUrl}`;
+    let image = tournament.logo || '';
+    let imageSize = null;
+
+    // Enlace de una fecha (/tournaments/:id?fecha=AAAA-MM-DD, botón
+    // "Compartir" de la página pública): la vista previa muestra la imagen
+    // con los partidos de ese día en vez del logo del torneo.
+    const day = request.query.fecha;
+    if (isValidDay(day)) {
+      const round = await getRoundInfo(tournamentId, day).catch(() => null);
+      if (round) {
+        const label = round.roundNumber ? `Fecha ${round.roundNumber}` : formatDay(day);
+        title = `${tournament.name} — ${label}`;
+        description = `${formatDay(day)} · ${round.matches.length} ${round.matches.length === 1 ? 'partido' : 'partidos'}`;
+        image = `${origin}/api/public/tournaments/${tournamentId}/rounds/${day}/image`;
+        imageSize = { width: 1200, height: 630 };
+      }
+    }
 
     response.set('Content-Type', 'text/html; charset=utf-8');
     response.send(`<!doctype html>
@@ -62,6 +80,9 @@ export async function renderTournamentPreview(request, response, next) {
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:url" content="${escapeHtml(pageUrl)}" />
     ${image ? `<meta property="og:image" content="${escapeHtml(image)}" />` : ''}
+    ${imageSize ? `<meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="${imageSize.width}" />
+    <meta property="og:image:height" content="${imageSize.height}" />` : ''}
     <meta name="twitter:card" content="summary_large_image" />
     <title>${escapeHtml(title)}</title>
   </head>

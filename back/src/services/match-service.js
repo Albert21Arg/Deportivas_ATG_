@@ -297,6 +297,84 @@ export async function startNextPeriod(id) {
   return updated;
 }
 
+// Descanso entre tiempos. Mantener igual que HALFTIME_MINUTES en
+// front/src/utils/match-clock.js (el cronómetro de las páginas hace el mismo
+// cálculo para mostrar "Descanso" y el segundo tiempo sin recargar).
+export const HALFTIME_MINUTES = 10;
+
+// Cuando el primer tiempo llega a su límite (duración + tiempo extra
+// agregado) y pasa el descanso, arranca el segundo tiempo solo. Como inicio
+// del segundo tiempo se guarda el instante exacto en que terminó el
+// descanso (no "ahora"), así el cronómetro es exacto aunque esta revisión
+// corra unos segundos tarde. Se ejecuta periódicamente desde server.js.
+export async function advanceDueHalftimes(now = Date.now()) {
+  const matches = await matchRepository.findLiveFirstHalves();
+
+  for (const match of matches) {
+    const firstHalfEnd =
+      new Date(match.periodStartedAt).getTime() +
+      (match.halfDurationMinutes + (match.extraMinutes ?? 0)) * 60 * 1000;
+    const secondHalfStart = firstHalfEnd + HALFTIME_MINUTES * 60 * 1000;
+    if (now < secondHalfStart) continue;
+
+    const changed = await matchRepository.startSecondHalfIfStillFirst(match.id, new Date(secondHalfStart));
+    if (changed) {
+      const updated = await matchRepository.findById(match.id);
+      if (updated) publish(updated.tournamentId, updated);
+    }
+  }
+}
+
+// Minutos que se espera después de cumplirse el segundo tiempo (duración +
+// tiempo extra agregado) antes de finalizar el partido solo. Si en ese
+// lapso el admin agrega tiempo extra, el límite se corre y el margen vuelve
+// a contar desde el nuevo límite. Mantener igual que FULL_TIME_GRACE_MINUTES
+// en front/src/utils/match-clock.js.
+export const FULL_TIME_GRACE_MINUTES = 5;
+
+// Partidos que no se pudieron cerrar solos (p.ej. eliminatoria empatada
+// que necesita penales): se avisa una sola vez en la consola por partido.
+const autoFinishSkipped = new Set();
+
+// Finaliza los partidos cuyo segundo tiempo ya se cumplió hace
+// FULL_TIME_GRACE_MINUTES. Usa el mismo cierre que el botón "Finalizar"
+// (avance de llaves incluido). Un empate de eliminatoria que pide penales no
+// se cierra solo: queda en vivo para que el admin registre la definición.
+// Se ejecuta periódicamente desde server.js.
+export async function finishDueMatches(now = Date.now()) {
+  const matches = await matchRepository.findLiveSecondHalves();
+
+  for (const match of matches) {
+    const finishAt =
+      new Date(match.periodStartedAt).getTime() +
+      (match.halfDurationMinutes + (match.extraMinutes ?? 0) + FULL_TIME_GRACE_MINUTES) * 60 * 1000;
+    if (now < finishAt) continue;
+
+    try {
+      await changeStatus(match.id, 'FINISHED');
+      autoFinishSkipped.delete(match.id);
+    } catch (error) {
+      if (!autoFinishSkipped.has(match.id)) {
+        autoFinishSkipped.add(match.id);
+        console.warn(`[fin automático] Partido #${match.id} no se finalizó solo: ${error.message}`);
+      }
+    }
+  }
+}
+
+// Tiempo en curso de un partido en vivo según su cronómetro. Si el primer
+// tiempo ya cumplió el descanso pero la revisión periódica todavía no lo
+// pasó al segundo, igual cuenta como segundo tiempo (mismo cálculo que
+// advanceDueHalftimes y que el cronómetro de las páginas).
+function currentPeriodOf(match, now = Date.now()) {
+  if ((match.currentPeriod ?? 1) !== 1) return match.currentPeriod;
+  if (!match.periodStartedAt || !match.halfDurationMinutes) return 1;
+  const secondHalfStart =
+    new Date(match.periodStartedAt).getTime() +
+    (match.halfDurationMinutes + (match.extraMinutes ?? 0) + HALFTIME_MINUTES) * 60 * 1000;
+  return now >= secondHalfStart ? 2 : 1;
+}
+
 // Suma minutos de tiempo extra/descuento al tiempo que está en curso.
 export async function addExtraTime(id, minutes) {
   const match = await getMatch(id);
@@ -342,7 +420,8 @@ export async function addEvent(id, data) {
   // /result), así que aquí solo se guarda el evento para las estadísticas
   // de goleadores/tarjetas, sin volver a sumar/restar el marcador.
   const adjustScore = match.status === 'STARTED';
-  const updated = await matchRepository.createEvent(match.id, data, adjustScore);
+  const period = data.period ?? (match.status === 'STARTED' ? currentPeriodOf(match) : null);
+  const updated = await matchRepository.createEvent(match.id, { ...data, period }, adjustScore);
   publish(updated.tournamentId, updated);
   return updated;
 }

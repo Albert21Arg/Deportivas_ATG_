@@ -44,6 +44,7 @@ const tieSelect = {
           teamId: true,
           type: true,
           minute: true,
+          period: true,
           createdAt: true,
           team: { select: teamSelect },
           player: { select: { id: true, name: true, paidUntil: true, showName: true } },
@@ -68,7 +69,7 @@ const matchSelect = {
   extraMinutes: true,
   homeTeam: { select: teamSelect },
   awayTeam: { select: teamSelect },
-  events: { select: { id: true, teamId: true, type: true, minute: true, createdAt: true, team: { select: teamSelect }, player: { select: { id: true, name: true, paidUntil: true, showName: true } } }, orderBy: { createdAt: 'asc' } },
+  events: { select: { id: true, teamId: true, type: true, minute: true, period: true, createdAt: true, team: { select: teamSelect }, player: { select: { id: true, name: true, paidUntil: true, showName: true } } }, orderBy: { createdAt: 'asc' } },
 };
 
 export function findActiveTournaments() {
@@ -151,5 +152,32 @@ export function findFinishedMatches(tournamentId) {
     where: { tournamentId, status: 'FINISHED' },
     select: matchSelect,
     orderBy: [{ date: 'desc' }, { time: 'desc' }],
+  });
+}
+
+// Partidos de un día concreto (para la imagen de "Fecha N"). Se toma el día
+// completo en UTC, que es como se guarda la fecha de cada partido.
+export function findMatchesOnDate(tournamentId, day) {
+  const start = new Date(`${day}T00:00:00.000Z`);
+  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+  return prisma.match.findMany({
+    where: {
+      tournamentId,
+      date: { gte: start, lt: end },
+      status: { in: ['SCHEDULED', 'STARTED', 'FINISHED'] },
+    },
+    select: { id: true, time: true, status: true, homeTeam: { select: teamSelect }, awayTeam: { select: teamSelect } },
+    orderBy: [{ time: 'asc' }],
+  });
+}
+
+// Días con partidos de liga/grupos (sin eliminatorias), para numerar
+// "Fecha N" igual que la página pública: cada día es una fecha, en orden.
+export function findRoundDates(tournamentId) {
+  return prisma.match.findMany({
+    where: { tournamentId, tieId: null, status: { in: ['SCHEDULED', 'STARTED', 'FINISHED'] } },
+    select: { date: true },
+    distinct: ['date'],
+    orderBy: { date: 'asc' },
   });
 }

@@ -1,0 +1,8 @@
+# Configuración de Cloudflare D1 (usada por wrangler para exportar/consultar la BD).
+name = "deportivas-atg"
+compatibility_date = "2026-09-26"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "deportivas-db"
+database_id = "6895aa3f-93a4-4ff6-9166-8ed4e007602e"

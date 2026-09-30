@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import prisma from '../config/prisma.js';
 
 export function create(tournamentId, ipAddress) {
@@ -17,12 +18,14 @@ export function countTotal(tournamentId) {
 
 // SQLite no soporta agrupar por fecha truncada con el `groupBy` normal de
 // Prisma (solo agrupa por el valor exacto de la columna), así que se hace
-// con SQL crudo usando strftime. Prisma guarda DateTime como entero
-// (milisegundos desde epoch), no como texto ISO, por eso hay que dividir
-// entre 1000 y pasarle el modificador 'unixepoch' (que espera segundos).
+// con SQL crudo usando strftime. Con SQLite local Prisma guarda DateTime como
+// entero (milisegundos desde epoch) y con Cloudflare D1 como texto ISO, así
+// que se normaliza según el tipo antes de formatear.
+const CREATED_AT = Prisma.sql`CASE WHEN typeof("createdAt") = 'integer'
+  THEN datetime("createdAt" / 1000, 'unixepoch') ELSE "createdAt" END`;
 export function countByDay(tournamentId) {
   return prisma.$queryRaw`
-    SELECT strftime('%Y-%m-%d', "createdAt" / 1000, 'unixepoch') as day, COUNT(*) as count
+    SELECT strftime('%Y-%m-%d', ${CREATED_AT}) as day, COUNT(*) as count
     FROM "TournamentView"
     WHERE "tournamentId" = ${tournamentId}
     GROUP BY day
@@ -32,7 +35,7 @@ export function countByDay(tournamentId) {
 
 export function countByMonth(tournamentId) {
   return prisma.$queryRaw`
-    SELECT strftime('%Y-%m', "createdAt" / 1000, 'unixepoch') as month, COUNT(*) as count
+    SELECT strftime('%Y-%m', ${CREATED_AT}) as month, COUNT(*) as count
     FROM "TournamentView"
     WHERE "tournamentId" = ${tournamentId}
     GROUP BY month

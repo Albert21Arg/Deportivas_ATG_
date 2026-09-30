@@ -25,7 +25,7 @@ const matchSelect = {
   updatedAt: true,
   homeTeam: { select: { id: true, name: true, logo: true, status: true } },
   awayTeam: { select: { id: true, name: true, logo: true, status: true } },
-  events: { select: { id: true, teamId: true, playerId: true, type: true, minute: true, createdAt: true, team: { select: { id: true, name: true } }, player: { select: { id: true, name: true } } }, orderBy: { createdAt: 'asc' } },
+  events: { select: { id: true, teamId: true, playerId: true, type: true, minute: true, period: true, createdAt: true, team: { select: { id: true, name: true } }, player: { select: { id: true, name: true } } }, orderBy: { createdAt: 'asc' } },
 };
 
 export function findById(id) {
@@ -143,6 +143,45 @@ export async function updateWithPenalties(id, data, penalties) {
 
 export function findPlayerForTeam(playerId, teamId) { return prisma.playerTeam.findUnique({ where: { playerId_teamId: { playerId, teamId } }, select: { playerId: true } }); }
 const SCORING_TYPES = new Set(['GOAL', 'OWN_GOAL']);
-export async function createEvent(matchId, data, adjustScore = true) { return prisma.$transaction(async (tx) => { await tx.matchEvent.create({ data: { matchId, ...data } }); if (data.type === 'YELLOW_CARD' && data.playerId) { const yellowCards = await tx.matchEvent.count({ where: { matchId, playerId: data.playerId, type: 'YELLOW_CARD' } }); if (yellowCards === 2) await tx.matchEvent.create({ data: { matchId, teamId: data.teamId, playerId: data.playerId, type: 'RED_CARD', minute: data.minute } }); } if (adjustScore && SCORING_TYPES.has(data.type)) { const match = await tx.match.findUnique({ where: { id: matchId } }); const scoreField = match.homeTeamId === data.teamId ? 'homeScore' : 'awayScore'; await tx.match.update({ where: { id: matchId }, data: { [scoreField]: { increment: 1 } } }); } return tx.match.findUnique({ where: { id: matchId }, select: matchSelect }); }); }
+export async function createEvent(matchId, data, adjustScore = true) { return prisma.$transaction(async (tx) => { await tx.matchEvent.create({ data: { matchId, ...data } }); if (data.type === 'YELLOW_CARD' && data.playerId) { const yellowCards = await tx.matchEvent.count({ where: { matchId, playerId: data.playerId, type: 'YELLOW_CARD' } }); if (yellowCards === 2) await tx.matchEvent.create({ data: { matchId, teamId: data.teamId, playerId: data.playerId, type: 'RED_CARD', minute: data.minute, period: data.period } }); } if (adjustScore && SCORING_TYPES.has(data.type)) { const match = await tx.match.findUnique({ where: { id: matchId } }); const scoreField = match.homeTeamId === data.teamId ? 'homeScore' : 'awayScore'; await tx.match.update({ where: { id: matchId }, data: { [scoreField]: { increment: 1 } } }); } return tx.match.findUnique({ where: { id: matchId }, select: matchSelect }); }); }
 export function hasRedCard(matchId, playerId) { return prisma.matchEvent.findFirst({ where: { matchId, playerId, type: 'RED_CARD' }, select: { id: true } }); }
 export async function removeEvent(eventId, matchId, adjustScore = true) { return prisma.$transaction(async (tx) => { const event = await tx.matchEvent.findFirst({ where: { id: eventId, matchId } }); if (!event) return null; if (adjustScore && SCORING_TYPES.has(event.type)) { const match = await tx.match.findUnique({ where: { id: matchId } }); const scoreField = match.homeTeamId === event.teamId ? 'homeScore' : 'awayScore'; await tx.match.update({ where: { id: matchId }, data: { [scoreField]: { decrement: 1 } } }); } await tx.matchEvent.delete({ where: { id: eventId } }); return tx.match.findUnique({ where: { id: matchId }, select: matchSelect }); }); }
+
+// Partidos en vivo que siguen en el primer tiempo y tienen cronómetro (para
+// pasar al segundo tiempo automáticamente al terminar el descanso).
+export function findLiveFirstHalves() {
+  return prisma.match.findMany({
+    where: {
+      status: 'STARTED',
+      currentPeriod: 1,
+      periodStartedAt: { not: null },
+      halfDurationMinutes: { not: null },
+    },
+    select: { id: true, periodStartedAt: true, halfDurationMinutes: true, extraMinutes: true },
+  });
+}
+
+// Pasa al segundo tiempo solo si el partido sigue en vivo y en el primero
+// (evita pisar un cambio manual hecho al mismo tiempo). Devuelve cuántos
+// partidos cambió (0 o 1).
+export async function startSecondHalfIfStillFirst(id, periodStartedAt) {
+  const { count } = await prisma.match.updateMany({
+    where: { id, status: 'STARTED', currentPeriod: 1 },
+    data: { currentPeriod: 2, periodStartedAt, extraMinutes: 0 },
+  });
+  return count;
+}
+
+// Partidos en vivo en el segundo tiempo con cronómetro (para finalizarlos
+// automáticamente cuando se cumple el tiempo y pasa el margen de espera).
+export function findLiveSecondHalves() {
+  return prisma.match.findMany({
+    where: {
+      status: 'STARTED',
+      currentPeriod: 2,
+      periodStartedAt: { not: null },
+      halfDurationMinutes: { not: null },
+    },
+    select: { id: true, periodStartedAt: true, halfDurationMinutes: true, extraMinutes: true },
+  });
+}
