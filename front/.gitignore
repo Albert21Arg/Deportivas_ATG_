@@ -3,3 +3,7 @@ node_modules
 
 #vite
 vite.config.js
+
+# macOS metadata
+._*
+.DS_Store
