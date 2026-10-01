@@ -1049,8 +1049,6 @@ export default function PlayerCardModal({
 
       'none';
 
-
-
     body.style.overscrollBehavior =
 
       'none';
@@ -3757,7 +3755,7 @@ export default function PlayerCardModal({
 
                 className="
 
-                  my-4
+                  hidden
 
                   flex
 
@@ -4133,16 +4131,11 @@ export default function PlayerCardModal({
 
                 <span
 
-                  className="
-
+                    className="
                     whitespace-nowrap
-
                     text-base
-
                     leading-none
-
                     opacity-70
-
                   "
 
                 >

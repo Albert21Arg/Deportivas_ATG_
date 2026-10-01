@@ -99,7 +99,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
       onMouseDown={onClose}
     >
       <section
-        className="h-[100dvh] w-full overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-2xl md:border md:border-slate-200 md:shadow-2xl md:dark:border-slate-700"
+        className="scroll-invisible h-[100dvh] w-full overflow-y-auto bg-white dark:bg-gradient-to-b dark:from-slate-900 dark:to-slate-950 md:h-auto md:max-h-[90vh] md:max-w-lg md:rounded-2xl md:border md:border-slate-200 md:shadow-2xl md:dark:border-slate-700"
         role="dialog"
         aria-modal="true"
         aria-labelledby="team-detail-modal-title"
@@ -120,7 +120,7 @@ export default function TeamDetailModal({ selection, onClose, blueCardEnabled = 
 
         <div className="mx-auto max-w-lg px-4 pb-10 pt-4 text-center sm:px-6">
           <div className="relative mx-auto w-fit">
-            <TeamLogo team={row.team} size="h-24 w-24 sm:h-28 sm:w-28" />
+            <TeamLogo team={row.team} size="h-64 w-64 sm:h-80 sm:w-80" />
 
             {isLeader && (
               <span

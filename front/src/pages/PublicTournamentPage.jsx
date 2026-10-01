@@ -159,18 +159,19 @@ function MatchDateAccordion({
 
         {onShare && (
           <button
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-300"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 text-xs font-semibold text-emerald-700 transition hover:border-emerald-400/50 hover:bg-emerald-400/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-400 dark:text-emerald-200"
             onClick={onShare}
             type="button"
             aria-label={`Compartir ${roundNumber ? `fecha ${roundNumber}` : formatDate(date)}`}
             title="Compartir en redes"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="18" cy="5" r="3" />
               <circle cx="6" cy="12" r="3" />
               <circle cx="18" cy="19" r="3" />
               <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
             </svg>
+            <span>Compartir</span>
           </button>
         )}
       </h3>

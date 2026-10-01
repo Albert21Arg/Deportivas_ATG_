@@ -12,9 +12,7 @@ import {
 } from '../utils/team-expiry.js';
 
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
-import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
-import StandingsTable from '../components/StandingsTable.jsx';
 import TeamLikeButton from '../components/TeamLikeButton.jsx';
 
 const formStyles = {
@@ -726,25 +724,22 @@ function TournamentLikeButton({ tournamentId, initialTotal }) {
       disabled={isSaving}
       className={`
         absolute right-3 top-3 z-30
-        flex min-h-12 min-w-[4.5rem] items-center justify-center gap-2
-        rounded-2xl border-2 px-4 py-3
-        text-lg font-black
-        shadow-[0_8px_28px_rgba(244,63,94,0.22)]
-        backdrop-blur-md transition-all duration-200
-        sm:right-4 sm:top-4 sm:min-h-14 sm:min-w-[5.25rem] sm:rounded-2xl sm:px-5 sm:py-3.5 sm:text-xl
+        inline-flex min-h-11 min-w-11 items-center justify-center gap-1 px-1
+        rounded-full text-sm font-bold transition-transform duration-200
+        hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-400
         ${
           isLiked
-            ? 'border-rose-400/40 bg-rose-400/15 text-rose-600 hover:border-rose-400/60 hover:bg-rose-400/25 dark:text-rose-300'
-            : 'border-slate-200 bg-white/90 text-slate-500 hover:border-rose-400/40 hover:bg-rose-400/10 hover:text-rose-600 dark:border-white/[0.08] dark:bg-black/40 dark:text-slate-400 dark:hover:text-rose-300'
+            ? 'text-rose-600 dark:text-rose-300'
+            : 'text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-300'
         }
         ${isSaving ? 'cursor-wait opacity-70' : 'cursor-pointer active:scale-95'}
       `}
       title={isLiked ? 'Quitar like (por si fue un error)' : 'Dar like a este torneo'}
     >
-      <span className="text-2xl leading-none sm:text-3xl" aria-hidden="true">
+      <span className="text-base leading-none" aria-hidden="true">
         {isLiked ? '❤️' : '🤍'}
       </span>
-      <span className="min-w-[2rem] text-center text-lg font-black tabular-nums sm:text-xl">{total}</span>
+      <span className="min-w-[1.25rem] text-center text-xs font-bold tabular-nums">{total}</span>
     </button>
   );
 }
@@ -757,26 +752,13 @@ function TournamentLikeButton({ tournamentId, initialTotal }) {
 
 function TournamentCard({
   tournament,
-  onSelectTeam,
   colorVariant = 'emerald',
 }) {
-  const standings = tournament.standings ?? [];
-
   const mode =
     tournament.tournament.mode ??
     'ROUND_ROBIN';
 
-  const leader = standings.find(
-    (row) => row.position === 1
-  );
-
   const liveMatch = getLiveMatch(tournament);
-
-  const totalTeams =
-    tournament.tournament.teamCount ??
-    tournament.teamCount ??
-    standings.length ??
-    0;
 
   const modeLabels = {
     ROUND_ROBIN: 'Liga',
@@ -793,7 +775,7 @@ function TournamentCard({
   const colors = isCyan
     ? {
       border:
-        'border-cyan-400/25 sm:border-cyan-400/15',
+        'border-cyan-400/25',
       borderHover:
         'hover:border-cyan-400/50',
       bg: 'bg-white dark:bg-[#07141a]',
@@ -829,7 +811,7 @@ function TournamentCard({
     }
     : {
       border:
-        'border-emerald-400/25 sm:border-slate-200 sm:dark:border-white/[0.07]',
+        'border-emerald-400/25',
       borderHover:
         'hover:border-emerald-400/30',
       bg: 'bg-white dark:bg-[#0a0f18]',
@@ -874,8 +856,6 @@ function TournamentCard({
         ${colors.bg}
         ${colors.shadow}
         transition-all duration-500
-        sm:rounded-[2rem]
-        sm:${colors.border}
         ${colors.borderHover} hover:-translate-y-1 hover:shadow-[0_25px_80px_rgba(0,0,0,0.4)]
       `}
     >
@@ -931,8 +911,8 @@ function TournamentCard({
       ============================================================ */}
 
       <div className="relative w-full overflow-hidden text-left">
-        <div className="p-3.5 sm:p-6 lg:p-7">
-          <div className="flex items-start gap-3 sm:gap-6">
+        <div className="p-3.5">
+          <div className="flex items-start gap-3">
             {/* Logo */}
 
             <div className="relative shrink-0">
@@ -948,7 +928,7 @@ function TournamentCard({
 
               {tournament.tournament.logo ? (
                 <img
-                  className="relative h-14 w-14 rounded-xl object-cover shadow-2xl sm:h-24 sm:w-24 sm:rounded-[1.5rem]"
+                  className="relative h-14 w-14 rounded-xl object-cover shadow-2xl"
                   src={tournament.tournament.logo}
                   alt=""
                 />
@@ -964,11 +944,9 @@ function TournamentCard({
                     from-slate-100 via-slate-200 to-slate-300
                     dark:from-slate-800 dark:via-slate-900 dark:to-slate-950
                     shadow-2xl
-                    sm:h-24 sm:w-24
-                    sm:rounded-[1.5rem]
                   `}
                 >
-                  <span className="text-xl sm:text-3xl">
+                  <span className="text-xl">
                     🏆
                   </span>
                 </div>
@@ -981,14 +959,12 @@ function TournamentCard({
                   justify-center rounded-full
                   border-2
                   ${colors.cardRing}
-                  sm:h-6 sm:w-6
                   ${colors.topStatus}
                 `}
               >
                 <span
                   className={`
                     h-1.5 w-1.5 rounded-full
-                    sm:h-2 sm:w-2
                     ${colors.topStatusDot}
                   `}
                 />
@@ -997,7 +973,7 @@ function TournamentCard({
 
             {/* Información */}
 
-            <div className="min-w-0 flex-1 pr-20 sm:pr-0">
+            <div className="min-w-0 flex-1 pr-20">
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`
@@ -1006,7 +982,6 @@ function TournamentCard({
                     px-2.5 py-1
                     text-[9px] font-bold uppercase
                     tracking-[0.16em]
-                    sm:px-3 sm:text-[10px]
                     ${colors.badge}
                   `}
                 >
@@ -1020,16 +995,16 @@ function TournamentCard({
                   En vivo
                 </span>
 
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025] sm:px-3 sm:text-[10px]">
+                <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:border-white/[0.07] dark:bg-white/[0.025]">
                   {modeLabel}
                 </span>
               </div>
 
-              <h2 className="mt-2 line-clamp-2 text-[1.05rem] font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:mt-3 sm:truncate sm:text-2xl lg:text-[1.7rem]">
+              <h2 className="mt-2 line-clamp-2 text-[1.05rem] font-black leading-tight tracking-tight text-slate-900 dark:text-white">
                 {tournament.tournament.name}
               </h2>
 
-              <p className="mt-1 line-clamp-2 max-w-3xl text-[11px] leading-4 text-slate-500 sm:mt-2 sm:text-sm sm:leading-6">
+              <p className="mt-1 line-clamp-2 max-w-3xl text-[11px] leading-4 text-slate-500">
                 {tournament.tournament.description ||
                   'Consulta la clasificación, partidos y resultados de esta competición.'}
               </p>
@@ -1039,33 +1014,21 @@ function TournamentCard({
         </div>
       </div>
 
-      <div className="px-3.5 pb-3.5 sm:px-6 sm:pb-6 lg:px-7">
+      <div className="px-3.5 pb-3.5">
         {/* ============================================================
     ESTADÍSTICAS
 ============================================================ */}
 
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-12 sm:gap-2">
-
-            {/* EQUIPOS
-      Oculto en móviles, visible desde sm */}
-            <div className="hidden rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:col-span-4 sm:rounded-2xl sm:px-4 sm:py-3 sm:block">
-              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
-                Equipos
-              </p>
-
-              <p className="mt-0.5 text-sm font-black text-slate-900 dark:text-white sm:text-base">
-                {totalTeams}
-              </p>
-            </div>
+          <div className="mt-4 grid grid-cols-1 gap-3">
 
             {/* ÚLTIMO CAMPEÓN */}
-            <div className="flex min-w-0 items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3.5 dark:border-white/[0.05] dark:bg-white/[0.025] sm:col-span-4 sm:px-4 sm:py-4">
+            <div className="flex min-w-0 items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-3.5 dark:border-white/[0.05] dark:bg-white/[0.025]">
               <div className="min-w-0 flex-1">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600">
                   Último campeón
                 </p>
 
-                <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-slate-900 dark:text-white sm:text-base sm:leading-6">
+                <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-slate-900 dark:text-white">
                   {tournament.tournament.championTeam?.name ?? '—'}
                 </p>
               </div>
@@ -1073,28 +1036,7 @@ function TournamentCard({
               {tournament.tournament.championTeam && (
                 <TeamLogo
                   team={tournament.tournament.championTeam}
-                  size="h-14 w-14 sm:h-16 sm:w-16"
-                  className="shrink-0"
-                />
-              )}
-            </div>
-
-            {/* LÍDER */}
-            <div className="hidden min-w-0 items-center justify-between gap-4 rounded-2xl border border-amber-400/20 bg-amber-400/[0.05] px-3.5 py-3.5 dark:bg-amber-400/[0.04] sm:col-span-4 sm:flex sm:px-4 sm:py-4">
-              <div className="min-w-0 flex-1">
-                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-slate-600 sm:text-[9px]">
-                  Líder
-                </p>
-
-                <p className="mt-1 break-words whitespace-normal text-sm font-black leading-5 text-amber-700 dark:text-amber-200 sm:text-base sm:leading-6">
-                  {leader?.team?.name ?? '—'}
-                </p>
-              </div>
-
-              {leader?.team && (
-                <TeamLogo
-                  team={leader.team}
-                  size="h-14 w-14 sm:h-16 sm:w-16"
+                  size="h-14 w-14"
                   className="shrink-0"
                 />
               )}
@@ -1102,7 +1044,7 @@ function TournamentCard({
 
             {/* PARTIDO EN VIVO - ANCHO COMPLETO */}
             {liveMatch && (
-              <div className="relative z-[2] col-span-1 w-full sm:col-span-12">
+              <div className="relative z-[2] w-full">
                 <LiveMatchCard
                   match={liveMatch}
                   accent={isCyan ? 'cyan' : 'emerald'}
@@ -1422,7 +1364,7 @@ export default function HomePage() {
               </p>
             </div>
           ) : (
-            <div className="grid w-full grid-cols-1 gap-3.5 sm:gap-5 lg:grid-cols-2 lg:gap-6">
+            <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3.5 lg:grid-cols-2 lg:gap-6">
               {filteredTournaments.map(
                 (tournament, index) => {
                   const tournamentId =
@@ -1436,15 +1378,6 @@ export default function HomePage() {
                         index % 2 === 0
                           ? 'emerald'
                           : 'cyan'
-                      }
-                      onSelectTeam={(
-                        row,
-                        recentForm
-                      ) =>
-                        setSelectedTeam({
-                          row,
-                          recentForm,
-                        })
                       }
                     />
                   );

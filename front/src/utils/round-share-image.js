@@ -287,7 +287,8 @@ export async function drawRoundShareImage({
     context.fillStyle = '#6ee7b7';
     context.fillText(fitText(context, formatTime(match.time), cellWidth, { weight: 800, size: timeSize, minSize: Math.round(timeSize * 0.75) }), centerX, y + offsetY + timeSize);
 
-    // Escudos
+    // Escudo real si está permitido y se pudo cargar; de lo contrario, usa
+    // la silueta con iniciales del equipo.
     drawLogo(context, logos[index * 2], match.homeTeam, homeCenterX - logoSize / 2, logoY, logoSize);
     drawLogo(context, logos[index * 2 + 1], match.awayTeam, awayCenterX - logoSize / 2, logoY, logoSize);
 
