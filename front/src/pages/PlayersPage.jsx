@@ -15,7 +15,7 @@ const emptyForm = {
   jerseyNumber: '',
   paidUntil: '',
   status: 'ACTIVE',
-  photo: null,
+  photo: '',
   fixedOvr: '',
 };
 
@@ -147,7 +147,7 @@ export default function PlayersPage() {
       jerseyNumber: player.jerseyNumber ?? '',
       paidUntil: toDateInputValue(player.paidUntil),
       status: player.status,
-      photo: null,
+      photo: player.photo ?? '',
       fixedOvr: player.fixedOvr ?? '',
     });
 
@@ -165,15 +165,16 @@ export default function PlayersPage() {
 
     setIsSaving(true);
 
-    const payload = new FormData();
-
-    ['name', 'birthDate', 'documentNumber', 'jerseyNumber', 'paidUntil', 'status', 'fixedOvr'].forEach(
-      (key) => payload.append(key, form[key])
-    );
-
-    if (form.photo) {
-      payload.append('photo', form.photo);
-    }
+    const payload = {
+      name: form.name,
+      birthDate: form.birthDate,
+      documentNumber: form.documentNumber,
+      jerseyNumber: form.jerseyNumber,
+      paidUntil: form.paidUntil,
+      status: form.status,
+      fixedOvr: form.fixedOvr,
+      photo: form.photo,
+    };
 
     try {
       if (editingId) {
@@ -562,32 +563,20 @@ export default function PlayersPage() {
                     />
                   </label>
 
-                  {/* Foto */}
+                  {/* Foto externa */}
                   {isSuperAdmin && (
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                      Foto
+                      URL de la foto
 
-                      <div className="relative mt-2 flex h-11 cursor-pointer items-center overflow-hidden rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 transition hover:border-slate-300 hover:dark:border-slate-600">
-                        <input
-                          name="photo"
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          onChange={updateField}
-                          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-                        />
-
-                        <div className="flex items-center gap-2.5 px-3.5">
-                          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-xs text-emerald-700 dark:text-emerald-300">
-                            ↑
-                          </span>
-
-                          <span className="max-w-[250px] truncate text-sm font-normal text-slate-500">
-                            {form.photo
-                              ? form.photo.name
-                              : 'Seleccionar imagen'}
-                          </span>
-                        </div>
-                      </div>
+                      <input
+                        name="photo"
+                        type="text"
+                        inputMode="url"
+                        value={form.photo}
+                        onChange={updateField}
+                        placeholder="https://sitio.com/foto.jpg"
+                        className="mt-2 h-11 w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 text-sm font-normal text-slate-900 dark:text-white outline-none transition placeholder:text-slate-600 hover:border-slate-300 hover:dark:border-slate-600 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/10"
+                      />
                     </label>
                   )}
 

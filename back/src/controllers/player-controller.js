@@ -1,10 +1,8 @@
-import fs from 'node:fs';
 import { createPlayer, deletePlayer, listPlayers, setGoalkeeper, setShowName, updatePlayer } from '../services/player-service.js';
 import { HttpError } from '../utils/http-error.js';
 
 function stripSuperAdminOnlyFields(request) {
   if (request.user.role === 'SUPERADMIN') return;
-  if (request.file) fs.unlink(request.file.path, () => {});
   delete request.validatedBody.photo;
   delete request.validatedBody.paidUntil;
   delete request.validatedBody.fixedOvr;
@@ -15,7 +13,6 @@ function stripSuperAdminOnlyFields(request) {
 // descarta, sin importar lo que mande el frontend.
 function stripToDtAllowedFields(request) {
   if (request.user.role !== 'DT') return;
-  if (request.file) fs.unlink(request.file.path, () => {});
   const { name, jerseyNumber } = request.validatedBody;
   request.validatedBody = { name, jerseyNumber };
 }
