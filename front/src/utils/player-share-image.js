@@ -1,4 +1,5 @@
 import { toCanvas } from 'html-to-image';
+import api from '../services/api.js';
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,25 @@ const FONT = 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sa
 // tarjeta se genera igual sin esa imagen en vez de fallar completa.
 const EMPTY_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
+function waitForImage(image, source) {
+  return new Promise((resolve) => {
+    let timeoutId;
+    const finish = () => {
+      clearTimeout(timeoutId);
+      image.removeEventListener('load', finish);
+      image.removeEventListener('error', finish);
+      resolve();
+    };
+
+    image.addEventListener('load', finish, { once: true });
+    image.addEventListener('error', finish, { once: true });
+    timeoutId = setTimeout(finish, 10000);
+    image.crossOrigin = 'anonymous';
+    image.src = source;
+    if (image.complete) queueMicrotask(finish);
+  });
+}
+
 // La silueta de la tarjeta es un <clipPath> SVG definido fuera del marco
 // (id "player-card-shape", en coordenadas 0..1). La foto del marco no lo
 // incluye, así que aquí se vuelve a recortar la imagen con esa misma forma.
@@ -30,13 +50,44 @@ function cardShapePath(clipPathId, x, y, width, height) {
 }
 
 export async function buildPlayerShareImage(cardElement, { footer = '', clipPathId = 'player-card-shape' } = {}) {
-  const card = await toCanvas(cardElement, {
-    pixelRatio: 2,
-    cacheBust: true,
-    skipFonts: true,
-    imagePlaceholder: EMPTY_IMAGE,
-    filter: (node) => !(node instanceof HTMLElement && node.dataset.shareHide !== undefined),
-  });
+  const externalImages = [...cardElement.querySelectorAll('img')]
+    .filter((image) => {
+      if (!image.src || !['http:', 'https:'].includes(new URL(image.src).protocol)) return false;
+      return new URL(image.src).origin !== window.location.origin;
+    })
+    .map((image) => ({
+      image,
+      source: image.src,
+      src: image.getAttribute('src'),
+      srcSet: image.getAttribute('srcset'),
+      crossOrigin: image.getAttribute('crossorigin'),
+    }));
+
+  let card;
+  try {
+    await Promise.all(externalImages.map(({ image, source }) => {
+      image.removeAttribute('srcset');
+      const proxyUrl = `${String(api.defaults.baseURL).replace(/\/$/, '')}/public/share-image?url=${encodeURIComponent(source)}`;
+      return waitForImage(image, proxyUrl);
+    }));
+
+    card = await toCanvas(cardElement, {
+      pixelRatio: 2,
+      cacheBust: true,
+      skipFonts: true,
+      imagePlaceholder: EMPTY_IMAGE,
+      filter: (node) => !(node instanceof HTMLElement && node.dataset.shareHide !== undefined),
+    });
+  } finally {
+    externalImages.forEach(({ image, src, srcSet, crossOrigin }) => {
+      if (src === null) image.removeAttribute('src');
+      else image.setAttribute('src', src);
+      if (srcSet === null) image.removeAttribute('srcset');
+      else image.setAttribute('srcset', srcSet);
+      if (crossOrigin === null) image.removeAttribute('crossorigin');
+      else image.setAttribute('crossorigin', crossOrigin);
+    });
+  }
 
   const canvas = document.createElement('canvas');
   canvas.width = WIDTH;
