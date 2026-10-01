@@ -1189,6 +1189,10 @@ export default function PlayerCardModal({
 
 
 
+  const playerIsGoalkeeper = Boolean(
+    isGoalkeeper || row.isGoalkeeper || player?.isGoalkeeper
+  );
+
   const expired =
 
     respectPaymentStatus &&
@@ -1249,7 +1253,7 @@ export default function PlayerCardModal({
 
   // bonus de likes, que solo aplica sobre el cálculo automático).
 
-  const calculatedOverall = isGoalkeeper
+  const calculatedOverall = playerIsGoalkeeper
 
     ? calculateGoalkeeperOverall({
 
@@ -1303,7 +1307,7 @@ export default function PlayerCardModal({
 
   // tabla de valla menos vencida, esa tabla ya manda su posición en `position`.
 
-  const isLeader = isGoalkeeper
+  const isLeader = playerIsGoalkeeper
 
     ? (goalkeeperPosition ?? position) === 1
 
@@ -1371,7 +1375,7 @@ export default function PlayerCardModal({
 
 
 
-  const stats = isGoalkeeper
+  const stats = playerIsGoalkeeper
 
     ? [
 
@@ -1467,7 +1471,7 @@ export default function PlayerCardModal({
 
 
 
-  if (!isGoalkeeper && blueCardEnabled) {
+  if (!playerIsGoalkeeper && blueCardEnabled) {
 
     stats.push({
 
@@ -4140,31 +4144,19 @@ export default function PlayerCardModal({
 
                 >
 
-                  {isGoalkeeper ? (
-
-                      <img
-
-                        src="https://img.icons8.com/?size=100&id=80IrfPbBUOYM&format=png&color=000000"
-
-                        alt="Arquero"
-
-                        style={{ width: 55, height: 55 }}
-
-                      />
-
-                    ) : (
-
-                      <img
-
-                        src="https://img.icons8.com/?size=100&id=erCS43MlrpQn&format=png&color=000000"
-
-                        alt="Jugador"
-
-                        style={{ width: 55, height: 55 }}
-
-                      />
-
-                    )}
+                  {playerIsGoalkeeper ? (
+                    <img
+                      src="/icons/goalkeeper.png"
+                      alt="Arquero"
+                      style={{ width: 55, height: 55 }}
+                    />
+                  ) : (
+                    <img
+                      src="/icons/player.png"
+                      alt="Jugador"
+                      style={{ width: 55, height: 55 }}
+                    />
+                  )}
 
 
 
