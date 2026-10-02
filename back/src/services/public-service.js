@@ -55,6 +55,46 @@ export async function listPublicTournaments() {
     });
 }
 
+  function toHomeCard(row, likesTotal) {
+    const { _count, matches, ...tournament } = row;
+    return {
+      tournament: {
+        ...tournament,
+        teamCount: _count.teams,
+        likesTotal,
+      },
+      upcomingMatches: matches.map((match) => ({
+        ...match,
+        homeTeam: withExpiryFlags(match.homeTeam),
+        awayTeam: withExpiryFlags(match.awayTeam),
+      })),
+    };
+  }
+
+  export async function listHomeTournaments() {
+    await expireOverdue();
+    const rows = await publicRepository.findHomeTournaments();
+    const scoresById = await getLikeScoresForTournaments(rows.map(({ id }) => id));
+
+    return rows
+      .map((row) => toHomeCard(row, scoresById.get(row.id)?.total ?? 0))
+      .sort((left, right) => {
+        const scoreLeft = scoresById.get(left.tournament.id)?.score ?? 0;
+        const scoreRight = scoresById.get(right.tournament.id)?.score ?? 0;
+        return scoreRight - scoreLeft || left.tournament.name.localeCompare(right.tournament.name);
+      });
+  }
+
+  export async function getHomeTournament(id) {
+    await expireOverdue();
+    const [row, scoresById] = await Promise.all([
+      publicRepository.findHomeTournaments(id).then((rows) => rows[0] ?? null),
+      getLikeScoresForTournaments([id]),
+    ]);
+    if (!row) throw new HttpError(404, 'Torneo público no encontrado');
+    return toHomeCard(row, scoresById.get(id)?.total ?? 0);
+  }
+
 export async function getPublicTournament(id) {
   await expireOverdue();
   const tournament = await publicRepository.findActiveTournament(id);

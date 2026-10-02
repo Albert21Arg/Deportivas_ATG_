@@ -1081,26 +1081,8 @@ export default function HomePage() {
   const loadAllTournaments = useCallback(
     async ({ silent = false } = {}) => {
       try {
-        const { data } = await api.get(
-          '/public/tournaments'
-        );
-
-        const tournamentList =
-          data.data.tournaments;
-
-        const details = await Promise.all(
-          tournamentList.map(
-            async (tournament) => {
-              const response = await api.get(
-                `/public/tournaments/${tournament.id}`
-              );
-
-              return response.data.data;
-            }
-          )
-        );
-
-        setTournaments(details);
+        const { data } = await api.get('/public/home/tournaments');
+        setTournaments(data.data.tournaments);
       } catch (error) {
         if (!silent) notify(getApiErrorDetails(error));
       } finally {
@@ -1115,9 +1097,7 @@ export default function HomePage() {
   const loadTournamentDetail = useCallback(
     async (tournamentId) => {
       try {
-        const { data } = await api.get(
-          `/public/tournaments/${tournamentId}`
-        );
+        const { data } = await api.get(`/public/home/tournaments/${tournamentId}`);
 
         setTournaments((current) =>
           current.map((entry) =>
@@ -1141,13 +1121,8 @@ export default function HomePage() {
   /*
   |--------------------------------------------------------------------------
   | Actualización en vivo
-  |
-  | Un stream por torneo (mismo canal que ya usa PublicTournamentPage), así
-  | que cualquier cambio del back para ese torneo -partido, like, equipo,
-  | jugador- refresca ese torneo casi al instante. El sondeo cada 4s queda
-  | como respaldo rápido: por si el stream tarda en conectar o se corta en
-  | silencio (algunos túneles/proxies intermedios bufferean SSE), y para
-  | detectar torneos nuevos que todavía no tienen stream abierto.
+  | Un stream por torneo actualiza las tarjetas casi al instante. El sondeo
+  | lento solo sirve de respaldo y para detectar torneos nuevos.
   |--------------------------------------------------------------------------
   */
 
@@ -1187,7 +1162,7 @@ export default function HomePage() {
   useEffect(() => {
     const interval = setInterval(() => {
       loadAllTournaments({ silent: true });
-    }, 4000);
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [loadAllTournaments]);

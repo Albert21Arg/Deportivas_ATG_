@@ -1,4 +1,4 @@
-import { getPublicHistory, getPublicTournament, listPublicTournaments } from '../services/public-service.js';
+import { getHomeTournament, getPublicHistory, getPublicTournament, listHomeTournaments, listPublicTournaments } from '../services/public-service.js';
 import { likeTournament, unlikeTournament } from '../services/tournament-like-service.js';
 import { recordVisit } from '../services/tournament-view-service.js';
 
@@ -15,6 +15,22 @@ function parseId(request) {
 export async function listController(_request, response, next) {
   try {
     return response.json({ success: true, data: { tournaments: await listPublicTournaments() } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function homeListController(_request, response, next) {
+  try {
+    return response.json({ success: true, data: { tournaments: await listHomeTournaments() } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function homeDetailController(request, response, next) {
+  try {
+    return response.json({ success: true, data: await getHomeTournament(parseId(request)) });
   } catch (error) {
     return next(error);
   }

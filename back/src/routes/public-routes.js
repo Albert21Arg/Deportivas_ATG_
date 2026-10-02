@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 
-import { detailController, historyController, likeController, listController, unlikeController, visitController } from '../controllers/public-controller.js';
+import { detailController, historyController, homeDetailController, homeListController, likeController, listController, unlikeController, visitController } from '../controllers/public-controller.js';
 import { bonusesController, likeController as likePlayerController, unlikeController as unlikePlayerController } from '../controllers/player-like-controller.js';
 import { likeController as likeTeamController, totalsController as teamTotalsController, unlikeController as unlikeTeamController } from '../controllers/team-like-controller.js';
 import { activeController } from '../controllers/announcement-controller.js';
@@ -35,6 +35,8 @@ const shareImageLimiter = rateLimit({
 });
 
 router.get('/share-image', shareImageLimiter, shareImageController);
+router.get('/home/tournaments', homeListController);
+router.get('/home/tournaments/:id', homeDetailController);
 router.get('/tournaments', listController);
 router.get('/tournaments/:id', detailController);
 router.post('/tournaments/:id/visit', visitController);

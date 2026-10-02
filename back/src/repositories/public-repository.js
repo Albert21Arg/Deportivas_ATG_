@@ -80,6 +80,46 @@ export function findActiveTournaments() {
   });
 }
 
+export function findHomeTournaments(tournamentId) {
+  return prisma.tournament.findMany({
+    where: {
+      status: 'ACTIVE',
+      teams: { some: {} },
+      ...(tournamentId ? { id: tournamentId } : {}),
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      logo: true,
+      mode: true,
+      championTeam: { select: { name: true, logo: true } },
+      _count: { select: { teams: true } },
+      matches: {
+        where: { status: 'STARTED' },
+        select: {
+          id: true,
+          date: true,
+          time: true,
+          status: true,
+          streamUrl: true,
+          homeScore: true,
+          awayScore: true,
+          halfDurationMinutes: true,
+          currentPeriod: true,
+          periodStartedAt: true,
+          extraMinutes: true,
+          homeTeam: { select: teamSelect },
+          awayTeam: { select: teamSelect },
+        },
+        orderBy: [{ date: 'asc' }, { time: 'asc' }],
+        take: 1,
+      },
+    },
+    orderBy: [{ position: 'asc' }, { name: 'asc' }],
+  });
+}
+
 export function findActiveTournament(id) {
   return prisma.tournament.findFirst({
     where: { id, status: 'ACTIVE' },
