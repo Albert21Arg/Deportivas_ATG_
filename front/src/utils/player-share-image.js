@@ -34,7 +34,6 @@ function waitForImage(image, source) {
     timeoutId = setTimeout(finish, 10000);
     image.crossOrigin = 'anonymous';
     image.src = source;
-    if (image.complete) queueMicrotask(finish);
   });
 }
 
@@ -50,28 +49,36 @@ function cardShapePath(clipPathId, x, y, width, height) {
 }
 
 export async function buildPlayerShareImage(cardElement, { footer = '', clipPathId = 'player-card-shape' } = {}) {
-  const externalImages = [...cardElement.querySelectorAll('img')]
-    .filter((image) => {
-      if (!image.src || !['http:', 'https:'].includes(new URL(image.src).protocol)) return false;
-      return new URL(image.src).origin !== window.location.origin;
-    })
-    .map((image) => ({
-      image,
-      source: image.src,
-      src: image.getAttribute('src'),
-      srcSet: image.getAttribute('srcset'),
-      crossOrigin: image.getAttribute('crossorigin'),
-    }));
+  const bounds = cardElement.getBoundingClientRect();
+  const captureElement = cardElement.cloneNode(true);
+  captureElement.style.position = 'fixed';
+  captureElement.style.left = '-10000px';
+  captureElement.style.top = '0';
+  captureElement.style.width = `${bounds.width}px`;
+  captureElement.style.height = `${bounds.height}px`;
+  captureElement.style.margin = '0';
+  captureElement.style.pointerEvents = 'none';
+  document.body.append(captureElement);
 
+  const originalImages = [...cardElement.querySelectorAll('img')];
+  const captureImages = [...captureElement.querySelectorAll('img')];
   let card;
   try {
-    await Promise.all(externalImages.map(({ image, source }) => {
+    await Promise.all(captureImages.map((image, index) => {
+      const source = originalImages[index]?.currentSrc || originalImages[index]?.src;
+      if (!source) return Promise.resolve();
+
+      const sourceUrl = new URL(source, window.location.href);
+      if (!['http:', 'https:'].includes(sourceUrl.protocol) || sourceUrl.origin === window.location.origin) {
+        return Promise.resolve();
+      }
+
       image.removeAttribute('srcset');
       const proxyUrl = `${String(api.defaults.baseURL).replace(/\/$/, '')}/public/share-image?url=${encodeURIComponent(source)}`;
       return waitForImage(image, proxyUrl);
     }));
 
-    card = await toCanvas(cardElement, {
+    card = await toCanvas(captureElement, {
       pixelRatio: 2,
       cacheBust: true,
       skipFonts: true,
@@ -79,14 +86,7 @@ export async function buildPlayerShareImage(cardElement, { footer = '', clipPath
       filter: (node) => !(node instanceof HTMLElement && node.dataset.shareHide !== undefined),
     });
   } finally {
-    externalImages.forEach(({ image, src, srcSet, crossOrigin }) => {
-      if (src === null) image.removeAttribute('src');
-      else image.setAttribute('src', src);
-      if (srcSet === null) image.removeAttribute('srcset');
-      else image.setAttribute('srcset', srcSet);
-      if (crossOrigin === null) image.removeAttribute('crossorigin');
-      else image.setAttribute('crossorigin', crossOrigin);
-    });
+    captureElement.remove();
   }
 
   const canvas = document.createElement('canvas');
