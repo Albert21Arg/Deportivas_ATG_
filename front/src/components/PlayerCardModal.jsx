@@ -1,12 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { createPortal } from 'react-dom';
 
 import api from '../services/api.js';
-
-import ShareImageModal from './ShareImageModal.jsx';
-
-import { buildPlayerShareImage } from '../utils/player-share-image.js';
 
 import { useNotifications } from '../context/NotificationContext.jsx';
 
@@ -921,13 +917,6 @@ export default function PlayerCardModal({
   const [likeTotal, setLikeTotal] = useState(row?.player?.likesTotal ?? 0);
 
   const [likeBonus, setLikeBonus] = useState(row?.player?.likesOvrBonus ?? 0);
-
-  // Compartir la tarjeta como imagen (WhatsApp, Instagram, Facebook...):
-  // cardFrameRef es el marco de la tarjeta que se "fotografía".
-  const cardFrameRef = useRef(null);
-  const [isShareOpen, setIsShareOpen] = useState(false);
-
-
 
   useEffect(() => {
 
@@ -2611,30 +2600,6 @@ export default function PlayerCardModal({
 
         </button>
 
-        {/* Compartir la tarjeta como imagen */}
-        <button
-          className="absolute -left-3 -top-3 z-[100] flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/85 text-white shadow-2xl backdrop-blur-xl transition-all duration-200 hover:scale-110 hover:border-white/40 hover:bg-white hover:text-black active:scale-95"
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            setIsShareOpen(true);
-          }}
-          aria-label="Compartir tarjeta"
-          title="Compartir en redes"
-        >
-          <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" />
-          </svg>
-        </button>
-
-
-
-        
-
-
         {/* ==============================================================
 
             MARCO
@@ -2644,8 +2609,6 @@ export default function PlayerCardModal({
 
 
         <div
-
-          ref={cardFrameRef}
 
           className={`
 
@@ -4297,22 +4260,6 @@ export default function PlayerCardModal({
         </div>
 
       </div>
-
-      {isShareOpen && (
-        <ShareImageModal
-          title={`Compartir tarjeta de ${player.name}`}
-          subtitle={team?.name}
-          fileName={`tarjeta-${String(player.name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}.png`}
-          shareText={`⭐ ${player.name}${team?.name ? ` · ${team.name}` : ''}\n${window.location.href}`}
-          zIndexClass="z-[2147483647]"
-          onClose={() => setIsShareOpen(false)}
-          buildImage={() =>
-            buildPlayerShareImage(cardFrameRef.current, {
-              footer: window.location.host + window.location.pathname,
-            })
-          }
-        />
-      )}
 
     </div>
 
