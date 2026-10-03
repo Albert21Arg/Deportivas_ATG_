@@ -100,16 +100,8 @@ function groupMatchesByDate(matches, direction = 'asc') {
 // numerada en orden cronológico desde el primer día jugado del torneo (se
 // cuentan juntos los próximos y los ya jugados para que el número sea el
 // mismo en las dos listas). Los partidos de eliminatoria no se numeran.
-function buildRoundNumbers(matches, knockoutMatchIds) {
-  const dates = [
-    ...new Set(
-      matches
-        .filter((match) => !knockoutMatchIds.has(match.id))
-        .map((match) => dateValue(match.date))
-    ),
-  ].sort();
-
-  return new Map(dates.map((date, index) => [date, index + 1]));
+function buildRoundNumbers(roundDates = []) {
+  return new Map(roundDates.map((date, index) => [dateValue(date), index + 1]));
 }
 
 // Una fecha como acordeón: cerrado al entrar, se despliega al hacerle clic.
@@ -858,6 +850,7 @@ function MatchDetailModal({
   match,
   recentFormByTeam,
   onClose,
+  isLoading = false,
 }) {
   const eventsContainerRef = useRef(null);
 
@@ -1082,13 +1075,19 @@ function MatchDetailModal({
                 pr-1
               "
             >
-              {(match.events ?? []).length === 0 && (
+              {isLoading && (
+                <p className="py-2 text-center text-xs text-slate-500 dark:text-slate-500">
+                  Cargando eventos…
+                </p>
+              )}
+
+              {!isLoading && (match.events ?? []).length === 0 && (
                 <p className="py-2 text-center text-xs text-slate-500 dark:text-slate-500">
                   Sin eventos registrados.
                 </p>
               )}
 
-              {(match.events ?? []).map((event) => {
+              {!isLoading && (match.events ?? []).map((event) => {
                 const isHomeTeam =
                   String(event.team?.id) === String(match.homeTeam?.id);
 
@@ -1578,6 +1577,7 @@ export default function PublicTournamentPage() {
 
   const [data, setData] = useState(null);
   const [history, setHistory] = useState([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(false);
 
   const [openSection, setOpenSection] = useState(null);
 
@@ -1614,25 +1614,39 @@ export default function PublicTournamentPage() {
   }
 
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [isSelectedMatchLoading, setIsSelectedMatchLoading] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [featuredPlayerRow, setFeaturedPlayerRow] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const historyLoadedRef = useRef(false);
+  const historyLoadingRef = useRef(false);
+  const matchDetailRequestRef = useRef(0);
+  const activeTournamentIdRef = useRef(id);
   const sectionRefs = useRef({});
   const visitLoggedIdRef = useRef(null);
 
   const loadHistory = useCallback(async () => {
+    if (historyLoadedRef.current || historyLoadingRef.current) return;
+    historyLoadingRef.current = true;
+    setIsHistoryLoading(true);
+
     try {
       const { data: response } = await api.get(
         `/public/tournaments/${id}/history`
       );
 
+      if (activeTournamentIdRef.current !== id) return;
       setHistory(response.data.matches);
       historyLoadedRef.current = true;
     } catch (error) {
-      notify(getApiErrorDetails(error));
+      if (activeTournamentIdRef.current === id) notify(getApiErrorDetails(error));
+    } finally {
+      if (activeTournamentIdRef.current === id) {
+        historyLoadingRef.current = false;
+        setIsHistoryLoading(false);
+      }
     }
   }, [id, notify]);
 
@@ -1642,38 +1656,41 @@ export default function PublicTournamentPage() {
         `/public/tournaments/${id}`
       );
 
+      if (activeTournamentIdRef.current !== id) return;
       setData(response.data);
-
-      if (historyLoadedRef.current) {
-        loadHistory();
-      }
     } catch (error) {
-      notify(getApiErrorDetails(error));
+      if (activeTournamentIdRef.current === id) notify(getApiErrorDetails(error));
     } finally {
-      setIsLoading(false);
+      if (activeTournamentIdRef.current === id) setIsLoading(false);
     }
-  }, [id, notify, loadHistory]);
+  }, [id, notify]);
 
   useEffect(() => {
+    activeTournamentIdRef.current = id;
+    setData(null);
+    setIsLoading(true);
+    setHistory([]);
+    setOpenSection(null);
+    historyLoadedRef.current = false;
+    historyLoadingRef.current = false;
+    setIsHistoryLoading(false);
+    sharedDateHandledRef.current = false;
+    sharedMatchHandledRef.current = false;
+    matchDetailRequestRef.current += 1;
+    setSelectedMatch(null);
+    setIsSelectedMatchLoading(false);
     loadTournament();
-
-    // El historial se pide una vez al entrar para que la numeración
-    // "Fecha N" de los próximos partidos cuente también los ya jugados.
-    api
-      .get(`/public/tournaments/${id}/history`)
-      .then(({ data: response }) => {
-        if (!historyLoadedRef.current) setHistory(response.data.matches);
-      })
-      .catch(() => {});
 
     const stream = new EventSource(
       `${api.defaults.baseURL}/public/tournaments/${id}/events`
     );
 
-    stream.addEventListener(
-      'match.updated',
-      loadTournament
-    );
+    function handleMatchUpdated() {
+      loadTournament();
+      historyLoadedRef.current = false;
+    }
+
+    stream.addEventListener('match.updated', handleMatchUpdated);
 
     // Sondeo de respaldo cada 10s: el stream en tiempo real cubre la
     // mayoría de los casos, pero esto asegura que la página igual se
@@ -1684,12 +1701,16 @@ export default function PublicTournamentPage() {
       stream.close();
       clearInterval(interval);
     };
-  }, [id, loadTournament]);
+  }, [id, loadHistory, loadTournament]);
 
   useEffect(() => {
     if (!sharedDate || sharedDateHandledRef.current || !data) return;
 
     const inUpcoming = data.upcomingMatches.some((match) => dateValue(match.date) === sharedDate);
+    if (!inUpcoming && !historyLoadedRef.current) {
+      loadHistory();
+      return;
+    }
     const inHistory = history.some((match) => dateValue(match.date) === sharedDate);
     if (!inUpcoming && !inHistory) return;
 
@@ -1700,7 +1721,7 @@ export default function PublicTournamentPage() {
     requestAnimationFrame(() => {
       sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-  }, [sharedDate, data, history]);
+  }, [sharedDate, data, history, loadHistory]);
 
   useEffect(() => {
     if (!sharedMatchId || sharedMatchHandledRef.current || !data) return;
@@ -1742,19 +1763,43 @@ export default function PublicTournamentPage() {
     }
   }, [data, selectedMatch]);
 
-  async function toggleHistory() {
-    if (
-      openSection !== 'history' &&
-      !historyLoadedRef.current
-    ) {
-      await loadHistory();
-    }
-
+  function toggleHistory() {
+    if (openSection !== 'history') loadHistory();
     setOpenSection((current) =>
       current === 'history'
         ? null
         : 'history'
     );
+  }
+
+  async function openHistoryMatch(match) {
+    const requestId = matchDetailRequestRef.current + 1;
+    matchDetailRequestRef.current = requestId;
+    setSelectedMatch({ ...match, events: [] });
+    setIsSelectedMatchLoading(true);
+
+    try {
+      const { data: response } = await api.get(
+        `/public/tournaments/${id}/history/${match.id}`
+      );
+      if (matchDetailRequestRef.current === requestId) {
+        setSelectedMatch(response.data.match);
+      }
+    } catch (error) {
+      if (matchDetailRequestRef.current === requestId) {
+        notify(getApiErrorDetails(error));
+      }
+    } finally {
+      if (matchDetailRequestRef.current === requestId) {
+        setIsSelectedMatchLoading(false);
+      }
+    }
+  }
+
+  function closeMatchDetail() {
+    matchDetailRequestRef.current += 1;
+    setSelectedMatch(null);
+    setIsSelectedMatchLoading(false);
   }
 
   function toggleStandings() {
@@ -1838,14 +1883,7 @@ export default function PublicTournamentPage() {
   const competitionMode =
     data.tournament.mode ?? 'ROUND_ROBIN';
 
-  const roundNumbers = buildRoundNumbers(
-    [...data.upcomingMatches, ...history],
-    new Set(
-      (data.ties ?? []).flatMap((tie) =>
-        (tie.matches ?? []).map((match) => match.id)
-      )
-    )
-  );
+  const roundNumbers = buildRoundNumbers(data.roundDates);
 
   const liveMatch =
     data.upcomingMatches?.find(
@@ -3133,7 +3171,11 @@ export default function PublicTournamentPage() {
             )}
 
             <div className="scroll-invisible w-full min-w-0 overflow-y-auto overflow-x-hidden pr-1">
-              {history.length === 0 ? (
+              {isHistoryLoading ? (
+                <p className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500 dark:border-white/[0.07]">
+                  Cargando historial…
+                </p>
+              ) : history.length === 0 ? (
                 <p className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-500 dark:border-white/[0.07]">
                   Aún no hay partidos jugados.
                 </p>
@@ -3156,7 +3198,7 @@ export default function PublicTournamentPage() {
                             <HistoryMatchCard
                               key={match.id}
                               match={match}
-                              onClick={() => setSelectedMatch(match)}
+                              onClick={() => openHistoryMatch(match)}
                             />
                           ))}
                         </div>
@@ -3181,7 +3223,8 @@ export default function PublicTournamentPage() {
       <MatchDetailModal
         match={selectedMatch}
         recentFormByTeam={data.recentFormByTeam}
-        onClose={() => setSelectedMatch(null)}
+        isLoading={isSelectedMatchLoading}
+        onClose={closeMatchDetail}
       />
 
       <TeamDetailModal

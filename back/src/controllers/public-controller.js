@@ -1,4 +1,4 @@
-import { getHomeTournament, getPublicHistory, getPublicTournament, listHomeTournaments, listPublicTournaments } from '../services/public-service.js';
+import { getHomeTournament, getPublicHistory, getPublicHistoryMatch, getPublicTournament, listHomeTournaments, listPublicTournaments } from '../services/public-service.js';
 import { likeTournament, unlikeTournament } from '../services/tournament-like-service.js';
 import { recordVisit } from '../services/tournament-view-service.js';
 
@@ -20,9 +20,19 @@ export async function listController(_request, response, next) {
   }
 }
 
-export async function homeListController(_request, response, next) {
+export async function homeListController(request, response, next) {
   try {
-    return response.json({ success: true, data: { tournaments: await listHomeTournaments() } });
+    const page = request.query.page === undefined ? 1 : Number(request.query.page);
+    const search = request.query.search === undefined ? '' : request.query.search;
+    if (!Number.isInteger(page) || page < 1 || typeof search !== 'string' || search.length > 120) {
+      const error = new Error('Parámetros de paginación no válidos');
+      error.statusCode = 400;
+      throw error;
+    }
+    return response.json({
+      success: true,
+      data: await listHomeTournaments({ page, search }),
+    });
   } catch (error) {
     return next(error);
   }
@@ -47,6 +57,23 @@ export async function detailController(request, response, next) {
 export async function historyController(request, response, next) {
   try {
     return response.json({ success: true, data: { matches: await getPublicHistory(parseId(request)) } });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+export async function historyMatchController(request, response, next) {
+  try {
+    const matchId = Number(request.params.matchId);
+    if (!Number.isInteger(matchId) || matchId <= 0) {
+      const error = new Error('Identificador de partido no válido');
+      error.statusCode = 400;
+      throw error;
+    }
+    return response.json({
+      success: true,
+      data: { match: await getPublicHistoryMatch(parseId(request), matchId) },
+    });
   } catch (error) {
     return next(error);
   }

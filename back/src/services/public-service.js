@@ -71,18 +71,40 @@ export async function listPublicTournaments() {
     };
   }
 
-  export async function listHomeTournaments() {
+  export async function listHomeTournaments({ page = 1, search = '' } = {}) {
     await expireOverdue();
-    const rows = await publicRepository.findHomeTournaments();
-    const scoresById = await getLikeScoresForTournaments(rows.map(({ id }) => id));
+    const tournamentIndex = await publicRepository.findActiveHomeTournamentIndex();
+    const normalizedSearch = search.trim().toLocaleLowerCase();
+    const matchingTournaments = tournamentIndex.filter(({ name }) =>
+      name.toLocaleLowerCase().includes(normalizedSearch)
+    );
+    const scoresById = await getLikeScoresForTournaments(matchingTournaments.map(({ id }) => id));
+    const rankedTournaments = matchingTournaments.sort((left, right) => {
+      const scoreLeft = scoresById.get(left.id)?.score ?? 0;
+      const scoreRight = scoresById.get(right.id)?.score ?? 0;
+      return scoreRight - scoreLeft || left.name.localeCompare(right.name);
+    });
+    const pageSize = 5;
+    const pageCount = Math.ceil(rankedTournaments.length / pageSize);
+    const currentPage = Math.min(page, Math.max(pageCount, 1));
+    const pageIds = rankedTournaments
+      .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+      .map(({ id }) => id);
+    const rows = pageIds.length
+      ? await publicRepository.findHomeTournamentsByIds(pageIds)
+      : [];
+    const rowsById = new Map(rows.map((row) => [row.id, row]));
 
-    return rows
-      .map((row) => toHomeCard(row, scoresById.get(row.id)?.total ?? 0))
-      .sort((left, right) => {
-        const scoreLeft = scoresById.get(left.tournament.id)?.score ?? 0;
-        const scoreRight = scoresById.get(right.tournament.id)?.score ?? 0;
-        return scoreRight - scoreLeft || left.tournament.name.localeCompare(right.tournament.name);
-      });
+    return {
+      tournaments: pageIds.flatMap((id) => {
+        const row = rowsById.get(id);
+        return row ? [toHomeCard(row, scoresById.get(id)?.total ?? 0)] : [];
+      }),
+      total: rankedTournaments.length,
+      page: currentPage,
+      pageSize,
+      pageCount,
+    };
   }
 
   export async function getHomeTournament(id) {
@@ -99,21 +121,23 @@ export async function getPublicTournament(id) {
   await expireOverdue();
   const tournament = await publicRepository.findActiveTournament(id);
   if (!tournament) throw new HttpError(404, 'Torneo público no encontrado');
-  tournament.likesTotal = (await getLikeScoresForTournaments([id])).get(id)?.total ?? 0;
 
-  const [standings, pots, scorers, cards, goalkeepers, upcomingMatches, finishedMatches, groups, ties, tournamentPlayers, playerStatMaps] = await Promise.all([
+  const [standings, pots, scorers, cards, goalkeepers, upcomingMatches, finishedMatches, roundDates, groups, ties, tournamentPlayers, playerStatMaps, likeScoresById] = await Promise.all([
     getStandings(id),
     getStandingsByPot(id),
     getTopScorers(id),
     getTopCards(id),
     getGoalkeepers(id),
     publicRepository.findUpcomingMatches(id),
-    publicRepository.findFinishedMatches(id),
+    publicRepository.findFinishedMatchResults(id),
+    publicRepository.findRoundDates(id),
     publicRepository.findGroups(id),
     publicRepository.findTies(id),
     publicRepository.findTournamentPlayers(id),
     getPlayerStatMaps(id),
+    getLikeScoresForTournaments([id]),
   ]);
+  tournament.likesTotal = likeScoresById.get(id)?.total ?? 0;
 
   const { goalsByPlayer, cardsByPlayer, matchesPlayedByPlayer } = playerStatMaps;
   // Igual que en el ranking de goleadores: si el jugador ya está en esa
@@ -175,11 +199,11 @@ export async function getPublicTournament(id) {
     const homeResult = match.homeScore > match.awayScore ? 'G' : match.homeScore === match.awayScore ? 'E' : 'P';
     const awayResult = homeResult === 'G' ? 'P' : homeResult === 'P' ? 'G' : 'E';
 
-    if (!recentFormByTeam[match.homeTeam.id]) recentFormByTeam[match.homeTeam.id] = [];
-    if (!recentFormByTeam[match.awayTeam.id]) recentFormByTeam[match.awayTeam.id] = [];
+    if (!recentFormByTeam[match.homeTeamId]) recentFormByTeam[match.homeTeamId] = [];
+    if (!recentFormByTeam[match.awayTeamId]) recentFormByTeam[match.awayTeamId] = [];
 
-    if (recentFormByTeam[match.homeTeam.id].length < 3) recentFormByTeam[match.homeTeam.id].push(homeResult);
-    if (recentFormByTeam[match.awayTeam.id].length < 3) recentFormByTeam[match.awayTeam.id].push(awayResult);
+    if (recentFormByTeam[match.homeTeamId].length < 3) recentFormByTeam[match.homeTeamId].push(homeResult);
+    if (recentFormByTeam[match.awayTeamId].length < 3) recentFormByTeam[match.awayTeamId].push(awayResult);
   }
 
   // Destacados de likes: el equipo y el jugador de ESTE torneo con más
@@ -219,6 +243,7 @@ export async function getPublicTournament(id) {
     goalkeepers,
     upcomingMatches: upcomingMatches.map(withPublicMatch),
     recentFormByTeam,
+    roundDates,
     groups: groups.map(withPublicGroup),
     ties: ties.map(withPublicTie),
     topLikedTeam,
@@ -227,8 +252,20 @@ export async function getPublicTournament(id) {
 }
 
 export async function getPublicHistory(id) {
-  const tournament = await publicRepository.findActiveTournament(id);
+  const [tournament, matches] = await Promise.all([
+    publicRepository.findActiveTournament(id),
+    publicRepository.findFinishedHistoryCards(id),
+  ]);
   if (!tournament) throw new HttpError(404, 'Torneo público no encontrado');
-  const matches = await publicRepository.findFinishedMatches(id);
   return matches.map(withPublicMatch);
+}
+
+export async function getPublicHistoryMatch(tournamentId, matchId) {
+  const [tournament, match] = await Promise.all([
+    publicRepository.findActiveTournament(tournamentId),
+    publicRepository.findFinishedMatchById(tournamentId, matchId),
+  ]);
+  if (!tournament) throw new HttpError(404, 'Torneo público no encontrado');
+  if (!match) throw new HttpError(404, 'Partido del historial no encontrado');
+  return withPublicMatch(match);
 }

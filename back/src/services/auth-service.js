@@ -48,12 +48,17 @@ async function registerFailedAttempt(user) {
 }
 
 export async function login({ email, password }) {
-  await userRepository.deleteStaleDtAccounts();
+  const [staleDtIds, user] = await Promise.all([
+    userRepository.deleteStaleDtAccounts(),
+    prisma.user.findUnique({
+      where: { email },
+      include: { team: { select: { id: true, name: true } } },
+    }),
+  ]);
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: { team: { select: { id: true, name: true } } },
-  });
+  if (user && staleDtIds.includes(user.id)) {
+    throw new HttpError(401, 'Email o contraseña incorrectos');
+  }
 
   if (user?.lockedUntil && user.lockedUntil > new Date()) {
     const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);

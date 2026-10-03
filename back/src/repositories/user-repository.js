@@ -93,7 +93,9 @@ export async function deleteStaleDtAccounts() {
     select: { id: true },
   });
 
-  if (!staleDts.length) return;
+  if (!staleDts.length) return [];
 
-  await prisma.user.deleteMany({ where: { id: { in: staleDts.map((user) => user.id) } } });
+  const staleDtIds = staleDts.map((user) => user.id);
+  await prisma.user.deleteMany({ where: { id: { in: staleDtIds } } });
+  return staleDtIds;
 }

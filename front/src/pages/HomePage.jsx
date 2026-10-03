@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useNotifications } from '../context/NotificationContext.jsx';
@@ -1069,6 +1069,9 @@ export default function HomePage() {
   const { notify } = useNotifications();
 
   const [tournaments, setTournaments] = useState([]);
+  const [totalTournaments, setTotalTournaments] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(0);
   const [selectedTeam, setSelectedTeam] =
     useState(null);
 
@@ -1077,19 +1080,40 @@ export default function HomePage() {
 
   const [searchQuery, setSearchQuery] =
     useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const listRequestRef = useRef(0);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setPage(1);
+      setDebouncedSearch(searchQuery.trim());
+    }, 250);
+
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
 
   const loadAllTournaments = useCallback(
     async ({ silent = false } = {}) => {
+      const requestId = listRequestRef.current + 1;
+      listRequestRef.current = requestId;
+      if (!silent) setIsLoading(true);
+
       try {
-        const { data } = await api.get('/public/home/tournaments');
+        const { data } = await api.get('/public/home/tournaments', {
+          params: { page, search: debouncedSearch },
+        });
+        if (listRequestRef.current !== requestId) return;
         setTournaments(data.data.tournaments);
+        setTotalTournaments(data.data.total);
+        setPageCount(data.data.pageCount);
+        setPage(data.data.page);
       } catch (error) {
-        if (!silent) notify(getApiErrorDetails(error));
+        if (!silent && listRequestRef.current === requestId) notify(getApiErrorDetails(error));
       } finally {
-        setIsLoading(false);
+        if (listRequestRef.current === requestId) setIsLoading(false);
       }
     },
-    [notify]
+    [debouncedSearch, notify, page]
   );
 
   // Refresco puntual de UN torneo (lo usa el stream en vivo de cada
@@ -1167,15 +1191,7 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [loadAllTournaments]);
 
-  const normalizedSearch =
-    searchQuery.trim().toLowerCase();
-
-  const filteredTournaments =
-    tournaments.filter((tournament) =>
-      tournament.tournament.name
-        .toLowerCase()
-        .includes(normalizedSearch)
-    );
+  const normalizedSearch = searchQuery.trim();
 
   return (
     <main className="lm-ready min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
@@ -1259,7 +1275,7 @@ export default function HomePage() {
               </div>
 
               {/* Buscador: visible únicamente en móviles */}
-              {tournaments.length > 0 && (
+              {totalTournaments > 0 && (
                 <div className="relative mt-2 flex h-11 w-full sm:hidden">
                   <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
                     🔍
@@ -1268,6 +1284,7 @@ export default function HomePage() {
                   <input
                     type="text"
                     value={searchQuery}
+                    maxLength={120}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder="Buscar torneo..."
                     className="h-12 w-full touch-manipulation rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-emerald-400/40 focus:ring-2 focus:ring-emerald-400/10 dark:border-white/[0.07] dark:bg-white/[0.025] dark:text-white dark:placeholder:text-slate-700"
@@ -1277,7 +1294,7 @@ export default function HomePage() {
             </div>
 
             <div className="flex w-full flex-col items-stretch gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
-              {tournaments.length > 0 && (
+              {totalTournaments > 0 && (
                 <div className="relative hidden h-11 w-72 shrink-0 items-center justify-center sm:flex sm:flex-none">
                   <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-600 sm:left-3.5 sm:translate-x-0">
                     🔍
@@ -1286,6 +1303,7 @@ export default function HomePage() {
                   <input
                     type="text"
                     value={searchQuery}
+                    maxLength={120}
                     onChange={(event) =>
                       setSearchQuery(
                         event.target.value
@@ -1302,7 +1320,7 @@ export default function HomePage() {
                   🏆
                 </span>
 
-                {tournaments.length}
+                {totalTournaments}
               </span>
             </div>
           </div>
@@ -1317,7 +1335,7 @@ export default function HomePage() {
                 Cargando torneos...
               </p>
             </div>
-          ) : tournaments.length === 0 ? (
+          ) : totalTournaments === 0 && !normalizedSearch ? (
             <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 p-10 text-center dark:border-white/[0.08] dark:bg-white/[0.015] sm:rounded-[2rem] sm:p-16">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl dark:border-white/[0.06] dark:bg-white/[0.025]">
                 🏟️
@@ -1328,7 +1346,7 @@ export default function HomePage() {
                 disponibles.
               </p>
             </div>
-          ) : filteredTournaments.length === 0 ? (
+          ) : tournaments.length === 0 ? (
             <div className="rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 p-10 text-center dark:border-white/[0.08] dark:bg-white/[0.015] sm:rounded-[2rem] sm:p-16">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-xl dark:border-white/[0.06] dark:bg-white/[0.025]">
                 🔍
@@ -1340,7 +1358,7 @@ export default function HomePage() {
             </div>
           ) : (
             <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-3.5 lg:grid-cols-2 lg:gap-6">
-              {filteredTournaments.map(
+              {tournaments.map(
                 (tournament, index) => {
                   const tournamentId =
                     tournament.tournament.id;
@@ -1360,6 +1378,33 @@ export default function HomePage() {
               )}
             </div>
           )}
+
+          {pageCount > 1 && (
+            <nav
+              className="mt-6 flex items-center justify-center gap-3"
+              aria-label="Paginación de torneos"
+            >
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={page <= 1 || isLoading}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.1] dark:text-slate-200 dark:hover:bg-white/[0.06]"
+              >
+                Anterior
+              </button>
+              <span className="text-sm text-slate-600 dark:text-slate-400" aria-live="polite">
+                Página {page} de {pageCount}
+              </span>
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.min(pageCount, current + 1))}
+                disabled={page >= pageCount || isLoading}
+                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.1] dark:text-slate-200 dark:hover:bg-white/[0.06]"
+              >
+                Siguiente
+              </button>
+            </nav>
+          )}
         </div>
       </section>
 
@@ -1372,5 +1417,3 @@ export default function HomePage() {
     </main>
   );
 }
-
-

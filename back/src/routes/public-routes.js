@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
 
-import { detailController, historyController, homeDetailController, homeListController, likeController, listController, unlikeController, visitController } from '../controllers/public-controller.js';
+import { detailController, historyController, historyMatchController, homeDetailController, homeListController, likeController, listController, unlikeController, visitController } from '../controllers/public-controller.js';
 import { bonusesController, likeController as likePlayerController, unlikeController as unlikePlayerController } from '../controllers/player-like-controller.js';
 import { likeController as likeTeamController, totalsController as teamTotalsController, unlikeController as unlikeTeamController } from '../controllers/team-like-controller.js';
 import { activeController } from '../controllers/announcement-controller.js';
@@ -44,6 +44,7 @@ router.post('/tournaments/:id/visit', visitController);
 router.post('/tournaments/:id/like', likeLimiter, likeController);
 router.delete('/tournaments/:id/like', likeLimiter, unlikeController);
 router.get('/tournaments/:id/history', historyController);
+router.get('/tournaments/:id/history/:matchId', historyMatchController);
 router.get('/tournaments/:id/matches/:matchId/live-image', liveMatchImageController);
 router.get('/tournaments/:id/rounds/:day/image', roundImageController);
 router.get('/tournaments/:id/events', streamController);

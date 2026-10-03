@@ -71,6 +71,45 @@ const matchSelect = {
   awayTeam: { select: teamSelect },
   events: { select: { id: true, teamId: true, type: true, minute: true, period: true, createdAt: true, team: { select: teamSelect }, player: { select: { id: true, name: true, paidUntil: true, showName: true } } }, orderBy: { createdAt: 'asc' } },
 };
+const historyCardSelect = {
+  id: true,
+  date: true,
+  time: true,
+  status: true,
+  homeScore: true,
+  awayScore: true,
+  homeTeam: { select: teamSelect },
+  awayTeam: { select: teamSelect },
+};
+const homeTournamentSelect = {
+  id: true,
+  name: true,
+  description: true,
+  logo: true,
+  mode: true,
+  championTeam: { select: { name: true, logo: true } },
+  _count: { select: { teams: true } },
+  matches: {
+    where: { status: 'STARTED' },
+    select: {
+      id: true,
+      date: true,
+      time: true,
+      status: true,
+      streamUrl: true,
+      homeScore: true,
+      awayScore: true,
+      halfDurationMinutes: true,
+      currentPeriod: true,
+      periodStartedAt: true,
+      extraMinutes: true,
+      homeTeam: { select: teamSelect },
+      awayTeam: { select: teamSelect },
+    },
+    orderBy: [{ date: 'asc' }, { time: 'asc' }],
+    take: 1,
+  },
+};
 
 export function findActiveTournaments() {
   return prisma.tournament.findMany({
@@ -87,36 +126,26 @@ export function findHomeTournaments(tournamentId) {
       teams: { some: {} },
       ...(tournamentId ? { id: tournamentId } : {}),
     },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      logo: true,
-      mode: true,
-      championTeam: { select: { name: true, logo: true } },
-      _count: { select: { teams: true } },
-      matches: {
-        where: { status: 'STARTED' },
-        select: {
-          id: true,
-          date: true,
-          time: true,
-          status: true,
-          streamUrl: true,
-          homeScore: true,
-          awayScore: true,
-          halfDurationMinutes: true,
-          currentPeriod: true,
-          periodStartedAt: true,
-          extraMinutes: true,
-          homeTeam: { select: teamSelect },
-          awayTeam: { select: teamSelect },
-        },
-        orderBy: [{ date: 'asc' }, { time: 'asc' }],
-        take: 1,
-      },
-    },
+    select: homeTournamentSelect,
     orderBy: [{ position: 'asc' }, { name: 'asc' }],
+  });
+}
+
+export function findActiveHomeTournamentIndex() {
+  return prisma.tournament.findMany({
+    where: { status: 'ACTIVE', teams: { some: {} } },
+    select: { id: true, name: true },
+  });
+}
+
+export function findHomeTournamentsByIds(tournamentIds) {
+  return prisma.tournament.findMany({
+    where: {
+      id: { in: tournamentIds },
+      status: 'ACTIVE',
+      teams: { some: {} },
+    },
+    select: homeTournamentSelect,
   });
 }
 
@@ -199,6 +228,34 @@ export function findFinishedMatches(tournamentId) {
     where: { tournamentId, status: 'FINISHED' },
     select: matchSelect,
     orderBy: [{ date: 'desc' }, { time: 'desc' }],
+  });
+}
+
+export function findFinishedMatchResults(tournamentId) {
+  return prisma.match.findMany({
+    where: { tournamentId, status: 'FINISHED' },
+    select: {
+      homeTeamId: true,
+      awayTeamId: true,
+      homeScore: true,
+      awayScore: true,
+    },
+    orderBy: [{ date: 'desc' }, { time: 'desc' }],
+  });
+}
+
+export function findFinishedHistoryCards(tournamentId) {
+  return prisma.match.findMany({
+    where: { tournamentId, status: 'FINISHED' },
+    select: historyCardSelect,
+    orderBy: [{ date: 'desc' }, { time: 'desc' }],
+  });
+}
+
+export function findFinishedMatchById(tournamentId, matchId) {
+  return prisma.match.findFirst({
+    where: { id: matchId, tournamentId, status: 'FINISHED' },
+    select: matchSelect,
   });
 }
 
