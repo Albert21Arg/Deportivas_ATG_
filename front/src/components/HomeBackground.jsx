@@ -34,7 +34,7 @@ function createAtmosphere() {
       delay: randomBetween(-24, 0),
     };
   });
-  const balls = Array.from({ length: 3 }, (_, index) => {
+  const balls = Array.from({ length: 1 }, (_, index) => {
     const stops = [0, 18, 42, 67, 86, 100].map((step) => ({
       step,
       x: randomBetween(6, 86),
@@ -161,6 +161,16 @@ export default function HomeBackground() {
           @keyframes ${bat.animationName} {
             ${bat.keyframes}
           }
+        `).join('\n')}
+        ${atmosphere.calabaza.map((calabaza) => `
+          @keyframes ${calabaza.animationName} {
+            ${calabaza.keyframes}
+          }
+        `).join('\n')}
+        ${atmosphere.bats.map((bat) => `
+          @keyframes ${bat.animationName} {
+            ${bat.keyframes}
+          }  
         `).join('\n')}
         @media (prefers-reduced-motion: reduce) {
           .home-background-motion {
