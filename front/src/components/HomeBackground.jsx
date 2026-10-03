@@ -13,6 +13,27 @@ function createAtmosphere() {
     delay: randomBetween(-5, 0),
     duration: randomBetween(2.5, 5.5),
   }));
+  const bats = Array.from({ length: 5 }, (_, index) => {
+    const animationName = `halloweenBatPath${index}${Math.random().toString(36).slice(2)}`;
+    const startX = randomBetween(0, 80);
+    const startY = randomBetween(4, 76);
+    const keyframes = `
+      0% { transform: translate(0, 0) scale(0.8) rotate(-8deg); }
+      50% { transform: translate(${randomBetween(-14, 18)}vw, ${randomBetween(-10, 14)}vh) scale(1) rotate(8deg); }
+      100% { transform: translate(${randomBetween(8, 24)}vw, ${randomBetween(-8, 18)}vh) scale(0.85) rotate(-5deg); }
+    `;
+
+    return {
+      id: index,
+      animationName,
+      keyframes,
+      left: startX,
+      top: startY,
+      size: randomBetween(20, 30),
+      duration: randomBetween(18, 32),
+      delay: randomBetween(-24, 0),
+    };
+  });
   const balls = Array.from({ length: 3 }, (_, index) => {
     const stops = [0, 18, 42, 67, 86, 100].map((step) => ({
       step,
@@ -36,7 +57,7 @@ function createAtmosphere() {
     };
   });
 
-  return { stars, balls };
+  return { stars, bats, balls };
 }
 
 export default function HomeBackground() {
@@ -45,12 +66,12 @@ export default function HomeBackground() {
   return (
     <>
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_18%,rgba(16,185,129,0.08),transparent_38%),radial-gradient(ellipse_at_82%_68%,rgba(6,182,212,0.07),transparent_42%)] dark:bg-[radial-gradient(ellipse_at_18%_18%,rgba(16,185,129,0.12),transparent_38%),radial-gradient(ellipse_at_82%_68%,rgba(6,182,212,0.1),transparent_42%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_12%_18%,rgba(249,115,22,0.06),transparent_38%),radial-gradient(ellipse_at_82%_68%,rgba(124,58,237,0.055),transparent_42%)] dark:bg-[radial-gradient(ellipse_at_12%_18%,rgba(249,115,22,0.09),transparent_38%),radial-gradient(ellipse_at_82%_68%,rgba(124,58,237,0.09),transparent_42%)]" />
 
         {atmosphere.stars.map((star) => (
           <span
             key={star.id}
-            className="home-background-motion absolute rounded-full bg-emerald-400/70 shadow-[0_0_8px_rgba(52,211,153,0.75)] dark:bg-cyan-200/70"
+            className="home-background-motion absolute rounded-full bg-amber-400/70 shadow-[0_0_8px_rgba(251,146,60,0.75)] dark:bg-orange-200/70"
             style={{
               left: `${star.left}%`,
               top: `${star.top}%`,
@@ -59,6 +80,23 @@ export default function HomeBackground() {
               animation: `homeStarTwinkle ${star.duration}s ease-in-out ${star.delay}s infinite`,
             }}
           />
+        ))}
+      </div>
+
+      <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden" aria-hidden="true">
+        {atmosphere.bats.map((bat) => (
+          <span
+            key={bat.id}
+            className="home-background-motion absolute select-none opacity-45 drop-shadow-[0_0_9px_rgba(124,58,237,0.6)]"
+            style={{
+              left: `${bat.left}%`,
+              top: `${bat.top}%`,
+              fontSize: `${bat.size}px`,
+              animation: `${bat.animationName} ${bat.duration}s ease-in-out ${bat.delay}s infinite alternate`,
+            }}
+          >
+            🦇
+          </span>
         ))}
       </div>
 
@@ -83,6 +121,11 @@ export default function HomeBackground() {
         ${atmosphere.balls.map((ball) => `
           @keyframes ${ball.animationName} {
             ${ball.keyframes}
+          }
+        `).join('\n')}
+        ${atmosphere.bats.map((bat) => `
+          @keyframes ${bat.animationName} {
+            ${bat.keyframes}
           }
         `).join('\n')}
         @media (prefers-reduced-motion: reduce) {
