@@ -8,6 +8,20 @@ function mediaUrl(path) {
   return `${api.defaults.baseURL.replace(/\/api\/?$/, '')}${path}`;
 }
 
+function preloadImage(url) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.fetchPriority = 'high';
+    image.decoding = 'async';
+    image.onload = () => image.decode().then(resolve, resolve);
+    image.onerror = resolve;
+    image.src = url;
+    if (image.complete) image.decode().then(resolve, resolve);
+  });
+}
+
+const MINIMUM_ANNOUNCEMENT_SECONDS = 10;
+
 /*
 |--------------------------------------------------------------------------
 | Anillo de cuenta regresiva del botón cerrar
@@ -70,19 +84,29 @@ export default function AnnouncementModal({ tournamentId } = {}) {
     const announcement = announcements[announcementIndex];
     if (!announcement) return undefined;
 
-    const seconds = visible
-      ? announcement.durationSeconds
-      : Math.max(announcement.delaySeconds, 1);
+    if (visible) {
+      const timer = window.setTimeout(
+        () => setVisible(false),
+        Math.max(announcement.durationSeconds, MINIMUM_ANNOUNCEMENT_SECONDS) * 1000,
+      );
+      return () => window.clearTimeout(timer);
+    }
 
-    const timer = window.setTimeout(() => {
-      if (visible) {
-        setVisible(false);
-      } else {
-        setVisible(true);
-      }
-    }, seconds * 1000);
+    let cancelled = false;
+    let delayTimer;
+    const delay = new Promise((resolve) => {
+      delayTimer = window.setTimeout(resolve, Math.max(announcement.delaySeconds, 1) * 1000);
+    });
+    const imageReady = preloadImage(mediaUrl(announcement.imageUrl));
 
-    return () => window.clearTimeout(timer);
+    Promise.all([delay, imageReady]).then(() => {
+      if (!cancelled) setVisible(true);
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(delayTimer);
+    };
   }, [announcements, announcementIndex, visible]);
 
   useEffect(() => {
@@ -100,8 +124,7 @@ export default function AnnouncementModal({ tournamentId } = {}) {
   */
 
   const activeAnnouncement = announcements[announcementIndex];
-  const closeLockSeconds =
-    activeAnnouncement && activeAnnouncement.durationSeconds > 4 ? 3 : 0;
+  const closeLockSeconds = activeAnnouncement ? MINIMUM_ANNOUNCEMENT_SECONDS : 0;
 
   useEffect(() => {
     if (!visible || closeLockSeconds === 0) {
@@ -134,6 +157,9 @@ export default function AnnouncementModal({ tournamentId } = {}) {
     <img
       className="max-h-[70vh] w-full object-contain transition-transform duration-500 group-hover:scale-[1.015]"
       src={mediaUrl(announcement.imageUrl)}
+      fetchPriority="high"
+      decoding="async"
+      loading="eager"
       alt={announcement.title}
     />
   );
@@ -279,7 +305,7 @@ export default function AnnouncementModal({ tournamentId } = {}) {
               style={{
                 animation: `adProgress ${Math.max(
                   announcement.durationSeconds,
-                  1
+                  MINIMUM_ANNOUNCEMENT_SECONDS
                 )}s linear forwards`,
               }}
             />

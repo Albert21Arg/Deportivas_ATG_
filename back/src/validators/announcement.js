@@ -37,7 +37,7 @@ export function validateAnnouncement(request, _response, next) {
       imageUrl: `/uploads/announcements/${request.file.filename}`,
       linkUrl: body.linkUrl?.trim() || null,
       delaySeconds: seconds(body.delaySeconds ?? 0, 'delaySeconds', { min: 0, max: 86400 }),
-      durationSeconds: seconds(body.durationSeconds ?? 8, 'durationSeconds', { min: 1, max: 86400 }),
+      durationSeconds: seconds(body.durationSeconds ?? 10, 'durationSeconds', { min: 1, max: 86400 }),
       status: body.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
       tournamentId: parseTournamentId(body.tournamentId),
       expiresAt: parseExpiresAt(body.expiresAt),

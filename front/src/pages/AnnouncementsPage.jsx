@@ -11,7 +11,7 @@ const emptyForm = {
   title: '',
   linkUrl: '',
   delaySeconds: 0,
-  durationSeconds: 8,
+  durationSeconds: 10,
   status: 'ACTIVE',
   tournamentId: '',
   expiresAt: '',
