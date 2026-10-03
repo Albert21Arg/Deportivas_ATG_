@@ -15,6 +15,7 @@ import {
 } from '../utils/team-expiry.js';
 
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
+import CardOpeningCelebration from '../components/CardOpeningCelebration.jsx';
 import CompetitionOverview from '../components/CompetitionOverview.jsx';
 import FutbolIcon from '../components/FutbolIcon.jsx';
 import ShareImageModal from '../components/ShareImageModal.jsx';
@@ -1617,12 +1618,15 @@ export default function PublicTournamentPage() {
   const [isSelectedMatchLoading, setIsSelectedMatchLoading] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [featuredPlayerRow, setFeaturedPlayerRow] = useState(null);
+  const [cardCelebration, setCardCelebration] = useState(null);
 
   const [isLoading, setIsLoading] = useState(true);
 
   const historyLoadedRef = useRef(false);
   const historyLoadingRef = useRef(false);
   const matchDetailRequestRef = useRef(0);
+  const cardOpenRef = useRef(null);
+  const cardCelebrationIdRef = useRef(0);
   const activeTournamentIdRef = useRef(id);
   const sectionRefs = useRef({});
   const visitLoggedIdRef = useRef(null);
@@ -1801,6 +1805,20 @@ export default function PublicTournamentPage() {
     setSelectedMatch(null);
     setIsSelectedMatchLoading(false);
   }
+
+  function celebrateCardOpening(type, openCard) {
+    cardOpenRef.current = openCard;
+    cardCelebrationIdRef.current += 1;
+    setCardCelebration({ type, id: cardCelebrationIdRef.current });
+  }
+
+  const finishCardCelebration = useCallback((id) => {
+    if (cardCelebrationIdRef.current !== id) return;
+    setCardCelebration(null);
+    const openCard = cardOpenRef.current;
+    cardOpenRef.current = null;
+    openCard?.();
+  }, []);
 
   function toggleStandings() {
     setOpenSection((current) =>
@@ -2019,7 +2037,10 @@ export default function PublicTournamentPage() {
         <section className="mx-auto mb-3 w-full max-w-7xl min-w-0 sm:mb-4">
           <button
             type="button"
-            onClick={() => setFeaturedPlayerRow(data.scorers[0])}
+            onClick={() => celebrateCardOpening(
+              'scorer',
+              () => setFeaturedPlayerRow(data.scorers[0]),
+            )}
             className="
               group relative flex w-full min-w-0 items-center gap-3
               overflow-hidden rounded-3xl border-2 border-amber-400/40
@@ -2106,10 +2127,11 @@ export default function PublicTournamentPage() {
                   );
 
                   if (row) {
-                    setSelectedTeam({
-                      row,
-                      recentForm:
-                        data.recentFormByTeam?.[row.team.id] ?? [],
+                    celebrateCardOpening('favorite-team', () => {
+                      setSelectedTeam({
+                        row,
+                        recentForm: data.recentFormByTeam?.[row.team.id] ?? [],
+                      });
                     });
                   }
                 }}
@@ -2148,7 +2170,7 @@ export default function PublicTournamentPage() {
             {data.topLikedPlayer?.player && (
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => celebrateCardOpening('favorite-player', () =>
                   setFeaturedPlayerRow({
                     player: data.topLikedPlayer.player,
                     team: data.topLikedPlayer.team,
@@ -2156,16 +2178,12 @@ export default function PublicTournamentPage() {
                     yellowCards: data.topLikedPlayer.player.yellowCards,
                     redCards: data.topLikedPlayer.player.redCards,
                     blueCards: data.topLikedPlayer.player.blueCards,
-                    matchesPlayed:
-                      data.topLikedPlayer.player.matchesPlayed,
-                    goalsConceded:
-                      data.topLikedPlayer.player.goalsConceded,
+                    matchesPlayed: data.topLikedPlayer.player.matchesPlayed,
+                    goalsConceded: data.topLikedPlayer.player.goalsConceded,
                     position: data.topLikedPlayer.player.position,
-                    isGoalkeeper: Boolean(
-                      data.topLikedPlayer.player.isGoalkeeper
-                    ),
+                    isGoalkeeper: Boolean(data.topLikedPlayer.player.isGoalkeeper),
                   })
-                }
+                )}
                 className="
                   flex min-w-0 flex-1 items-center gap-3
                   p-3 text-left
@@ -3243,6 +3261,14 @@ export default function PublicTournamentPage() {
         )}
         onClose={() => setFeaturedPlayerRow(null)}
       />
+
+      {cardCelebration && (
+        <CardOpeningCelebration
+          key={cardCelebration.id}
+          type={cardCelebration.type}
+          onComplete={() => finishCardCelebration(cardCelebration.id)}
+        />
+      )}
     </main>
   );
 }

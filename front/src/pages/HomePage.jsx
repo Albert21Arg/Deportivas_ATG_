@@ -12,6 +12,7 @@ import {
 } from '../utils/team-expiry.js';
 
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
+import HomeBackground from '../components/HomeBackground.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
 import TeamLikeButton from '../components/TeamLikeButton.jsx';
 
@@ -1194,7 +1195,9 @@ export default function HomePage() {
   const normalizedSearch = searchQuery.trim();
 
   return (
-    <main className="lm-ready min-h-screen bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
+    <main className="lm-ready relative isolate min-h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
+      <HomeBackground />
+
       <PublicNavbar />
 
       <AnnouncementModal />
@@ -1203,7 +1206,7 @@ export default function HomePage() {
           HERO
       ================================================================ */}
 
-      <section className="relative hidden w-full overflow-hidden border-b border-slate-200 bg-slate-50 px-4 pb-12 pt-24 dark:border-white/[0.06] dark:bg-[#070b12] sm:block sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
+      <section className="relative z-[1] hidden w-full overflow-hidden border-b border-slate-200 px-4 pb-12 pt-24 dark:border-white/[0.06] sm:block sm:px-6 sm:pb-20 sm:pt-32 lg:px-12 xl:px-20">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.025]"
           style={{
@@ -1252,7 +1255,7 @@ export default function HomePage() {
           TORNEOS
       ================================================================ */}
 
-      <section className="relative w-full px-3 pb-7 pt-[5.5rem] sm:px-6 sm:py-14 lg:px-12 xl:px-20">
+      <section className="relative z-[1] w-full px-3 pb-7 pt-[5.5rem] sm:px-6 sm:py-14 lg:px-12 xl:px-20">
         <div className="mx-auto w-full max-w-7xl">
           <div className="mb-4 flex flex-col gap-3 sm:mb-9 sm:flex-row sm:items-end sm:justify-between">
             <div className="w-full sm:w-auto">
