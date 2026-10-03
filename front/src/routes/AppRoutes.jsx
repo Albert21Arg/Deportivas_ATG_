@@ -29,6 +29,7 @@ import FloatingBubbles from '../components/FloatingBubbles.jsx';
 import FaviconLoader from '../components/FaviconLoader.jsx';
 import ModalScrollLock from '../components/ModalScrollLock.jsx';
 import LiveMatchButton from '../components/LiveMatchButton.jsx';
+import HomeBackground from '../components/HomeBackground.jsx';
 
 export default function AppRoutes() {
   return (
@@ -36,6 +37,7 @@ export default function AppRoutes() {
       <ThemeProvider>
         <NotificationProvider>
           <AuthProvider>
+            <HomeBackground />
             <FaviconLoader />
             <ModalScrollLock />
             <LiveMatchButton />

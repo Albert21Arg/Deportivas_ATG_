@@ -12,7 +12,6 @@ import {
 } from '../utils/team-expiry.js';
 
 import AnnouncementModal from '../components/AnnouncementModal.jsx';
-import HomeBackground from '../components/HomeBackground.jsx';
 import PublicNavbar from '../components/PublicNavbar.jsx';
 import TeamLikeButton from '../components/TeamLikeButton.jsx';
 
@@ -1196,8 +1195,6 @@ export default function HomePage() {
 
   return (
     <main className="lm-ready relative isolate min-h-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-[#070b12] dark:text-slate-100">
-      <HomeBackground />
-
       <PublicNavbar />
 
       <AnnouncementModal />
