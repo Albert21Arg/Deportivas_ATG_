@@ -96,7 +96,7 @@ async function loadLogo(source) {
 }
 
 /**
- * Imagen JPEG de una fecha. format: "landscape" (1200x630, vista previa de
+ * Imagen PNG de una fecha. format: "landscape" (1200x630, vista previa de
  * enlaces) o "portrait" (vertical, igual a la del botón Compartir).
  */
 export async function getRoundImage(tournamentId, day, format = 'landscape', pageUrl = '') {
@@ -118,11 +118,10 @@ export async function getRoundImage(tournamentId, day, format = 'landscape', pag
     hideLogo: (team) => Boolean(team?.logoExpired),
     footer: pageUrl.replace(/^https?:\/\//, ''),
     fontFamily: FONT_FAMILY,
+    transparentBackground: true,
   });
 
-  // JPEG: pesa bastante menos que PNG (WhatsApp ignora imágenes de vista
-  // previa muy pesadas).
-  const buffer = await canvas.encode('jpeg', 88);
+  const buffer = await canvas.encode('png');
 
   cache.set(key, { buffer, expiresAt: Date.now() + CACHE_TTL_MS });
   for (const [cacheKey, entry] of cache) {

@@ -220,6 +220,7 @@ function ShareRoundModal({ round, tournament, onClose }) {
           formatTime,
           hideLogo: (team) => !team?.logo || isLogoHidden(team),
           footer: pageUrl.replace(/^https?:\/\//, ''),
+          transparentBackground: true,
         })
       }
     />

@@ -38,6 +38,19 @@ function setFont(context, weight, size) {
   context.font = `${weight} ${size}px ${context.fontFamilyForShare ?? FONT}`;
 }
 
+function drawShareText(context, text, x, y, transparentBackground) {
+  if (transparentBackground) {
+    const fontSize = Number(context.font.match(/(\d+(?:\.\d+)?)px/)?.[1] ?? 24);
+    context.save();
+    context.lineJoin = 'round';
+    context.lineWidth = Math.max(4, fontSize * 0.16);
+    context.strokeStyle = 'rgba(255, 255, 255, 0.96)';
+    context.strokeText(text, x, y);
+    context.restore();
+  }
+  context.fillText(text, x, y);
+}
+
 // Achica la letra hasta que el texto quepa; si aun así no cabe, lo corta
 // con "…". Deja puesta en el contexto la fuente con la que cupo.
 function fitText(context, text, maxWidth, { weight = 700, size = 34, minSize = 24 } = {}) {
@@ -168,37 +181,39 @@ function computeLayout(format, count) {
   return { width, height, padding, columns, rows, columnGap, rowGap, headerHeight, footerHeight, cellWidth, cellHeight, nameSize, nameLine, timeSize, logoSize };
 }
 
-function drawHeader(context, format, layout, { tournamentName, title, subtitle }) {
+function drawHeader(context, format, layout, { tournamentName, title, subtitle }, transparentBackground) {
   const { width, padding } = layout;
   context.textAlign = 'left';
   context.textBaseline = 'alphabetic';
 
   if (format === 'landscape') {
-    context.fillStyle = 'rgba(226, 232, 240, 0.85)';
-    context.fillText(fitText(context, tournamentName, width - padding * 2, { weight: 700, size: 28, minSize: 20 }), padding, padding + 26);
+    context.fillStyle = transparentBackground ? '#0f172a' : 'rgba(226, 232, 240, 0.85)';
+    drawShareText(context, fitText(context, tournamentName, width - padding * 2, { weight: 700, size: 28, minSize: 20 }), padding, padding + 26, transparentBackground);
 
-    context.fillStyle = '#34d399';
+    context.fillStyle = transparentBackground ? '#047857' : '#34d399';
     const titleText = fitText(context, title.toUpperCase(), (width - padding * 2) * 0.55, { weight: 900, size: 64, minSize: 40 });
-    context.fillText(titleText, padding, padding + 92);
+    drawShareText(context, titleText, padding, padding + 92, transparentBackground);
     const titleWidth = context.measureText(titleText).width;
 
-    context.fillStyle = '#cbd5e1';
-    context.fillText(
+    context.fillStyle = transparentBackground ? '#334155' : '#cbd5e1';
+    drawShareText(
+      context,
       fitText(context, subtitle, width - padding * 2 - titleWidth - 24, { weight: 600, size: 30, minSize: 20 }),
       padding + titleWidth + 24,
       padding + 90,
+      transparentBackground,
     );
     return;
   }
 
-  context.fillStyle = 'rgba(226, 232, 240, 0.85)';
-  context.fillText(fitText(context, tournamentName, width - padding * 2, { weight: 700, size: 38, minSize: 28 }), padding, padding + 38);
+  context.fillStyle = transparentBackground ? '#0f172a' : 'rgba(226, 232, 240, 0.85)';
+  drawShareText(context, fitText(context, tournamentName, width - padding * 2, { weight: 700, size: 38, minSize: 28 }), padding, padding + 38, transparentBackground);
 
-  context.fillStyle = '#34d399';
-  context.fillText(fitText(context, title.toUpperCase(), width - padding * 2, { weight: 900, size: 92, minSize: 56 }), padding, padding + 146);
+  context.fillStyle = transparentBackground ? '#047857' : '#34d399';
+  drawShareText(context, fitText(context, title.toUpperCase(), width - padding * 2, { weight: 900, size: 92, minSize: 56 }), padding, padding + 146, transparentBackground);
 
-  context.fillStyle = '#cbd5e1';
-  context.fillText(fitText(context, subtitle, width - padding * 2, { weight: 600, size: 38, minSize: 28 }), padding, padding + 204);
+  context.fillStyle = transparentBackground ? '#334155' : '#cbd5e1';
+  drawShareText(context, fitText(context, subtitle, width - padding * 2, { weight: 600, size: 38, minSize: 28 }), padding, padding + 204, transparentBackground);
 }
 
 /**
@@ -230,6 +245,7 @@ export async function drawRoundShareImage({
   hideLogo = () => false,
   footer = '',
   fontFamily = FONT,
+  transparentBackground = false,
 }) {
   const layout = computeLayout(format, matches.length);
   const { width, height, padding, columns, columnGap, rowGap, headerHeight, cellWidth, cellHeight, nameSize, nameLine, timeSize, logoSize } = layout;
@@ -238,20 +254,21 @@ export async function drawRoundShareImage({
   const context = canvas.getContext('2d');
   context.fontFamilyForShare = fontFamily;
 
-  // Fondo
-  const background = context.createLinearGradient(0, 0, 0, height);
-  background.addColorStop(0, '#0b1220');
-  background.addColorStop(1, '#042f2e');
-  context.fillStyle = background;
-  context.fillRect(0, 0, width, height);
+  if (!transparentBackground) {
+    const background = context.createLinearGradient(0, 0, 0, height);
+    background.addColorStop(0, '#0b1220');
+    background.addColorStop(1, '#042f2e');
+    context.fillStyle = background;
+    context.fillRect(0, 0, width, height);
 
-  const glow = context.createRadialGradient(width - 120, 80, 10, width - 120, 80, 460);
-  glow.addColorStop(0, 'rgba(52, 211, 153, 0.22)');
-  glow.addColorStop(1, 'rgba(52, 211, 153, 0)');
-  context.fillStyle = glow;
-  context.fillRect(0, 0, width, height);
+    const glow = context.createRadialGradient(width - 120, 80, 10, width - 120, 80, 460);
+    glow.addColorStop(0, 'rgba(52, 211, 153, 0.22)');
+    glow.addColorStop(1, 'rgba(52, 211, 153, 0)');
+    context.fillStyle = glow;
+    context.fillRect(0, 0, width, height);
+  }
 
-  drawHeader(context, format, layout, { tournamentName, title, subtitle });
+  drawHeader(context, format, layout, { tournamentName, title, subtitle }, transparentBackground);
 
   // Partidos
   const logos = await Promise.all(
@@ -285,8 +302,8 @@ export async function drawRoundShareImage({
     // Hora
     context.textAlign = 'center';
     context.textBaseline = 'alphabetic';
-    context.fillStyle = '#6ee7b7';
-    context.fillText(fitText(context, formatTime(match.time), cellWidth, { weight: 800, size: timeSize, minSize: Math.round(timeSize * 0.75) }), centerX, y + offsetY + timeSize);
+    context.fillStyle = transparentBackground ? '#047857' : '#6ee7b7';
+    drawShareText(context, fitText(context, formatTime(match.time), cellWidth, { weight: 800, size: timeSize, minSize: Math.round(timeSize * 0.75) }), centerX, y + offsetY + timeSize, transparentBackground);
 
     // Escudo real si está permitido y se pudo cargar; de lo contrario, usa
     // la silueta con iniciales del equipo.
@@ -295,23 +312,25 @@ export async function drawRoundShareImage({
 
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillStyle = 'rgba(203, 213, 225, 0.7)';
+    context.fillStyle = transparentBackground ? '#047857' : 'rgba(203, 213, 225, 0.7)';
     setFont(context, 900, Math.round(Math.min(32, logoSize * 0.2)));
-    context.fillText(
+    drawShareText(
+      context,
       fitText(context, centerLabel, cellWidth / 2, { weight: 900, size: Math.round(Math.min(32, logoSize * 0.2)), minSize: 14 }),
       centerX,
       logoY + logoSize / 2,
+      transparentBackground,
     );
 
     // Nombres debajo de cada escudo (hasta dos renglones)
     context.textBaseline = 'top';
-    context.fillStyle = '#f8fafc';
+    context.fillStyle = transparentBackground ? '#0f172a' : '#f8fafc';
     [
       [match.homeTeam?.name, homeCenterX],
       [match.awayTeam?.name, awayCenterX],
     ].forEach(([name, nameX]) => {
       wrapName(context, name, nameWidth, nameSize).forEach((line, lineIndex) => {
-        context.fillText(line, nameX, logoY + logoSize + 10 + lineIndex * nameLine);
+        drawShareText(context, line, nameX, logoY + logoSize + 10 + lineIndex * nameLine, transparentBackground);
       });
     });
   });
@@ -320,12 +339,14 @@ export async function drawRoundShareImage({
   if (footer) {
     context.textAlign = 'center';
     context.textBaseline = 'alphabetic';
-    context.fillStyle = 'rgba(148, 163, 184, 0.9)';
+    context.fillStyle = transparentBackground ? '#334155' : 'rgba(148, 163, 184, 0.9)';
     const footerSize = format === 'landscape' ? 20 : 28;
-    context.fillText(
+    drawShareText(
+      context,
       fitText(context, footer, width - padding * 2, { weight: 600, size: footerSize, minSize: 16 }),
       width / 2,
       height - (format === 'landscape' ? 16 : 52),
+      transparentBackground,
     );
   }
 
@@ -412,6 +433,7 @@ export async function buildRoundShareImage(options) {
   const canvas = await drawRoundShareImage({
     ...options,
     format: 'portrait',
+    transparentBackground: true,
     createCanvas: (width, height) => {
       const element = document.createElement('canvas');
       element.width = width;

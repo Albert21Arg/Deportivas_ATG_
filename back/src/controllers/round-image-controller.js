@@ -15,7 +15,7 @@ export async function roundImageController(request, response, next) {
     const pageUrl = `${request.protocol}://${request.get('host')}/tournaments/${tournamentId}`;
     const image = await getRoundImage(tournamentId, request.params.day, format, pageUrl);
 
-    response.set('Content-Type', 'image/jpeg');
+    response.set('Content-Type', 'image/png');
     response.set('Cache-Control', 'public, max-age=300');
     return response.send(image);
   } catch (error) {
