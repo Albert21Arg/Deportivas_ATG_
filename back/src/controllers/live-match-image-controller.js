@@ -12,7 +12,7 @@ export async function liveMatchImageController(request, response, next) {
     const frontendUrl = (process.env.FRONTEND_URL ?? `${request.protocol}://${request.get('host')}`).replace(/\/$/, '');
     const pageUrl = `${frontendUrl}/tournaments/${tournamentId}?partido=${matchId}`;
     const image = await getLiveMatchImage(tournamentId, matchId, pageUrl);
-    response.set('Content-Type', 'image/jpeg');
+    response.set('Content-Type', 'image/png');
     response.set('Cache-Control', 'public, max-age=15');
     return response.send(image);
   } catch (error) {

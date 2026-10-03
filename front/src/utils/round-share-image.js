@@ -332,6 +332,75 @@ export async function drawRoundShareImage({
   return canvas;
 }
 
+export async function drawLiveMatchShareImage({
+  createCanvas,
+  loadImage,
+  tournamentName,
+  match,
+  centerLabel,
+  footer = '',
+  fontFamily = FONT,
+}) {
+  const width = 1200;
+  const height = 700;
+  const logoSize = 400;
+  const canvas = createCanvas(width, height);
+  const context = canvas.getContext('2d');
+  context.fontFamilyForShare = fontFamily;
+
+  const [homeLogo, awayLogo] = await Promise.all([
+    match.homeTeam?.logo && !match.homeTeam?.logoExpired ? loadImage(match.homeTeam.logo) : null,
+    match.awayTeam?.logo && !match.awayTeam?.logoExpired ? loadImage(match.awayTeam.logo) : null,
+  ]);
+
+  context.textAlign = 'center';
+  context.textBaseline = 'alphabetic';
+  context.lineJoin = 'round';
+  context.lineWidth = 8;
+  context.strokeStyle = 'rgba(255, 255, 255, 0.96)';
+  context.fillStyle = '#047857';
+  setFont(context, 900, 30);
+  context.strokeText(fitText(context, tournamentName, width - 100, { weight: 900, size: 30, minSize: 20 }), width / 2, 48);
+  setFont(context, 900, 72);
+  context.strokeText('EN VIVO', width / 2, 125);
+  context.fillText('EN VIVO', width / 2, 125);
+
+  const logoY = 145;
+  const homeCenterX = 300;
+  const awayCenterX = 900;
+  drawLogo(context, homeLogo, match.homeTeam, homeCenterX - logoSize / 2, logoY, logoSize);
+  drawLogo(context, awayLogo, match.awayTeam, awayCenterX - logoSize / 2, logoY, logoSize);
+
+  context.textBaseline = 'middle';
+  context.fillStyle = '#047857';
+  setFont(context, 900, 74);
+  context.lineWidth = 12;
+  context.strokeText(centerLabel, width / 2, logoY + logoSize / 2);
+  context.fillText(centerLabel, width / 2, logoY + logoSize / 2);
+
+  context.textBaseline = 'alphabetic';
+  context.fillStyle = '#0f172a';
+  context.lineWidth = 7;
+  [
+    [match.homeTeam?.name, homeCenterX],
+    [match.awayTeam?.name, awayCenterX],
+  ].forEach(([name, x]) => {
+    const label = fitText(context, name, 500, { weight: 900, size: 42, minSize: 26 });
+    context.strokeText(label, x, 595);
+    context.fillText(label, x, 595);
+  });
+
+  if (footer) {
+    context.fillStyle = '#334155';
+    context.lineWidth = 5;
+    const label = fitText(context, footer, width - 100, { weight: 700, size: 22, minSize: 16 });
+    context.strokeText(label, width / 2, 670);
+    context.fillText(label, width / 2, 670);
+  }
+
+  return canvas;
+}
+
 /*
 | Versión para el navegador: genera la imagen vertical y la devuelve como
 | Blob PNG. Los escudos se cargan con crossOrigin="anonymous": si el sitio

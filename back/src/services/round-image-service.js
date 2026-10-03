@@ -4,7 +4,7 @@ import { GlobalFonts, createCanvas, loadImage } from '@napi-rs/canvas';
 
 // El dibujo es el mismo que usa la página pública para el botón "Compartir"
 // (así la vista previa del enlace y la imagen descargada son iguales).
-import { drawRoundShareImage } from '../../../front/src/utils/round-share-image.js';
+import { drawLiveMatchShareImage, drawRoundShareImage } from '../../../front/src/utils/round-share-image.js';
 import * as publicRepository from '../repositories/public-repository.js';
 import { withExpiryFlags } from '../utils/team-expiry.js';
 import { HttpError } from '../utils/http-error.js';
@@ -149,22 +149,17 @@ export async function getLiveMatchImage(tournamentId, matchId, pageUrl = '') {
     homeTeam: withExpiryFlags(match.homeTeam),
     awayTeam: withExpiryFlags(match.awayTeam),
   };
-  const canvas = await drawRoundShareImage({
+  const canvas = await drawLiveMatchShareImage({
     createCanvas,
-    loadImage: loadLogo,
-    format: 'landscape',
+    loadImage,
     tournamentName: tournament.name,
-    title: 'EN VIVO',
-    subtitle: `${score} · ${formatDay(new Date(match.date).toISOString().slice(0, 10))}`,
-    matches: [imageMatch],
-    formatTime,
+    match: imageMatch,
     centerLabel: score,
-    hideLogo: (team) => Boolean(team?.logoExpired),
     footer: pageUrl.replace(/^https?:\/\//, ''),
     fontFamily: FONT_FAMILY,
   });
 
-  const buffer = await canvas.encode('jpeg', 88);
+  const buffer = await canvas.encode('png');
   cache.set(key, { buffer, expiresAt: Date.now() + 15 * 1000 });
   return buffer;
 }

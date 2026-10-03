@@ -725,7 +725,7 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
       <ShareImageModal
         title={`Partido en vivo · ${match.homeTeam.name} vs ${match.awayTeam.name}`}
         subtitle={`${tournamentName} · ${match.homeScore ?? 0}-${match.awayScore ?? 0}`}
-        fileName={`partido-en-vivo-${match.id}.jpg`}
+        fileName={`partido-en-vivo-${match.id}.png`}
         shareText={`⚽ EN VIVO: ${match.homeTeam.name} ${match.homeScore ?? 0} - ${match.awayScore ?? 0} ${match.awayTeam.name}\n${tournamentName}\n${shareUrl}`}
         onClose={() => setIsShareImageOpen(false)}
         buildImage={buildLiveShareImage}
