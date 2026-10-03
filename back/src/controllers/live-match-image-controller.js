@@ -9,7 +9,8 @@ export async function liveMatchImageController(request, response, next) {
       throw new HttpError(400, 'Identificadores no válidos');
     }
 
-    const pageUrl = `${request.protocol}://${request.get('host')}/tournaments/${tournamentId}?partido=${matchId}`;
+    const frontendUrl = (process.env.FRONTEND_URL ?? `${request.protocol}://${request.get('host')}`).replace(/\/$/, '');
+    const pageUrl = `${frontendUrl}/tournaments/${tournamentId}?partido=${matchId}`;
     const image = await getLiveMatchImage(tournamentId, matchId, pageUrl);
     response.set('Content-Type', 'image/jpeg');
     response.set('Cache-Control', 'public, max-age=15');

@@ -121,7 +121,7 @@ export default function ShareImageModal({
         <div className="mx-auto grid w-full max-w-md gap-2 border-t border-slate-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] dark:border-white/[0.06]">
           {canShareFile && (
             <button
-              className="min-h-11 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-slate-950 transition hover:bg-emerald-400"
+              className="min-h-11 rounded-xl bg-emerald-500 px-4 text-sm font-bold text-black transition hover:bg-emerald-400"
               onClick={shareImage}
               type="button"
             >

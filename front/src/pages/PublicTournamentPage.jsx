@@ -709,7 +709,7 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
               bg-cyan-500/10
               py-2.5
               text-[11px] font-black uppercase tracking-wider
-              text-cyan-700 dark:text-cyan-300
+              text-black dark:text-cyan-300
               transition
               hover:bg-cyan-500/20
               sm:py-3 sm:text-xs

@@ -140,7 +140,7 @@ export async function getLiveMatchImage(tournamentId, matchId, pageUrl = '') {
   if (!tournament || !match) throw new HttpError(404, 'Partido en vivo no encontrado');
 
   const score = `${match.homeScore ?? 0}-${match.awayScore ?? 0}`;
-  const key = `live:${tournamentId}:${matchId}:${score}:${match.time}`;
+  const key = `live:${tournamentId}:${matchId}:${score}:${match.time}:${pageUrl}`;
   const cached = cache.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.buffer;
 
@@ -168,4 +168,3 @@ export async function getLiveMatchImage(tournamentId, matchId, pageUrl = '') {
   cache.set(key, { buffer, expiresAt: Date.now() + 15 * 1000 });
   return buffer;
 }
-
