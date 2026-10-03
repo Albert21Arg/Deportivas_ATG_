@@ -56,8 +56,30 @@ function createAtmosphere() {
       delay: -index * 9,
     };
   });
+  const calabaza = Array.from({ length: 1 }, (_, index) => {
+    const stops = [0, 18, 42, 67, 86, 100].map((step) => ({
+      step,
+      x: randomBetween(6, 86),
+      y: randomBetween(8, 82),
+      rotation: randomBetween(-160, 360),
+    }));
+    const animationName = `homeBallPath${index}${Math.random().toString(36).slice(2)}`;
+    const keyframes = stops
+      .map(({ step, x, y, rotation }) => (
+        `${step}% { transform: translate(${x}vw, ${y}vh) rotate(${rotation}deg); }`
+      ))
+      .join('\n');
 
-  return { stars, bats, balls };
+    return {
+      id: index,
+      animationName,
+      keyframes,
+      duration: 30 + index * 7,
+      delay: -index * 9,
+    };
+  });
+
+  return { stars, bats, balls, calabaza };
 }
 
 export default function HomeBackground() {
@@ -109,7 +131,19 @@ export default function HomeBackground() {
           }}
           aria-hidden="true"
         >
-          ⚽
+          👻
+        </span>
+      ))}
+      {atmosphere.calabaza.map((calabaza) => (
+        <span
+          key={calabaza.id}
+          className="home-background-motion pointer-events-none fixed left-0 top-0 z-[2] select-none text-4xl opacity-70 drop-shadow-[0_0_18px_rgba(16,185,129,0.8)] sm:text-5xl"
+          style={{
+            animation: `${calabaza.animationName} ${calabaza.duration}s ease-in-out ${calabaza.delay}s infinite`,
+          }}
+          aria-hidden="true"
+        >
+          🎃
         </span>
       ))}
 
