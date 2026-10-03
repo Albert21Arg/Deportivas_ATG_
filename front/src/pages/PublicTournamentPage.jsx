@@ -208,7 +208,7 @@ function ShareRoundModal({ round, tournament, onClose }) {
     <ShareImageModal
       title={`Compartir ${title}`}
       subtitle={formatDate(round.date)}
-      fileName={`${round.roundNumber ? `fecha-${round.roundNumber}` : dateValue(round.date)}.png`}
+      fileName={`${round.roundNumber ? `fecha-${round.roundNumber}` : dateValue(round.date)}.jpg`}
       shareText={`⚽ ${tournament.name} — ${title}\n${formatDate(round.date)}\n${shareUrl}`}
       onClose={onClose}
       buildImage={() =>
@@ -220,7 +220,6 @@ function ShareRoundModal({ round, tournament, onClose }) {
           formatTime,
           hideLogo: (team) => !team?.logo || isLogoHidden(team),
           footer: pageUrl.replace(/^https?:\/\//, ''),
-          transparentBackground: true,
         })
       }
     />

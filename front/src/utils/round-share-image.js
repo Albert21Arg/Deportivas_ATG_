@@ -433,7 +433,6 @@ export async function buildRoundShareImage(options) {
   const canvas = await drawRoundShareImage({
     ...options,
     format: 'portrait',
-    transparentBackground: true,
     createCanvas: (width, height) => {
       const element = document.createElement('canvas');
       element.width = width;
