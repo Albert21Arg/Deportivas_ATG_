@@ -55,11 +55,22 @@ export async function renderTournamentPreview(request, response, next) {
     let image = tournament.logo || '';
     let imageSize = null;
 
+    const requestedMatchId = Number(request.query.partido);
+    if (Number.isInteger(requestedMatchId) && requestedMatchId > 0) {
+      const sharedMatch = await publicRepository.findLiveMatchById(tournamentId, requestedMatchId);
+      if (sharedMatch) {
+        title = `⚽ EN VIVO: ${sharedMatch.homeTeam.name} ${sharedMatch.homeScore ?? 0} - ${sharedMatch.awayScore ?? 0} ${sharedMatch.awayTeam.name}`;
+        description = `${tournament.name} · Toca para ver el partido en vivo.`;
+        image = `${origin}/api/public/tournaments/${tournamentId}/matches/${requestedMatchId}/live-image`;
+        imageSize = { width: 1200, height: 630 };
+      }
+    }
+
     // Enlace de una fecha (/tournaments/:id?fecha=AAAA-MM-DD, botón
     // "Compartir" de la página pública): la vista previa muestra la imagen
     // con los partidos de ese día en vez del logo del torneo.
     const day = request.query.fecha;
-    if (isValidDay(day)) {
+    if (!request.query.partido && isValidDay(day)) {
       const round = await getRoundInfo(tournamentId, day).catch(() => null);
       if (round) {
         const label = round.roundNumber ? `Fecha ${round.roundNumber}` : formatDay(day);

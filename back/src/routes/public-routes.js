@@ -9,6 +9,7 @@ import { activeController as activeFloatingBubblesController } from '../controll
 import { activeController as activeSiteSettingsController } from '../controllers/site-setting-controller.js';
 import { streamController } from '../controllers/realtime-controller.js';
 import { roundImageController } from '../controllers/round-image-controller.js';
+import { liveMatchImageController } from '../controllers/live-match-image-controller.js';
 import { shareImageController } from '../controllers/share-image-controller.js';
 
 const router = Router();
@@ -43,6 +44,7 @@ router.post('/tournaments/:id/visit', visitController);
 router.post('/tournaments/:id/like', likeLimiter, likeController);
 router.delete('/tournaments/:id/like', likeLimiter, unlikeController);
 router.get('/tournaments/:id/history', historyController);
+router.get('/tournaments/:id/matches/:matchId/live-image', liveMatchImageController);
 router.get('/tournaments/:id/rounds/:day/image', roundImageController);
 router.get('/tournaments/:id/events', streamController);
 router.get('/players/likes', bonusesController);

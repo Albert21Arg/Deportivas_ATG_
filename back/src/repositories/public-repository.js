@@ -187,6 +187,13 @@ export function findUpcomingMatches(tournamentId) {
   });
 }
 
+export function findLiveMatchById(tournamentId, matchId) {
+  return prisma.match.findFirst({
+    where: { id: matchId, tournamentId, status: 'STARTED' },
+    select: matchSelect,
+  });
+}
+
 export function findFinishedMatches(tournamentId) {
   return prisma.match.findMany({
     where: { tournamentId, status: 'FINISHED' },

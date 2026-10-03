@@ -131,3 +131,41 @@ export async function getRoundImage(tournamentId, day, format = 'landscape', pag
 
   return buffer;
 }
+
+export async function getLiveMatchImage(tournamentId, matchId, pageUrl = '') {
+  const [tournament, match] = await Promise.all([
+    publicRepository.findActiveTournament(tournamentId),
+    publicRepository.findLiveMatchById(tournamentId, matchId),
+  ]);
+  if (!tournament || !match) throw new HttpError(404, 'Partido en vivo no encontrado');
+
+  const score = `${match.homeScore ?? 0}-${match.awayScore ?? 0}`;
+  const key = `live:${tournamentId}:${matchId}:${score}:${match.time}`;
+  const cached = cache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.buffer;
+
+  const imageMatch = {
+    ...match,
+    homeTeam: withExpiryFlags(match.homeTeam),
+    awayTeam: withExpiryFlags(match.awayTeam),
+  };
+  const canvas = await drawRoundShareImage({
+    createCanvas,
+    loadImage: loadLogo,
+    format: 'landscape',
+    tournamentName: tournament.name,
+    title: 'EN VIVO',
+    subtitle: `${score} · ${formatDay(new Date(match.date).toISOString().slice(0, 10))}`,
+    matches: [imageMatch],
+    formatTime,
+    centerLabel: score,
+    hideLogo: (team) => Boolean(team?.logoExpired),
+    footer: pageUrl.replace(/^https?:\/\//, ''),
+    fontFamily: FONT_FAMILY,
+  });
+
+  const buffer = await canvas.encode('jpeg', 88);
+  cache.set(key, { buffer, expiresAt: Date.now() + 15 * 1000 });
+  return buffer;
+}
+

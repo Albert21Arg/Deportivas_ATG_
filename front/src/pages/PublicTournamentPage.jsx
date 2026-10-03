@@ -513,10 +513,11 @@ function RoundShowcase({ matches, onSelect }) {
 */
 
 function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
+  const [isShareImageOpen, setIsShareImageOpen] = useState(false);
+  const shareUrl = `${window.location.origin}/tournaments/${tournamentId}?partido=${match.id}`;
+
   function shareOnWhatsapp(event) {
     event.stopPropagation();
-
-    const shareUrl = `${window.location.origin}/tournaments/${tournamentId}`;
 
     const shareText =
       `⚽ EN VIVO: ${match.homeTeam.name} ${match.homeScore ?? 0} - ${match.awayScore ?? 0} ${match.awayTeam.name}\n` +
@@ -530,7 +531,21 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
     );
   }
 
+  async function buildLiveShareImage() {
+    const { data: image } = await api.get(
+      `/public/tournaments/${tournamentId}/matches/${match.id}/live-image`,
+      { responseType: 'blob' },
+    );
+    return image;
+  }
+
+  function shareLiveImage(event) {
+    event.stopPropagation();
+    setIsShareImageOpen(true);
+  }
+
   return (
+    <>
     <div
       role="button"
       tabIndex={0}
@@ -684,9 +699,39 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
           >
             ✆ Compartir por WhatsApp
           </button>
+
+          <button
+            type="button"
+            onClick={shareLiveImage}
+            className="
+              flex flex-1 items-center justify-center gap-2
+              rounded-xl border border-cyan-400/30
+              bg-cyan-500/10
+              py-2.5
+              text-[11px] font-black uppercase tracking-wider
+              text-cyan-700 dark:text-cyan-300
+              transition
+              hover:bg-cyan-500/20
+              sm:py-3 sm:text-xs
+            "
+          >
+            Compartir imagen
+          </button>
         </div>
       </div>
     </div>
+
+    {isShareImageOpen && (
+      <ShareImageModal
+        title={`Partido en vivo · ${match.homeTeam.name} vs ${match.awayTeam.name}`}
+        subtitle={`${tournamentName} · ${match.homeScore ?? 0}-${match.awayScore ?? 0}`}
+        fileName={`partido-en-vivo-${match.id}.jpg`}
+        shareText={`⚽ EN VIVO: ${match.homeTeam.name} ${match.homeScore ?? 0} - ${match.awayScore ?? 0} ${match.awayTeam.name}\n${tournamentName}\n${shareUrl}`}
+        onClose={() => setIsShareImageOpen(false)}
+        buildImage={buildLiveShareImage}
+      />
+    )}
+    </>
   );
 }
 
@@ -1550,6 +1595,8 @@ export default function PublicTournamentPage() {
   const [searchParams] = useSearchParams();
   const sharedDate = searchParams.get('fecha');
   const sharedDateHandledRef = useRef(false);
+  const sharedMatchId = searchParams.get('partido');
+  const sharedMatchHandledRef = useRef(false);
 
   function firstUpcomingDateKey() {
     const dates = (data?.upcomingMatches ?? []).map((match) => dateValue(match.date)).sort();
@@ -1654,6 +1701,20 @@ export default function PublicTournamentPage() {
       sectionRefs.current[section]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }, [sharedDate, data, history]);
+
+  useEffect(() => {
+    if (!sharedMatchId || sharedMatchHandledRef.current || !data) return;
+
+    const matches = [
+      ...(data.upcomingMatches ?? []),
+      ...(data.ties ?? []).flatMap((tie) => tie.matches ?? []),
+    ];
+    const match = matches.find((item) => String(item.id) === sharedMatchId);
+    if (!match) return;
+
+    sharedMatchHandledRef.current = true;
+    setSelectedMatch(match);
+  }, [sharedMatchId, data]);
 
   // Contador de visitas (solo para el superadmin): se registra UNA vez por
   // carga de la página, no en cada refresco del polling/SSE de arriba (que

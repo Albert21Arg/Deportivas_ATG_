@@ -226,6 +226,7 @@ export async function drawRoundShareImage({
   subtitle,
   matches,
   formatTime,
+  centerLabel = 'VS',
   hideLogo = () => false,
   footer = '',
   fontFamily = FONT,
@@ -296,7 +297,11 @@ export async function drawRoundShareImage({
     context.textBaseline = 'middle';
     context.fillStyle = 'rgba(203, 213, 225, 0.7)';
     setFont(context, 900, Math.round(Math.min(32, logoSize * 0.2)));
-    context.fillText('VS', centerX, logoY + logoSize / 2);
+    context.fillText(
+      fitText(context, centerLabel, cellWidth / 2, { weight: 900, size: Math.round(Math.min(32, logoSize * 0.2)), minSize: 14 }),
+      centerX,
+      logoY + logoSize / 2,
+    );
 
     // Nombres debajo de cada escudo (hasta dos renglones)
     context.textBaseline = 'top';
