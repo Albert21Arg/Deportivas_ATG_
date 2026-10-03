@@ -1199,6 +1199,25 @@ export default function HomePage() {
 
       <AnnouncementModal />
 
+      <div className="relative z-[1] border-b border-slate-200 bg-gradient-to-r from-emerald-500/[0.08] via-transparent to-cyan-500/[0.06] px-3 pb-3 pt-[4.75rem] dark:border-white/[0.06] sm:px-6 sm:pb-4 sm:pt-[5.25rem] lg:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 rounded-2xl border border-emerald-400/15 bg-white/70 p-3 dark:bg-white/[0.025] sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <div>
+            <p className="text-sm font-black text-slate-900 dark:text-white">
+              ¿Organizas torneos? Conoce Deportiva.ATG
+            </p>
+            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+              Descubre las herramientas para gestionar y compartir tu competencia.
+            </p>
+          </div>
+          <Link
+            to="/presentacion"
+            className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-black text-slate-950 transition hover:bg-emerald-400"
+          >
+            Conocer la plataforma <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </div>
+
       {/* ================================================================
           HERO
       ================================================================ */}

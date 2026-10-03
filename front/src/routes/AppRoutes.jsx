@@ -16,6 +16,7 @@ import GoleadoresPage from '../pages/GoleadoresPage.jsx';
 import TarjetasPage from '../pages/TarjetasPage.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
 import HomePage from '../pages/HomePage.jsx';
+import LandingPage from '../pages/LandingPage.jsx';
 import PublicTournamentPage from '../pages/PublicTournamentPage.jsx';
 import AnnouncementsPage from '../pages/AnnouncementsPage.jsx';
 import FloatingBubblesPage from '../pages/FloatingBubblesPage.jsx';
@@ -43,6 +44,7 @@ export default function AppRoutes() {
             <LiveMatchButton />
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/presentacion" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />

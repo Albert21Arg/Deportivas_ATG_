@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 function randomBetween(min, max) {
   return Math.random() * (max - min) + min;
@@ -83,7 +84,10 @@ function createAtmosphere() {
 }
 
 export default function HomeBackground() {
+  const { pathname } = useLocation();
   const [atmosphere] = useState(createAtmosphere);
+
+  if (pathname !== '/') return null;
 
   return (
     <>
