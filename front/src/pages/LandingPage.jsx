@@ -159,6 +159,17 @@ export default function LandingPage() {
   const [activeScreen, setActiveScreen] = useState(productScreens[0]);
 
   useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setActiveScreen((currentScreen) => {
+        const currentIndex = productScreens.findIndex((screen) => screen.id === currentScreen.id);
+        return productScreens[(currentIndex + 1) % productScreens.length];
+      });
+    }, 5000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
     const elements = document.querySelectorAll('[data-landing-reveal]');
 
     if (!('IntersectionObserver' in window)) {
