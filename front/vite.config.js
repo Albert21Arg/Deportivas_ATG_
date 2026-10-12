@@ -5,23 +5,23 @@ export default defineConfig({
   plugins: [react()],
 
   server: {
-    allowedHosts: ['qs0p5djd-3000.use.devtunnels.ms'],
+    allowedHosts: ['v7n460l4-3000.use.devtunnels.ms'],
 
     proxy: {
       '/api': {
-        target: 'https://qs0p5djd-3000.use.devtunnels.ms',
+        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         changeOrigin: true,
         secure: true,
       },
 
       '/uploads': {
-        target: 'https://qs0p5djd-3000.use.devtunnels.ms',
+        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         changeOrigin: true,
         secure: true,
       },
 
       '/tournaments': {
-        target: 'https://qs0p5djd-3000.use.devtunnels.ms',
+        target: 'https://v7n460l4-3000.use.devtunnels.ms/',
         changeOrigin: true,
         secure: true,
       },
