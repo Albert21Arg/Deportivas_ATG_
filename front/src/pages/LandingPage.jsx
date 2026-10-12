@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Trophy,
   Users,
+  X,
 } from 'lucide-react';
 
 import PublicNavbar from '../components/PublicNavbar.jsx';
@@ -95,7 +96,7 @@ const formats = [
   'Eliminatoria ida y vuelta',
 ];
 
-function ScreenshotPlaceholder({ screen, featured = false }) {
+function ScreenshotPlaceholder({ screen, featured = false, onScreenshotClick }) {
   const Icon = screen.icon;
   const [hasImage, setHasImage] = useState(true);
 
@@ -116,12 +117,19 @@ function ScreenshotPlaceholder({ screen, featured = false }) {
 
       <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden p-6 text-center">
         {hasImage && (
-          <img
-            src={`/images/landing/${screen.file}`}
-            alt={`Interfaz de Deportiva.ATG: ${screen.title}`}
-            className="absolute inset-0 h-full w-full bg-white object-contain dark:bg-[#080d14]"
-            onError={() => setHasImage(false)}
-          />
+          <button
+            type="button"
+            onClick={() => onScreenshotClick(screen)}
+            aria-label={`Ampliar captura: ${screen.title}`}
+            className="absolute inset-0 h-full w-full cursor-zoom-in"
+          >
+            <img
+              src={`/images/landing/${screen.file}`}
+              alt={`Interfaz de Deportiva.ATG: ${screen.title}`}
+              className="h-full w-full bg-white object-contain dark:bg-[#080d14]"
+              onError={() => setHasImage(false)}
+            />
+          </button>
         )}
         {!hasImage && (
           <>
@@ -157,6 +165,18 @@ function SectionHeading({ eyebrow, title, description, light = false }) {
 
 export default function LandingPage() {
   const [activeScreen, setActiveScreen] = useState(productScreens[0]);
+  const [expandedScreen, setExpandedScreen] = useState(null);
+
+  useEffect(() => {
+    if (!expandedScreen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setExpandedScreen(null);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [expandedScreen]);
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
@@ -258,7 +278,11 @@ export default function LandingPage() {
 
           <div data-landing-reveal className="landing-reveal [transition-delay:120ms]">
             <div className="rounded-[1.8rem] border border-slate-200 bg-white/80 p-2 shadow-2xl shadow-slate-300/40 dark:border-white/[0.08] dark:bg-white/[0.03] dark:shadow-black/30 sm:p-3">
-              <ScreenshotPlaceholder screen={productScreens[0]} featured />
+              <ScreenshotPlaceholder
+                screen={productScreens[0]}
+                featured
+                onScreenshotClick={setExpandedScreen}
+              />
             </div>
             <div className="mx-auto mt-4 flex max-w-lg items-center gap-3 rounded-2xl border border-slate-200 bg-white/90 p-3 shadow-lg dark:border-white/[0.08] dark:bg-[#0b111a]">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-500 dark:text-emerald-300">
@@ -314,7 +338,12 @@ export default function LandingPage() {
             aria-labelledby={`tab-${activeScreen.id}`}
             className="mt-5 grid gap-6 rounded-[1.8rem] border border-slate-200 bg-slate-50 p-3 dark:border-white/[0.07] dark:bg-[#080d14] sm:p-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-center"
           >
-            <ScreenshotPlaceholder key={activeScreen.id} screen={activeScreen} featured />
+            <ScreenshotPlaceholder
+              key={activeScreen.id}
+              screen={activeScreen}
+              featured
+              onScreenshotClick={setExpandedScreen}
+            />
             <div className="px-2 py-4 sm:px-5">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-500 dark:text-emerald-300">
                 Funcionalidad
@@ -499,6 +528,36 @@ export default function LandingPage() {
           }
         }
       `}</style>
+      {expandedScreen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
+          role="presentation"
+          onClick={() => setExpandedScreen(null)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Captura ampliada: ${expandedScreen.title}`}
+            className="relative flex max-h-[94vh] max-w-[96vw] flex-col items-center"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setExpandedScreen(null)}
+              aria-label="Cerrar captura"
+              className="absolute -right-2 -top-2 z-10 rounded-full bg-white p-2 text-slate-900 shadow-lg transition hover:bg-slate-200 sm:-right-4 sm:-top-4"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+            <img
+              src={`/images/landing/${expandedScreen.file}`}
+              alt={`Interfaz de Deportiva.ATG: ${expandedScreen.title}`}
+              className="max-h-[85vh] max-w-[94vw] rounded-xl bg-white object-contain shadow-2xl"
+            />
+            <p className="mt-3 text-sm font-bold text-white">{expandedScreen.title}</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
