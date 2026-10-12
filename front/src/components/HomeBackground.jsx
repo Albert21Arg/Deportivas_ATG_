@@ -125,7 +125,6 @@ export default function HomeBackground() {
           </span>
         ))}
       </div>
-
       {atmosphere.balls.map((ball) => (
         <span
           key={ball.id}
