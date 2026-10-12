@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
 
   server: {
-    allowedHosts: ['v7n460l4-5173.use.devtunnels.ms'],
+    allowedHosts: ['v7n460l4-3000.use.devtunnels.ms'],
 
     proxy: {
       '/api': {
