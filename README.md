@@ -64,7 +64,7 @@ Es un monorepo con dos proyectos independientes:
 ## Estructura del repositorio
 
 ```
-Deportivas_ATG_/
+./
 ├─ back/                   API y lógica de negocio
 │  ├─ src/
 │  │  ├─ config/           configuración (env, Prisma, auth)
