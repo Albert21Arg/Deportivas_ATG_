@@ -3,6 +3,9 @@ compatibility_date = "2026-09-26"
 main = "../back/src/worker.js"
 compatibility_flags = ["nodejs_compat", "enable_nodejs_http_server_modules"]
 
+[build]
+command = "npm ci --prefix ../back"
+
 [triggers]
 crons = ["* * * * *"]
 

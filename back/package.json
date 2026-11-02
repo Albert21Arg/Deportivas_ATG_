@@ -36,7 +36,7 @@
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
-    "nodemailer": "^6.10.1"
+    "nodemailer": "^10.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -49,5 +49,9 @@
     "@prisma/client@6.19.3": true,
     "@prisma/engines@6.19.3": true,
     "prisma@6.19.3": true
+  },
+  "overrides": {
+    "minimatch": "^11.0.1",
+    "deepmerge-ts": "^8.0.0"
   }
 }
