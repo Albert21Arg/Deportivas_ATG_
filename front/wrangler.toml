@@ -1,6 +1,23 @@
 name = "deportivas-atg"
 compatibility_date = "2026-09-26"
+main = "../back/src/worker.js"
+compatibility_flags = ["nodejs_compat", "enable_nodejs_http_server_modules"]
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "deportivas-db"
+database_id = "6895aa3f-93a4-4ff6-9166-8ed4e007602e"
 
 [assets]
 directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/api", "/api/*", "/uploads/*", "/tournaments/*"]
 not_found_handling = "single-page-application"
+
+[vars]
+CORS_ORIGIN = "https://deportivas-atg.alberttaborda.workers.dev"
+FRONTEND_URL = "https://deportivas-atg.alberttaborda.workers.dev"
+JWT_EXPIRES_IN = "1d"

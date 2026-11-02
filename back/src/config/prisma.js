@@ -1,19 +1,31 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaD1 } from '@prisma/adapter-d1';
 
-// Si están definidas las credenciales de Cloudflare, Prisma usa la base D1
-// "deportivas-db" vía HTTP; si no, usa el SQLite local de DATABASE_URL.
-function createAdapter() {
+let prismaClient;
+
+function createLocalOrHttpClient() {
   const { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_D1_TOKEN } = process.env;
 
-  if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_DATABASE_ID || !CLOUDFLARE_D1_TOKEN) {
-    return undefined;
+  if (CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_DATABASE_ID && CLOUDFLARE_D1_TOKEN) {
+    return new PrismaClient({
+      adapter: new PrismaD1({ CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_D1_TOKEN }),
+    });
   }
 
-  return new PrismaD1({ CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_D1_TOKEN });
+  return new PrismaClient();
 }
 
-const adapter = createAdapter();
-const prisma = adapter ? new PrismaClient({ adapter }) : new PrismaClient();
+export function configurePrismaD1(binding) {
+  if (!binding) throw new Error('Cloudflare D1 binding DB is not configured');
+  if (!prismaClient) prismaClient = new PrismaClient({ adapter: new PrismaD1(binding) });
+}
+
+const prisma = new Proxy({}, {
+  get(_target, property) {
+    if (!prismaClient) prismaClient = createLocalOrHttpClient();
+    const value = Reflect.get(prismaClient, property, prismaClient);
+    return typeof value === 'function' ? value.bind(prismaClient) : value;
+  },
+});
 
 export default prisma;

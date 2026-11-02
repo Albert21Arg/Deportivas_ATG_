@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#064e3b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#background)"/>
+  <circle cx="600" cy="275" r="115" fill="none" stroke="#34d399" stroke-width="14"/>
+  <path d="m600 205 42 30-16 49h-52l-16-49zM531 262l43 22-4 51-47 15-31-40zM669 262l-43 22 4 51 47 15 31-40zM558 347l35-39h14l35 39-12 47h-60z" fill="#34d399"/>
+  <text x="600" y="500" fill="#ecfdf5" font-family="Arial, sans-serif" font-size="38" font-weight="700" text-anchor="middle">DEPORTIVAS ATG</text>
+</svg>

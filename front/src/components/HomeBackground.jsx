@@ -121,7 +121,7 @@ export default function HomeBackground() {
               animation: `${bat.animationName} ${bat.duration}s ease-in-out ${bat.delay}s infinite alternate`,
             }}
           >
-            🦇
+            
           </span>
         ))}
       </div>
@@ -134,7 +134,7 @@ export default function HomeBackground() {
           }}
           aria-hidden="true"
         >
-          👻
+          
         </span>
       ))}
       {atmosphere.calabaza.map((calabaza) => (
@@ -146,7 +146,7 @@ export default function HomeBackground() {
           }}
           aria-hidden="true"
         >
-          🎃
+          
         </span>
       ))}
 

@@ -15,7 +15,7 @@ const emptyForm = {
   status: 'ACTIVE',
   tournamentId: '',
   expiresAt: '',
-  image: null,
+  imageUrl: '',
 };
 
 function toDateInputValue(value) {
@@ -129,11 +129,11 @@ export default function AnnouncementsPage() {
   if (user?.role !== 'SUPERADMIN') return <Navigate to="/dashboard" replace />;
 
   function updateField(event) {
-    const { name, value, files } = event.target;
+    const { name, value } = event.target;
 
     setForm((current) => ({
       ...current,
-      [name]: files ? files[0] : value,
+      [name]: value,
     }));
   }
 
@@ -160,7 +160,7 @@ export default function AnnouncementsPage() {
       status: item.status,
       tournamentId: item.tournamentId ? String(item.tournamentId) : '',
       expiresAt: toDateInputValue(item.expiresAt),
-      image: null,
+      imageUrl: item.imageUrl || '',
     });
 
     // Abrir automáticamente el formulario al editar
@@ -175,45 +175,22 @@ export default function AnnouncementsPage() {
   async function saveAnnouncement(event) {
     event.preventDefault();
 
-    const payload = new FormData();
-
-    [
+    const payload = Object.fromEntries([
       'title',
+      'imageUrl',
       'linkUrl',
       'delaySeconds',
       'durationSeconds',
       'status',
       'tournamentId',
       'expiresAt',
-    ].forEach((key) => {
-      payload.append(key, form[key]);
-    });
-
-    if (form.image) {
-      payload.append('image', form.image);
-    }
+    ].map((key) => [key, form[key]]));
 
     try {
       if (editingId) {
-        await api.patch(
-          `/announcements/${editingId}`,
-          payload,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-          }
-        );
+        await api.patch(`/announcements/${editingId}`, payload);
       } else {
-        if (!form.image) {
-          throw new Error('Debes seleccionar una imagen');
-        }
-
-        await api.post('/announcements', payload, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        await api.post('/announcements', payload);
       }
 
       const wasEditing = Boolean(editingId);
@@ -401,33 +378,25 @@ export default function AnnouncementsPage() {
                     />
                   </label>
 
-                  {/* Imagen */}
+                  {/* Imagen externa */}
                   <label className="block">
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      Imagen
+                      URL de imagen
                     </span>
 
                     <input
-                      className="mt-2 block w-full cursor-pointer rounded-lg border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-sm text-slate-500 dark:text-slate-400 file:mr-3 file:border-0 file:bg-emerald-500 file:px-3 file:py-2.5 file:text-xs file:font-bold file:text-slate-950 file:dark:text-slate-950 hover:border-emerald-500/50"
-                      name="image"
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/gif"
+                      className="mt-2 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none transition placeholder:text-slate-600 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/10"
+                      name="imageUrl"
+                      type="url"
+                      value={form.imageUrl}
                       onChange={updateField}
-                      required={!editingId}
+                      placeholder="https://..."
+                      required
                     />
 
-                    {form.image && (
-                      <p className="mt-2 truncate text-xs text-emerald-600 dark:text-emerald-400">
-                        ✓ {form.image.name}
-                      </p>
-                    )}
-
-                    {editingId && (
-                      <p className="mt-2 text-[11px] text-slate-500">
-                        Deja vacío para conservar la imagen
-                        actual.
-                      </p>
-                    )}
+                    <p className="mt-2 text-[11px] text-slate-500">
+                      Usa una imagen alojada en una URL pública. Los archivos locales no se guardan en Cloudflare.
+                    </p>
                   </label>
 
                   {/* Enlace */}

@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import { AUTH } from '../config/auth.js';
 import * as teamRepository from '../repositories/team-repository.js';

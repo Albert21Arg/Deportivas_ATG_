@@ -422,6 +422,36 @@ export async function drawLiveMatchShareImage({
   return canvas;
 }
 
+export async function buildLiveMatchShareImage({ tournamentName, match, footer = '' }) {
+  const canvas = await drawLiveMatchShareImage({
+    createCanvas: (width, height) => {
+      const element = document.createElement('canvas');
+      element.width = width;
+      element.height = height;
+      return element;
+    },
+    loadImage: (src) =>
+      new Promise((resolve) => {
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => resolve(image);
+        image.onerror = () => resolve(null);
+        image.src = src;
+      }),
+    tournamentName,
+    match,
+    centerLabel: `${match.homeScore ?? 0}-${match.awayScore ?? 0}`,
+    footer,
+  });
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('No se pudo generar la imagen'))),
+      'image/png',
+    );
+  });
+}
+
 /*
 | Versión para el navegador: genera la imagen vertical y la devuelve como
 | Blob PNG. Los escudos se cargan con crossOrigin="anonymous": si el sitio

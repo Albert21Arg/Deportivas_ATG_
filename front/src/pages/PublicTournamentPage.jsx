@@ -5,7 +5,7 @@ import { useNotifications } from '../context/NotificationContext.jsx';
 import api from '../services/api.js';
 import { getApiErrorDetails } from '../utils/api-error.js';
 import { formatEventTime, getMatchClock } from '../utils/match-clock.js';
-import { buildRoundShareImage } from '../utils/round-share-image.js';
+import { buildLiveMatchShareImage, buildRoundShareImage } from '../utils/round-share-image.js';
 import {
   EXPIRED_CLASS,
   isLogoHidden,
@@ -525,11 +525,11 @@ function LiveMatchCard({ match, onClick, tournamentId, tournamentName }) {
   }
 
   async function buildLiveShareImage() {
-    const { data: image } = await api.get(
-      `/public/tournaments/${tournamentId}/matches/${match.id}/live-image`,
-      { responseType: 'blob' },
-    );
-    return image;
+    return buildLiveMatchShareImage({
+      tournamentName,
+      match,
+      footer: window.location.host,
+    });
   }
 
   function shareLiveImage(event) {

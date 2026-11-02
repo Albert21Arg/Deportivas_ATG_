@@ -17,6 +17,7 @@ const outPath = path.join(root, 'prisma', 'd1-export.sql');
 const target = process.argv.includes('--local') ? '--local' : '--remote';
 
 const db = new DatabaseSync(srcPath, { readOnly: true });
+const LOCAL_IMAGE_PLACEHOLDER = '/images/announcement-placeholder.svg';
 
 const allTables = db
   .prepare("SELECT name, sql FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")
@@ -76,6 +77,7 @@ for (const { table, rowid, parent } of orphans) {
 }
 
 let rowCount = 0;
+let replacedLocalImages = 0;
 for (const { name } of tables) {
   const orphanRowIds = orphans.filter((o) => o.table === name).map((o) => o.rowid);
   const where = orphanRowIds.length ? ` WHERE rowid NOT IN (${orphanRowIds.join(', ')})` : '';
@@ -93,6 +95,12 @@ for (const { name } of tables) {
         row[col] = new Date(Number(row[col])).toISOString().replace('Z', '+00:00');
       }
     }
+    for (const col of ['imageUrl', 'photo', 'logo']) {
+      if (typeof row[col] === 'string' && row[col].startsWith('/uploads/')) {
+        row[col] = LOCAL_IMAGE_PLACEHOLDER;
+        replacedLocalImages += 1;
+      }
+    }
     const columns = Object.keys(row).map(quoteId).join(', ');
     const values = Object.values(row).map(toSqlLiteral).join(', ');
     lines.push(`INSERT INTO ${quoteId(name)} (${columns}) VALUES (${values});`);
@@ -102,6 +110,9 @@ for (const { name } of tables) {
 
 writeFileSync(outPath, `${lines.join('\n')}\n`);
 console.log(`SQL generado en ${path.relative(root, outPath)}: ${tables.length} tablas, ${rowCount} filas`);
+if (replacedLocalImages) {
+  console.log(`Imágenes locales sustituidas por la imagen de respaldo: ${replacedLocalImages}`);
+}
 
 execFileSync('npx', ['wrangler', 'd1', 'execute', 'deportivas-db', target, `--file=${outPath}`, '--yes'], {
   cwd: root,

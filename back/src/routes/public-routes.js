@@ -8,9 +8,6 @@ import { activeController } from '../controllers/announcement-controller.js';
 import { activeController as activeFloatingBubblesController } from '../controllers/floating-bubble-controller.js';
 import { activeController as activeSiteSettingsController } from '../controllers/site-setting-controller.js';
 import { streamController } from '../controllers/realtime-controller.js';
-import { roundImageController } from '../controllers/round-image-controller.js';
-import { liveMatchImageController } from '../controllers/live-match-image-controller.js';
-import { shareImageController } from '../controllers/share-image-controller.js';
 
 const router = Router();
 
@@ -28,14 +25,6 @@ const likeLimiter = rateLimit({
     message: 'Demasiados intentos. Espera un momento antes de volver a intentarlo.',
   },
 });
-const shareImageLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  limit: 60,
-  standardHeaders: 'draft-8',
-  legacyHeaders: false,
-});
-
-router.get('/share-image', shareImageLimiter, shareImageController);
 router.get('/home/tournaments', homeListController);
 router.get('/home/tournaments/:id', homeDetailController);
 router.get('/tournaments', listController);
@@ -45,8 +34,6 @@ router.post('/tournaments/:id/like', likeLimiter, likeController);
 router.delete('/tournaments/:id/like', likeLimiter, unlikeController);
 router.get('/tournaments/:id/history', historyController);
 router.get('/tournaments/:id/history/:matchId', historyMatchController);
-router.get('/tournaments/:id/matches/:matchId/live-image', liveMatchImageController);
-router.get('/tournaments/:id/rounds/:day/image', roundImageController);
 router.get('/tournaments/:id/events', streamController);
 router.get('/players/likes', bonusesController);
 router.post('/players/:id/like', likeLimiter, likePlayerController);

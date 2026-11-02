@@ -52,14 +52,14 @@ Es un monorepo con dos proyectos independientes:
 | Runtime | Node.js ≥ 20.19 | Node.js ≥ 20.19 |
 | Framework | Express 5 | React 19 |
 | Build/Dev | — | Vite 7 |
-| Base de datos | SQLite (vía Prisma 6) | — |
+| Base de datos | SQLite local y Cloudflare D1 en producción (vía Prisma 6) | — |
 | Estilos | — | Tailwind CSS 3 |
 | Autenticación | JWT (jsonwebtoken) + bcrypt | Contexto de React (sesión en `sessionStorage`) |
 | Enrutado | Express Router | React Router 7 |
 | HTTP client | — | Axios |
 | Seguridad | Helmet, CORS por lista blanca, `express-rate-limit` | — |
 | Íconos | — | lucide-react |
-| Subida de archivos | Multer (`uploads/`) | — |
+| Imágenes de anuncios | URL HTTP/HTTPS externa; no se guardan cargas locales | — |
 
 ## Estructura del repositorio
 
@@ -94,7 +94,7 @@ Cada carpeta (`back/`, `front/`) tiene su propio `README.md` con más detalle.
 ## Requisitos previos
 
 - Node.js 20.19 o superior y npm 10 o superior.
-- No se necesita ningún motor de base de datos externo: la base de datos es un archivo SQLite local (`back/prisma/dev.db`), gestionado por Prisma.
+- Para desarrollo local se usa el archivo SQLite `back/prisma/dev.db`; producción usa la D1 de Cloudflare `deportivas-db`.
 
 ## Puesta en marcha
 
@@ -119,13 +119,27 @@ npm run dev                # http://localhost:5173
 
 En desarrollo, Vite corre en el puerto `5173` y redirige (`proxy`) las peticiones a `/api` y `/uploads` hacia el backend en el puerto `3000` — no hace falta configurar CORS manualmente para desarrollo local.
 
+### Producción en Cloudflare
+
+El Worker `deportivas-atg` sirve la SPA y la API desde el mismo origen, usa la base D1 existente `deportivas-db` y ejecuta la revisión de partidos en vivo cada minuto. El Worker requiere el secreto `JWT_SECRET`:
+
+```bash
+cd back
+npx wrangler secret put JWT_SECRET --config wrangler.toml
+npm run cloudflare:deploy
+```
+
+La carga de archivos locales está deshabilitada en producción: las imágenes de anuncios deben estar alojadas en una URL HTTP/HTTPS pública. Los anuncios que apuntaban a `/uploads/` se sustituyen por una imagen de respaldo al exportar la base local.
+
+`npm run d1:export` reemplaza las tablas y los datos de D1 con el contenido de `back/prisma/dev.db`; úsalo solo cuando quieras hacer esa sustitución explícitamente.
+
 ## Variables de entorno
 
 ### `back/.env`
 
 | Variable | Descripción |
 |---|---|
-| `DATABASE_URL` | Cadena de conexión de Prisma hacia el archivo SQLite, p. ej. `file:./dev.db` |
+| `DATABASE_URL` | Cadena de conexión local de Prisma hacia SQLite, p. ej. `file:./dev.db` |
 | `JWT_SECRET` | Secreto usado para firmar y verificar los tokens de sesión. Debe ser largo y aleatorio. |
 | `JWT_EXPIRES_IN` | Vigencia del token de acceso (p. ej. `1d`) |
 | `PORT` | Puerto donde escucha el servidor Express (por defecto `3000`) |
@@ -153,6 +167,8 @@ En desarrollo, Vite corre en el puerto `5173` y redirige (`proxy`) las peticione
 | `npm run db:studio` | Abre Prisma Studio para explorar/editar la base de datos |
 | `npm run db:seed` | Ejecuta `prisma/seed.js` |
 | `npm run serve:tunnel` | Compila el frontend y levanta el backend sirviéndolo como una sola app (ver más abajo) |
+| `npm run cloudflare:dev` | Compila el frontend e inicia el Worker en modo local |
+| `npm run cloudflare:deploy` | Compila la SPA y publica el backend/API Worker con D1 |
 
 ### `front/`
 

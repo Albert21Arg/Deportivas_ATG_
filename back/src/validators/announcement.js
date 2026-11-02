@@ -26,15 +26,33 @@ function parseExpiresAt(value) {
   return parsed;
 }
 
+function parseImageUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new HttpError(422, 'Debes proporcionar una URL para la imagen');
+  }
+
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    throw new HttpError(422, 'La imagen debe ser una URL pública válida');
+  }
+
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) {
+    throw new HttpError(422, 'La imagen debe usar una URL HTTP o HTTPS pública');
+  }
+
+  return url.href;
+}
+
 export function validateAnnouncement(request, _response, next) {
   try {
     const body = request.body ?? {};
-    if (!request.file) throw new HttpError(422, 'Debes subir una imagen para el anuncio');
     if (typeof body.title !== 'string' || !body.title.trim() || body.title.length > 160) throw new HttpError(422, 'El título es obligatorio y debe tener máximo 160 caracteres');
     if (body.linkUrl && !/^https?:\/\//i.test(body.linkUrl)) throw new HttpError(422, 'El enlace debe comenzar por http:// o https://');
     request.validatedBody = {
       title: body.title.trim(),
-      imageUrl: `/uploads/announcements/${request.file.filename}`,
+      imageUrl: parseImageUrl(body.imageUrl),
       linkUrl: body.linkUrl?.trim() || null,
       delaySeconds: seconds(body.delaySeconds ?? 0, 'delaySeconds', { min: 0, max: 86400 }),
       durationSeconds: seconds(body.durationSeconds ?? 10, 'durationSeconds', { min: 1, max: 86400 }),
@@ -55,12 +73,12 @@ export function validateAnnouncementUpdate(request, _response, next) {
     if (body.status !== undefined && !['ACTIVE', 'INACTIVE'].includes(body.status)) throw new HttpError(422, 'Estado no válido');
     if (body.status !== undefined) data.status = body.status;
     if (body.title !== undefined) data.title = String(body.title).trim();
+    if (body.imageUrl !== undefined) data.imageUrl = parseImageUrl(body.imageUrl);
     if (body.linkUrl !== undefined) data.linkUrl = body.linkUrl?.trim() || null;
     if (body.delaySeconds !== undefined) data.delaySeconds = seconds(body.delaySeconds, 'delaySeconds', { min: 0, max: 86400 });
     if (body.durationSeconds !== undefined) data.durationSeconds = seconds(body.durationSeconds, 'durationSeconds', { min: 1, max: 86400 });
     if (body.tournamentId !== undefined) data.tournamentId = parseTournamentId(body.tournamentId);
     if (body.expiresAt !== undefined) data.expiresAt = parseExpiresAt(body.expiresAt);
-    if (request.file) data.imageUrl = `/uploads/announcements/${request.file.filename}`;
     if (!Object.keys(data).length) throw new HttpError(422, 'No hay cambios para guardar');
     request.validatedBody = data;
     return next();
